@@ -529,37 +529,52 @@ function renderStudyLog() {
    ============================================================ */
 let reviewTab = "weekly";
 function setReviewTab(t) { reviewTab = t; renderReviews(); }
-function openReviewModal() {
+function openReviewModal(id) {
+  const r = id ? STATE.reviews[reviewTab].find(r => r.id === id) : null;
   openModal(`
-    <div class="modal-header"><h3>New ${reviewTab} review</h3><button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
-    <div class="field"><label>${reviewTab === "weekly" ? "Week of" : "Month"}</label><input type="text" id="f-period" placeholder="${reviewTab === "weekly" ? "e.g. Week 5 (Days 31-37)" : "e.g. Month 2"}" /></div>
-    <div class="field"><label>What did I complete?</label><textarea id="f-completed" rows="2"></textarea></div>
-    <div class="field"><label>What did I fail to complete?</label><textarea id="f-failed" rows="2"></textarea></div>
-    <div class="field"><label>Why?</label><textarea id="f-why" rows="2"></textarea></div>
-    <div class="field"><label>What should be cut?</label><textarea id="f-cut" rows="2"></textarea></div>
-    <div class="field"><label>What should be accelerated?</label><textarea id="f-accelerate" rows="2"></textarea></div>
+    <div class="modal-header"><h3>${r ? "Edit" : "New"} ${reviewTab} review</h3><button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="field"><label>${reviewTab === "weekly" ? "Week of" : "Month"}</label><input type="text" id="f-period" value="${escapeHtml(r ? r.period : "")}" placeholder="${reviewTab === "weekly" ? "e.g. Week 5 (Days 31-37)" : "e.g. Month 2"}" /></div>
+    <div class="field"><label>What did I complete?</label><textarea id="f-completed" rows="2">${escapeHtml(r ? r.completed : "")}</textarea></div>
+    <div class="field"><label>What did I fail to complete?</label><textarea id="f-failed" rows="2">${escapeHtml(r ? r.failed : "")}</textarea></div>
+    <div class="field"><label>Why?</label><textarea id="f-why" rows="2">${escapeHtml(r ? r.why : "")}</textarea></div>
+    <div class="field"><label>What am I avoiding?</label><textarea id="f-avoiding" rows="2">${escapeHtml(r ? r.avoiding || "" : "")}</textarea></div>
+    <div class="field"><label>Which weaknesses are becoming bottlenecks?</label><textarea id="f-bottleneck" rows="2">${escapeHtml(r ? r.bottleneck || "" : "")}</textarea></div>
+    <div class="field"><label>Consuming vs. producing this ${reviewTab === "weekly" ? "week" : "month"}?</label><input type="text" id="f-consume" value="${escapeHtml(r ? r.consumeVsProduce || "" : "")}" placeholder="e.g. too much course-watching, not enough problems solved" /></div>
+    <div class="field"><label>Am I actually becoming more employable? (evidence, not vibes)</label><textarea id="f-employable" rows="2">${escapeHtml(r ? r.employable || "" : "")}</textarea></div>
+    <div class="field"><label>Surprise quiz result this ${reviewTab === "weekly" ? "week" : "month"} (domain + score)</label><input type="text" id="f-quiz" value="${escapeHtml(r ? r.quizSummary || "" : "")}" placeholder="e.g. Probability spot-check: 3/6, up from 1.7" /></div>
+    <div class="field"><label>What should be cut?</label><textarea id="f-cut" rows="2">${escapeHtml(r ? r.cut : "")}</textarea></div>
+    <div class="field"><label>What should be accelerated?</label><textarea id="f-accelerate" rows="2">${escapeHtml(r ? r.accelerate : "")}</textarea></div>
     <div class="modal-actions">
+      ${r ? `<button class="btn btn-danger" onclick="deleteReview('${r.id}')">Delete</button>` : ""}
       <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveReview()">Save</button>
+      <button class="btn btn-primary" onclick="saveReview('${r ? r.id : ""}')">Save</button>
     </div>
   `);
 }
-function saveReview() {
-  const entry = {
-    id: uid("rev"), date: todayISO(),
+function saveReview(id) {
+  const data = {
     period: document.getElementById("f-period").value.trim() || "Untitled",
     completed: document.getElementById("f-completed").value.trim(),
     failed: document.getElementById("f-failed").value.trim(),
     why: document.getElementById("f-why").value.trim(),
+    avoiding: document.getElementById("f-avoiding").value.trim(),
+    bottleneck: document.getElementById("f-bottleneck").value.trim(),
+    consumeVsProduce: document.getElementById("f-consume").value.trim(),
+    employable: document.getElementById("f-employable").value.trim(),
+    quizSummary: document.getElementById("f-quiz").value.trim(),
     cut: document.getElementById("f-cut").value.trim(),
     accelerate: document.getElementById("f-accelerate").value.trim()
   };
-  STATE.reviews[reviewTab].unshift(entry);
+  if (id) {
+    Object.assign(STATE.reviews[reviewTab].find(r => r.id === id), data);
+  } else {
+    STATE.reviews[reviewTab].unshift({ id: uid("rev"), date: todayISO(), ...data });
+  }
   saveState(); closeModal(); renderReviews(); toast("Review saved");
 }
 function deleteReview(id) {
   STATE.reviews[reviewTab] = STATE.reviews[reviewTab].filter(r => r.id !== id);
-  saveState(); renderReviews();
+  saveState(); closeModal(); renderReviews();
 }
 function renderReviews() {
   const el = document.getElementById("view-reviews");
@@ -571,12 +586,17 @@ function renderReviews() {
     </div>
     <div class="flex-between mb-16"><div></div><button class="btn btn-primary" onclick="openReviewModal()"><i class="fa-solid fa-plus"></i> New review</button></div>
     ${list.length ? list.map(r => `
-      <div class="card mb-16">
-        <div class="card-title-row"><h3 style="color:var(--text-primary);">${escapeHtml(r.period)}</h3><button class="icon-btn" onclick="deleteReview('${r.id}')"><i class="fa-solid fa-trash"></i></button></div>
+      <div class="card mb-16" style="cursor:pointer;" onclick="openReviewModal('${r.id}')">
+        <div class="card-title-row"><h3 style="color:var(--text-primary);">${escapeHtml(r.period)}</h3><span class="muted">${fmtDate(r.date)}</span></div>
         <div class="grid grid-2">
           <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">COMPLETED</p><p style="font-size:13px;">${escapeHtml(r.completed) || "–"}</p></div>
           <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">FAILED</p><p style="font-size:13px;">${escapeHtml(r.failed) || "–"}</p></div>
           <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">WHY</p><p style="font-size:13px;">${escapeHtml(r.why) || "–"}</p></div>
+          <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">AVOIDING</p><p style="font-size:13px;">${escapeHtml(r.avoiding) || "–"}</p></div>
+          <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">BOTTLENECK</p><p style="font-size:13px;">${escapeHtml(r.bottleneck) || "–"}</p></div>
+          <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">CONSUME VS PRODUCE</p><p style="font-size:13px;">${escapeHtml(r.consumeVsProduce) || "–"}</p></div>
+          <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">EMPLOYABLE?</p><p style="font-size:13px;">${escapeHtml(r.employable) || "–"}</p></div>
+          <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">QUIZ RESULT</p><p style="font-size:13px;">${escapeHtml(r.quizSummary) || "–"}</p></div>
           <div><p style="font-size:12px; color:var(--text-muted); font-weight:650;">CUT / ACCELERATE</p><p style="font-size:13px;">${escapeHtml(r.cut)} ${r.accelerate ? " · " + escapeHtml(r.accelerate) : ""}</p></div>
         </div>
       </div>
