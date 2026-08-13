@@ -7,7 +7,7 @@
    localStorage and this file is never read again (see app.js `loadState`).
    ========================================================================= */
 
-const PLAN_START_DATE = "2026-08-12";
+const PLAN_START_DATE = "2026-08-15";
 
 const DEFAULT_STATE = {
   meta: {

@@ -116,6 +116,7 @@ function escapeHtml(str) {
    ============================================================ */
 const VIEW_TITLES = {
   dashboard: ["Dashboard", "Your career operating system, at a glance"],
+  mastersheet: ["90-Day Master Sheet", "Everything on one page — weeks, milestones, and the skill matrix"],
   roadmap: ["90-Day Roadmap", "Days 1-30 · 31-60 · 61-90, week by week"],
   timetable: ["Timetable & Calendar", "The daily template + a study-day log"],
   skills: ["Skill Trackers", "AI · Quant · Math · DSA · Finance — evidence-based, 0-6 scale"],
@@ -153,6 +154,7 @@ function goToView(name) {
 
 const RENDERERS = {
   dashboard: renderDashboard,
+  mastersheet: renderMasterSheet,
   roadmap: renderRoadmap,
   timetable: renderTimetable,
   skills: renderSkills,          // trackers.js
@@ -295,6 +297,98 @@ function renderDashboard() {
         <p style="font-size:12.5px;"><b>Option:</b> ${escapeHtml(STATE.strategy.option)}</p>
         <p style="font-size:11.5px; margin-top:10px;">${escapeHtml(STATE.strategy.notes)}</p>
       </div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   90-DAY MASTER SHEET
+   (the digital replacement for a printable master sheet — one
+   consolidated view of weeks, milestones, and the skill matrix.
+   A native browser print (Ctrl/Cmd+P) works fine on this page if
+   a physical copy is ever wanted, no dedicated print stylesheet.)
+   ============================================================ */
+function renderMasterSheet() {
+  const day = currentPlanDay();
+  const el = document.getElementById("view-mastersheet");
+
+  let weekRows = "";
+  STATE.roadmap.forEach((phase, pIdx) => {
+    phase.weeks.forEach((w, wIdx) => {
+      const [start, end] = w.days.split("-").map(n => parseInt(n, 10));
+      const total = w.tasks.length;
+      const done = w.tasks.filter((_, tIdx) => (STATE.roadmapDone || {})[`${pIdx}-${wIdx}-${tIdx}`]).length;
+      const state = done === total && total > 0 ? "done" : (day >= start && day <= end) ? "in-progress" : (day > end) ? "overdue" : "not-started";
+      const badge = state === "done" ? statusBadge("completed") : state === "in-progress" ? statusBadge("in-progress") : state === "overdue" ? statusBadge("failed") : statusBadge("pending");
+      weekRows += `
+        <tr>
+          <td class="muted">${phase.phase.split("—")[0].trim()}</td>
+          <td><b>${escapeHtml(w.title)}</b></td>
+          <td>${w.days}</td>
+          <td>${done}/${total}</td>
+          <td>${badge}</td>
+        </tr>`;
+    });
+  });
+
+  const milestoneRows = STATE.milestones.map(m => `
+    <tr>
+      <td><b>${escapeHtml(m.title)}</b></td>
+      <td>${m.dueDay}</td>
+      <td>${statusBadge(m.status)}</td>
+      <td class="muted" style="font-size:12px;">${escapeHtml(m.criteria)}</td>
+    </tr>`).join("");
+
+  const skillRows = STATE.skills.map(s => `
+    <tr>
+      <td><b>${escapeHtml(s.name)}</b></td>
+      <td class="muted">${escapeHtml(s.category)}</td>
+      <td>${s.level}/6</td>
+      <td>${s.target}/6</td>
+      <td>${s.level >= s.target ? statusBadge("completed") : s.level >= s.target - 1 ? `<span class="badge badge-warning"><i class="fa-solid fa-minus"></i>close</span>` : `<span class="badge badge-critical"><i class="fa-solid fa-arrow-down"></i>behind</span>`}</td>
+    </tr>`).join("");
+
+  const weeksTotal = STATE.roadmap.reduce((a, p) => a + p.weeks.length, 0);
+  const weeksDone = STATE.roadmap.reduce((a, p) => a + p.weeks.filter((w, wIdx) => {
+    const pIdx = STATE.roadmap.indexOf(p);
+    return w.tasks.every((_, tIdx) => (STATE.roadmapDone || {})[`${pIdx}-${wIdx}-${tIdx}`]);
+  }).length, 0);
+
+  el.innerHTML = `
+    <div class="flex-between mb-16">
+      <p class="muted">Day ${day} of 90 · Plan start ${fmtDate(STATE.meta.startDate)} · Generated ${fmtDate(todayISO())}</p>
+      <button class="btn btn-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> Print this page</button>
+    </div>
+
+    <div class="grid grid-4 mb-16">
+      <div class="card stat-tile"><div class="value">${day}/90</div><div class="label">Day of plan</div></div>
+      <div class="card stat-tile"><div class="value">${weeksDone}/${weeksTotal}</div><div class="label">Weeks fully complete</div></div>
+      <div class="card stat-tile"><div class="value">${STATE.milestones.filter(m => m.status === "passed").length}/${STATE.milestones.length}</div><div class="label">Gates passed</div></div>
+      <div class="card stat-tile"><div class="value">${(STATE.skills.reduce((a, s) => a + s.level, 0) / STATE.skills.length).toFixed(1)}/6</div><div class="label">Average skill level</div></div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="card-title-row"><h3><i class="fa-solid fa-route"></i>&nbsp; All 12 weeks</h3></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Phase</th><th>Week</th><th>Days</th><th>Tasks</th><th>Status</th></tr></thead>
+        <tbody>${weekRows}</tbody>
+      </table></div>
+    </div>
+
+    <div class="card mb-16">
+      <div class="card-title-row"><h3><i class="fa-solid fa-flag-checkered"></i>&nbsp; Go/No-Go gates</h3></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Gate</th><th>Due day</th><th>Status</th><th>Criteria</th></tr></thead>
+        <tbody>${milestoneRows}</tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row"><h3><i class="fa-solid fa-brain"></i>&nbsp; Skill matrix snapshot</h3></div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Domain</th><th>Category</th><th>Level</th><th>Target</th><th></th></tr></thead>
+        <tbody>${skillRows}</tbody>
+      </table></div>
     </div>
   `;
 }
