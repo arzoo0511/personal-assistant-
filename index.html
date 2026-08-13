@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Career OS — Personal Dashboard</title>
+<meta name="description" content="90-day / long-term career operating system: skills, roadmap, projects, applications, and reviews in one place." />
+
+<!-- Font Awesome (icons) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+<!-- Chart.js (charts) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>Career OS</span>
+    </div>
+
+    <nav id="navList">
+      <div class="nav-group-label">Overview</div>
+      <button class="nav-item" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i>Dashboard</button>
+      <button class="nav-item" data-view="roadmap"><i class="fa-solid fa-route"></i>Roadmap</button>
+      <button class="nav-item" data-view="timetable"><i class="fa-solid fa-calendar-days"></i>Timetable &amp; Calendar</button>
+
+      <div class="nav-group-label">Skills &amp; Growth</div>
+      <button class="nav-item" data-view="skills"><i class="fa-solid fa-brain"></i>Skill Trackers</button>
+      <button class="nav-item" data-view="progress"><i class="fa-solid fa-chart-column"></i>Progress &amp; Charts</button>
+
+      <div class="nav-group-label">Work</div>
+      <button class="nav-item" data-view="projects"><i class="fa-solid fa-diagram-project"></i>Projects</button>
+      <button class="nav-item" data-view="courses"><i class="fa-solid fa-book"></i>Courses &amp; Resources</button>
+
+      <div class="nav-group-label">Opportunities</div>
+      <button class="nav-item" data-view="applications"><i class="fa-solid fa-paper-plane"></i>Applications</button>
+      <button class="nav-item" data-view="interviews"><i class="fa-solid fa-comments"></i>Interviews</button>
+      <button class="nav-item" data-view="competitions"><i class="fa-solid fa-trophy"></i>Competitions</button>
+
+      <div class="nav-group-label">Tracking</div>
+      <button class="nav-item" data-view="studylog"><i class="fa-solid fa-stopwatch"></i>Study &amp; Exercise Log</button>
+      <button class="nav-item" data-view="milestones"><i class="fa-solid fa-flag-checkered"></i>Milestones</button>
+      <button class="nav-item" data-view="reviews"><i class="fa-solid fa-arrows-rotate"></i>Weekly / Monthly Review</button>
+
+      <div class="nav-group-label">Personal</div>
+      <button class="nav-item" data-view="notes"><i class="fa-solid fa-note-sticky"></i>Notes</button>
+      <button class="nav-item" data-view="resume"><i class="fa-solid fa-id-card"></i>Resume &amp; Portfolio</button>
+      <button class="nav-item" data-view="achievements"><i class="fa-solid fa-medal"></i>Achievements</button>
+
+      <div class="nav-group-label">System</div>
+      <button class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i>Settings &amp; Backup</button>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="flex gap-10">
+        <button class="btn mobile-toggle" id="mobileToggle"><i class="fa-solid fa-bars"></i></button>
+        <div>
+          <h1 id="viewTitle">Dashboard</h1>
+          <div class="sub" id="viewSub">Day <span id="dayCounterInline">–</span> of your 90-day plan</div>
+        </div>
+      </div>
+      <button class="btn" id="themeToggle"><i class="fa-solid fa-circle-half-stroke"></i> Theme</button>
+    </div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <section class="view" id="view-dashboard"></section>
+
+    <!-- ===================== ROADMAP ===================== -->
+    <section class="view" id="view-roadmap"></section>
+
+    <!-- ===================== TIMETABLE & CALENDAR ===================== -->
+    <section class="view" id="view-timetable"></section>
+
+    <!-- ===================== SKILLS ===================== -->
+    <section class="view" id="view-skills"></section>
+
+    <!-- ===================== PROGRESS & CHARTS ===================== -->
+    <section class="view" id="view-progress"></section>
+
+    <!-- ===================== PROJECTS ===================== -->
+    <section class="view" id="view-projects"></section>
+
+    <!-- ===================== COURSES ===================== -->
+    <section class="view" id="view-courses"></section>
+
+    <!-- ===================== APPLICATIONS ===================== -->
+    <section class="view" id="view-applications"></section>
+
+    <!-- ===================== INTERVIEWS ===================== -->
+    <section class="view" id="view-interviews"></section>
+
+    <!-- ===================== COMPETITIONS ===================== -->
+    <section class="view" id="view-competitions"></section>
+
+    <!-- ===================== STUDY LOG ===================== -->
+    <section class="view" id="view-studylog"></section>
+
+    <!-- ===================== MILESTONES ===================== -->
+    <section class="view" id="view-milestones"></section>
+
+    <!-- ===================== REVIEWS ===================== -->
+    <section class="view" id="view-reviews"></section>
+
+    <!-- ===================== NOTES ===================== -->
+    <section class="view" id="view-notes"></section>
+
+    <!-- ===================== RESUME ===================== -->
+    <section class="view" id="view-resume"></section>
+
+    <!-- ===================== ACHIEVEMENTS ===================== -->
+    <section class="view" id="view-achievements"></section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section class="view" id="view-settings"></section>
+
+  </main>
+</div>
+
+<!-- Generic modal used by all "add / edit" forms -->
+<div class="modal-backdrop hidden" id="modalBackdrop">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/trackers.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
