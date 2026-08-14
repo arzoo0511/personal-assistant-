@@ -72,6 +72,8 @@
       <button class="btn" id="themeToggle"><i class="fa-solid fa-circle-half-stroke"></i> Theme</button>
     </div>
 
+    <div class="stakes-banner" id="stakesBanner"></div>
+
     <!-- ===================== DASHBOARD ===================== -->
     <section class="view" id="view-dashboard"></section>
 
@@ -135,6 +137,30 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- Floating focus timer (Pomodoro-style) -->
+<div id="focusTimer">
+  <button class="ft-close" id="ftClose" style="display:none;" onclick="collapseTimer(event)"><i class="fa-solid fa-xmark"></i></button>
+  <div class="ft-collapsed-row" onclick="toggleTimerExpanded()" style="display:flex; align-items:center; gap:10px;">
+    <div class="ft-ring" id="ftRing"></div>
+    <div>
+      <div class="ft-time" id="ftTimeCollapsed">25:00</div>
+      <div class="ft-label" id="ftLabelCollapsed">Focus timer</div>
+    </div>
+  </div>
+  <div class="ft-expanded-body">
+    <div class="ft-modes">
+      <button id="ftModeWork" class="active" onclick="setTimerMode('work')">Focus 25</button>
+      <button id="ftModeBreak" onclick="setTimerMode('break')">Break 5</button>
+    </div>
+    <div class="ft-big-time" id="ftBigTime">25:00</div>
+    <div class="ft-controls">
+      <button class="btn btn-sm btn-primary" id="ftStartPause" onclick="startPauseTimer(event)">Start</button>
+      <button class="btn btn-sm" onclick="resetTimer(event)">Reset</button>
+    </div>
+    <div class="ft-sessions" id="ftSessions">0 focus sessions today</div>
+  </div>
+</div>
 
 <script src="js/data.js"></script>
 <script src="js/trackers.js"></script>

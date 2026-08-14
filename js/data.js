@@ -72,7 +72,7 @@ const DEFAULT_STATE = {
     { phase: "Days 1-30 — Foundation & Acceleration", range: [1, 30], weeks: [
       { title: "Week 1: Python discipline + Probability foundations + SQL fix", days: "1-7", tasks: [
         "10 LeetCode Easy problems using the trace-before-you-run protocol (pseudocode -> hand-trace 2 cases -> verify in Python Tutor -> run)",
-        "Recursion remediation: factorial, sum of digits, Fibonacci, string reversal, sum of list — trace call stack in Python Tutor for each",
+        "Recursion remediation, TWO passes not one: factorial, sum of digits, Fibonacci, string reversal, sum of list, then a second harder set (reverse a linked list, subsets/power set) — trace call stack in Python Tutor for each. This WILL be spot-checked cold later without warning.",
         "SQLZoo JOIN tutorial, then 10 LeetCode SQL Medium problems using joins",
         "Stat 110 Lectures 1-4 (probability & counting, Bayes' rule) + Strategic Practice sets"
       ], resources: ["python-tutor", "stat110", "sqlzoo", "neetcode"] },
@@ -83,20 +83,22 @@ const DEFAULT_STATE = {
         "fast.ai Practical Deep Learning for Coders — Lessons 1-2"
       ], resources: ["neetcode", "bandit", "tlcl", "stat110", "fastai"] },
       { title: "Week 3: DSA continues + AI project starts + quant mental math layer", days: "15-21", tasks: [
+        "SPACED-REPETITION CHECKPOINT: before anything new, redo every Week 1-2 problem you got wrong or were slow on. Skipping this is how 'progress' turns out to be an illusion.",
         "NeetCode 150 — Two Pointers, Stack, Binary Search categories, 15-20 problems",
         "Start Project 1 (RAG Q&A system) — ingestion + retrieval working",
-        "fast.ai Lessons 3-4 + DeepLearning.AI: LangChain for LLM Application Development",
+        "fast.ai Lessons 3-4 + DeepLearning.AI: LangChain for LLM Application Development — HARD RULE: you may not start the next course until the previous one's concept is actually used in Project 1's real code. Watching without applying doesn't count as progress and won't move your skill level.",
         "Daily 15-20 min timed mental math + probability brain-teasers begins"
       ], resources: ["neetcode", "fastai", "dlai-langchain"] },
       { title: "Week 4: Consolidation + first project ships + cold re-test", days: "22-30", tasks: [
         "NeetCode 150 — Trees, Recursion/Backtracking",
-        "DeepLearning.AI: AI Agents in LangGraph + finish + deploy Project 1",
+        "DeepLearning.AI: AI Agents in LangGraph + finish + deploy Project 1 — same apply-before-advance rule as Week 3",
         "Stat 110 Lectures 9-12 (expectation, more distributions)",
         "Day 30 cold re-test: fresh Bayes problem, fresh EV problem, define variance/stationarity unaided, debug a fresh buggy loop"
       ], resources: ["neetcode", "dlai-langgraph"] }
     ]},
     { phase: "Days 31-60 — Building & Applying", range: [31, 60], weeks: [
       { title: "Week 5: DSA expansion + statistics for ML + real evaluation", days: "31-37", tasks: [
+        "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 3-4 before starting new categories",
         "NeetCode 150 — Heaps/Priority Queues, Intervals, 12-15 problems",
         "Stat 110 Lectures 13-16 (continuous & joint distributions) + Khan Academy hypothesis testing / CI modules",
         "Build a golden 20-30 question eval set for Project 1 — measure retrieval quality + answer correctness systematically",
@@ -109,6 +111,7 @@ const DEFAULT_STATE = {
         "Turn Project 1 into a real backend: FastAPI endpoints, validation, basic auth, real DB for history, add tool-use/agent behavior"
       ], resources: ["neetcode", "sysdesign-primer", "dlai-eval-agents"] },
       { title: "Week 7: Stochastic processes gap + interview prep starts", days: "45-51", tasks: [
+        "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 5-6",
         "NeetCode 150 — 1-D Dynamic Programming, 12 problems",
         "MIT OCW probability/random processes — Markov chain mechanics only",
         "Brainstellar moves to Medium tier",
@@ -124,6 +127,7 @@ const DEFAULT_STATE = {
     ]},
     { phase: "Days 61-90 — Polishing & Interview Prep", range: [61, 90], weeks: [
       { title: "Week 9: DSA final gaps + first full mock cycle", days: "61-67", tasks: [
+        "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 7-8",
         "NeetCode 150 — Advanced Graphs, Tries, Bit Manipulation, Union-Find",
         "Shift to timed mixed practice (random category, 30-45 min cap)",
         "Pramp: first DSA + system design mock interviews with a live person",
@@ -203,6 +207,7 @@ const DEFAULT_STATE = {
      ----------------------------------------------------------------- */
   studyLog: [],
   exerciseLog: [],
+  pomodoroLog: [],
 
   /* -----------------------------------------------------------------
      TIMETABLE — the max-availability daily template

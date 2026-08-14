@@ -270,6 +270,82 @@ tr:last-child td { border-bottom: none; }
 .link-list a { display:block; font-size: 13px; padding: 4px 0; }
 .resource-cost { font-size: 11px; color: var(--text-muted); }
 
+/* ---------- Stakes banner (persistent, every view) ---------- */
+.stakes-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; margin-bottom: 18px;
+  border-radius: var(--radius-m);
+  border-left: 4px solid var(--status-critical);
+  background: color-mix(in srgb, var(--status-critical) 8%, var(--surface-1));
+  font-size: 13px;
+}
+.stakes-banner.on-track { border-left-color: var(--status-good); background: color-mix(in srgb, var(--status-good) 7%, var(--surface-1)); }
+.stakes-banner i.sb-icon { color: var(--status-critical); font-size: 15px; flex-shrink: 0; }
+.stakes-banner.on-track i.sb-icon { color: var(--status-good); }
+.stakes-banner b { font-weight: 700; }
+.stakes-banner .sb-sub { color: var(--text-muted); font-size: 12px; }
+
+/* ---------- Level / XP ---------- */
+.level-card { display: flex; align-items: center; gap: 16px; }
+.level-badge {
+  width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--series-1), var(--series-7));
+  color: #fff; font-weight: 800; font-size: 20px;
+}
+.level-info { flex: 1; }
+.level-info .title { font-weight: 700; font-size: 14.5px; }
+.level-info .xp { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+.xp-bar { height: 10px; border-radius: 999px; background: var(--gridline); overflow: hidden; margin-top: 8px; }
+.xp-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--series-1), var(--series-3)); transition: width .4s ease; }
+
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.earned-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 11px; border-radius: 999px; font-size: 12px; font-weight: 650;
+  background: color-mix(in srgb, var(--series-4) 16%, transparent); color: #8a5a00;
+}
+:root[data-theme="dark"] .earned-badge { color: var(--series-4); }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .earned-badge { color: var(--series-4); } }
+.earned-badge i { color: var(--series-4); }
+
+/* ---------- Floating focus timer ---------- */
+#focusTimer {
+  position: fixed; left: 20px; bottom: 20px; z-index: 70;
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: 999px; box-shadow: 0 6px 24px rgba(0,0,0,.18);
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px 8px 8px; cursor: pointer;
+  transition: border-radius .15s ease;
+  user-select: none;
+}
+#focusTimer .ft-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: conic-gradient(var(--series-1) calc(var(--pct, 0) * 1%), var(--gridline) 0);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+#focusTimer .ft-ring::after {
+  content: ""; width: 32px; height: 32px; border-radius: 50%; background: var(--surface-1);
+  display: flex;
+}
+#focusTimer .ft-time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13px; margin-right: 2px; }
+#focusTimer .ft-label { font-size: 11px; color: var(--text-muted); }
+#focusTimer.expanded { border-radius: var(--radius-l); padding: 14px; flex-direction: column; align-items: stretch; width: 220px; cursor: default; }
+#focusTimer.expanded .ft-collapsed-row { display: none; }
+.ft-expanded-body { display: none; }
+#focusTimer.expanded .ft-expanded-body { display: block; }
+.ft-big-time { font-size: 32px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; margin: 4px 0 10px; }
+.ft-modes { display: flex; gap: 6px; margin-bottom: 10px; }
+.ft-modes button { flex: 1; padding: 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--page-plane); font-size: 11.5px; cursor: pointer; color: var(--text-secondary); }
+.ft-modes button.active { background: var(--series-1); color: #fff; border-color: var(--series-1); }
+.ft-controls { display: flex; gap: 6px; }
+.ft-controls button { flex: 1; }
+.ft-close { position: absolute; top: 8px; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 13px; }
+.ft-sessions { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 8px; }
+
+/* ---------- Daily nudge ---------- */
+.nudge-card { border: 1px dashed var(--series-1); background: color-mix(in srgb, var(--series-1) 6%, var(--surface-1)); }
+
 /* ---------- Toast ---------- */
 #toast { position: fixed; bottom: 20px; right: 20px; background: var(--text-primary); color: var(--page-plane); padding: 10px 16px; border-radius: var(--radius-s); font-size: 13px; z-index: 80; opacity: 0; transform: translateY(8px); transition: all .2s ease; pointer-events: none; }
 #toast.show { opacity: 1; transform: translateY(0); }

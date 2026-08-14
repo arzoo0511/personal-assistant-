@@ -23,7 +23,17 @@ function loadState() {
 
 function saveState() {
   STATE.meta.lastUpdated = todayISO();
+  checkLevelUp();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE));
+}
+function checkLevelUp() {
+  const { level, title } = levelInfo();
+  const known = STATE.meta.lastKnownLevel || 1;
+  if (level > known) {
+    STATE.meta.lastKnownLevel = level;
+    STATE.achievements.unshift({ id: uid("a"), date: todayISO(), title: `Level ${level}: ${title}`, description: "Earned through logged activity — tasks completed, milestones passed, days shown up." });
+    setTimeout(() => toast(`Level up → ${level}: ${title}`), 50);
+  }
 }
 
 function todayISO() {
@@ -147,6 +157,7 @@ function goToView(name) {
   document.getElementById("viewTitle").textContent = title;
   document.getElementById("viewSub").innerHTML = sub + ` &nbsp;·&nbsp; Day <b>${currentPlanDay()}</b> of 90`;
   renderView(name);
+  renderStakesBanner();
   document.getElementById("sidebar").classList.remove("open");
   document.getElementById("sidebarScrim").classList.remove("show");
   window.scrollTo(0, 0);
@@ -185,6 +196,157 @@ function refreshAll() {
     const name = active.id.replace("view-", "");
     renderView(name);
   }
+}
+
+/* ============================================================
+   GAMIFICATION — XP / Levels / Badges
+   (computed from real tracked activity, never a fake number —
+   if this reads as inflated, it's because the underlying data is)
+   ============================================================ */
+const LEVEL_TITLES = [
+  "Diagnostic Survivor", "Pattern Recognizer", "Habit Breaker", "Momentum Builder",
+  "Problem Solver", "Shipped Something Real", "Interview Sharp", "Bottleneck Killer",
+  "Offer Threat", "Groundtruth"
+];
+const LEVEL_THRESHOLDS = [0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700];
+
+function totalXP() {
+  STATE.pomodoroLog = STATE.pomodoroLog || [];
+  const tasksDone = Object.values(STATE.roadmapDone || {}).filter(Boolean).length;
+  const milestonesPassed = STATE.milestones.filter(m => m.status === "passed").length;
+  const studyDays = STATE.studyLog.length;
+  const projectMilestones = STATE.projects.reduce((a, p) => a + (p.milestones || []).filter(m => m.done).length, 0);
+  const exerciseDays = STATE.exerciseLog.filter(e => e.done).length;
+  const pomodoroSessions = STATE.pomodoroLog.reduce((a, l) => a + l.count, 0);
+  return tasksDone * 10 + milestonesPassed * 50 + studyDays * 5 + projectMilestones * 15 + exerciseDays * 3 + pomodoroSessions * 8;
+}
+function levelInfo() {
+  const xp = totalXP();
+  let level = 1;
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (xp >= LEVEL_THRESHOLDS[i]) { level = i + 1; break; }
+  }
+  const idx = level - 1;
+  const floor = LEVEL_THRESHOLDS[idx];
+  const next = LEVEL_THRESHOLDS[idx + 1] ?? (floor + 600);
+  const pct = Math.min(100, Math.round(((xp - floor) / (next - floor)) * 100));
+  return { xp, level, title: LEVEL_TITLES[idx] || "Groundtruth", floor, next, pct };
+}
+
+/* ============================================================
+   STAKES BANNER (persistent, every view)
+   ============================================================ */
+function renderStakesBanner() {
+  const el = document.getElementById("stakesBanner");
+  if (!el) return;
+  const day = currentPlanDay();
+  const nextGate = STATE.milestones.find(m => m.status !== "passed" && m.status !== "failed") || STATE.milestones[STATE.milestones.length - 1];
+  const daysToGate = nextGate ? nextGate.dueDay - day : null;
+  const weakest = [...STATE.skills].sort((a, b) => (a.level - a.target) - (b.level - b.target))[0];
+  const cw = findCurrentWeek();
+  const weekTasksTotal = cw ? cw.week.tasks.length : 0;
+  const weekTasksDone = cw ? cw.week.tasks.filter((_, tIdx) => {
+    const pIdx = STATE.roadmap.indexOf(cw.phase);
+    const wIdx = cw.phase.weeks.indexOf(cw.week);
+    return (STATE.roadmapDone || {})[`${pIdx}-${wIdx}-${tIdx}`];
+  }).length : 0;
+  const onTrack = weekTasksTotal > 0 && weekTasksDone === weekTasksTotal;
+
+  el.className = "stakes-banner" + (onTrack ? " on-track" : "");
+  el.innerHTML = `
+    <i class="fa-solid ${onTrack ? "fa-fire" : "fa-triangle-exclamation"} sb-icon"></i>
+    <div>
+      <b>TARGET: ${escapeHtml(STATE.strategy.primary)}</b> ${escapeHtml("+ a real " + STATE.strategy.aggressiveParallel.split(" (")[0] + " shot")} — before 2027 graduation.
+      <span class="sb-sub">&nbsp;Day ${day}/90 ${daysToGate != null ? `· ${daysToGate <= 0 ? "GATE DUE NOW" : daysToGate + " days to " + nextGate.title} ` : ""}· weakest right now: ${escapeHtml(weakest.name)} (${weakest.level}/6, needs ${weakest.target}/6)${onTrack ? " · this week's tasks: done" : ""}</span>
+    </div>
+  `;
+}
+
+/* ============================================================
+   FLOATING FOCUS TIMER (Pomodoro-style)
+   ============================================================ */
+const TIMER_DURATIONS = { work: 25 * 60, break: 5 * 60 };
+let timer = { mode: "work", remaining: TIMER_DURATIONS.work, running: false, intervalId: null };
+
+function fmtClock(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, "0");
+  const s = Math.floor(sec % 60).toString().padStart(2, "0");
+  return `${m}:${s}`;
+}
+function todayPomodoroCount() {
+  const t = todayISO();
+  const entry = (STATE.pomodoroLog || []).find(l => l.date === t);
+  return entry ? entry.count : 0;
+}
+function logPomodoroSession() {
+  const t = todayISO();
+  STATE.pomodoroLog = STATE.pomodoroLog || [];
+  const entry = STATE.pomodoroLog.find(l => l.date === t);
+  if (entry) entry.count++;
+  else STATE.pomodoroLog.push({ date: t, count: 1 });
+  saveState();
+}
+function updateTimerUI() {
+  const pctElapsed = Math.round(((TIMER_DURATIONS[timer.mode] - timer.remaining) / TIMER_DURATIONS[timer.mode]) * 100);
+  document.getElementById("ftRing").style.setProperty("--pct", pctElapsed);
+  document.getElementById("ftTimeCollapsed").textContent = fmtClock(timer.remaining);
+  document.getElementById("ftLabelCollapsed").textContent = timer.running ? (timer.mode === "work" ? "Focusing…" : "On break…") : "Focus timer";
+  document.getElementById("ftBigTime").textContent = fmtClock(timer.remaining);
+  document.getElementById("ftStartPause").innerHTML = timer.running ? '<i class="fa-solid fa-pause"></i> Pause' : '<i class="fa-solid fa-play"></i> Start';
+  document.getElementById("ftSessions").textContent = `${todayPomodoroCount()} focus session${todayPomodoroCount() === 1 ? "" : "s"} today`;
+}
+function toggleTimerExpanded() {
+  const el = document.getElementById("focusTimer");
+  const expanding = !el.classList.contains("expanded");
+  el.classList.toggle("expanded");
+  document.getElementById("ftClose").style.display = expanding ? "block" : "none";
+  updateTimerUI();
+}
+function collapseTimer(e) {
+  e.stopPropagation();
+  document.getElementById("focusTimer").classList.remove("expanded");
+  document.getElementById("ftClose").style.display = "none";
+}
+function setTimerMode(mode) {
+  if (timer.running) return;
+  timer.mode = mode;
+  timer.remaining = TIMER_DURATIONS[mode];
+  document.getElementById("ftModeWork").classList.toggle("active", mode === "work");
+  document.getElementById("ftModeBreak").classList.toggle("active", mode === "break");
+  updateTimerUI();
+}
+function startPauseTimer(e) {
+  e.stopPropagation();
+  if (timer.running) {
+    clearInterval(timer.intervalId);
+    timer.running = false;
+  } else {
+    timer.running = true;
+    timer.intervalId = setInterval(() => {
+      timer.remaining--;
+      if (timer.remaining <= 0) {
+        clearInterval(timer.intervalId);
+        timer.running = false;
+        if (timer.mode === "work") {
+          logPomodoroSession();
+          toast("Focus session done — logged. " + (Math.random() < 0.5 ? "Take the break." : "Now go update something real."));
+          setTimerMode("break");
+        } else {
+          toast("Break's over.");
+          setTimerMode("work");
+        }
+      }
+      updateTimerUI();
+    }, 1000);
+  }
+  updateTimerUI();
+}
+function resetTimer(e) {
+  e.stopPropagation();
+  clearInterval(timer.intervalId);
+  timer.running = false;
+  timer.remaining = TIMER_DURATIONS[timer.mode];
+  updateTimerUI();
 }
 
 /* ============================================================
@@ -227,8 +389,32 @@ function renderDashboard() {
   const streak = studyStreak();
   const upcomingMilestone = STATE.milestones.find(m => m.status !== "passed" && m.status !== "failed" && m.dueDay >= day) || STATE.milestones[STATE.milestones.length - 1];
 
+  const li = levelInfo();
+  const loggedToday = STATE.studyLog.some(l => l.date === todayISO());
+
   const el = document.getElementById("view-dashboard");
   el.innerHTML = `
+    ${!loggedToday ? `
+    <div class="card nudge-card mb-16">
+      <div class="flex-between">
+        <div>
+          <b style="font-size:13.5px;">Nothing logged today yet.</b>
+          <p style="font-size:12.5px; margin-top:2px;">Streak is at ${streak}. A zero today breaks it — that's the whole mechanic, no exceptions for "basically did stuff."</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="goToView('studylog')">Log now</button>
+      </div>
+    </div>` : ""}
+
+    <div class="card level-card mb-16">
+      <div class="level-badge">${li.level}</div>
+      <div class="level-info">
+        <div class="title">Level ${li.level}: ${escapeHtml(li.title)}</div>
+        <div class="xp">${li.xp} XP ${li.next ? `· ${li.next - li.xp} to next level` : ""}</div>
+        <div class="xp-bar"><span style="width:${li.pct}%"></span></div>
+        ${STATE.achievements.length ? `<div class="badge-row">${STATE.achievements.slice(0, 4).map(a => `<span class="earned-badge"><i class="fa-solid fa-medal"></i>${escapeHtml(a.title)}</span>`).join("")}</div>` : ""}
+      </div>
+    </div>
+
     <div class="grid grid-4 mb-16">
       <div class="card stat-tile">
         <div class="value">${day} <small style="font-size:14px;color:var(--text-muted)">/ 90</small></div>
@@ -751,7 +937,9 @@ function initNav() {
 
 document.addEventListener("DOMContentLoaded", () => {
   STATE = loadState();
+  STATE.pomodoroLog = STATE.pomodoroLog || [];
   applyTheme(STATE.settings.theme || "system");
   initNav();
+  updateTimerUI();
   goToView("dashboard");
 });
