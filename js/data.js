@@ -75,26 +75,64 @@ const DEFAULT_STATE = {
         "Recursion remediation, TWO passes not one: factorial, sum of digits, Fibonacci, string reversal, sum of list, then a second harder set (reverse a linked list, subsets/power set) — trace call stack in Python Tutor for each. This WILL be spot-checked cold later without warning.",
         "SQLZoo JOIN tutorial, then 10 LeetCode SQL Medium problems using joins",
         "Stat 110 Lectures 1-4 (probability & counting, Bayes' rule) + Strategic Practice sets"
-      ], resources: ["python-tutor", "stat110", "sqlzoo", "neetcode"] },
+      ], resources: ["python-tutor", "stat110", "sqlzoo", "neetcode"],
+      dailyPlan: [
+        { d: 1, morning: "Read Python Tutor's interface, don't skip this", daytime: "3 LeetCode Easy — trace protocol", deep1: "Stat 110 Lecture 1 + practice", deep2: "SQLZoo JOIN tutorial, part 1", night: "Recap today in 2 sentences" },
+        { d: 2, morning: "Quick arithmetic warm-up", daytime: "3 more LeetCode Easy", deep1: "Stat 110 Lecture 2 + practice", deep2: "SQLZoo JOIN tutorial part 2 + 3 SQL Medium", night: "Explain Bayes' rule out loud, no notes" },
+        { d: 3, morning: "Quick arithmetic warm-up", daytime: "4 LeetCode Easy (10 done) + recursion set A: factorial, digit sum, Fibonacci", deep1: "Stat 110 Lecture 3 + practice", deep2: "4 more SQL Medium", night: "Re-trace one recursion problem cold" },
+        { d: 4, morning: "Quick arithmetic warm-up", daytime: "Recursion set A finish (string reversal, sum of list) + set B start (reverse a linked list)", deep1: "Stat 110 Lecture 4 + practice", deep2: "Remaining SQL Medium (10 done)", night: "Write Bayes' theorem from memory" },
+        { d: 5, morning: "Quick arithmetic warm-up", daytime: "Recursion set B finish (subsets/power set)", deep1: "Strategic Practice catch-up for Lectures 1-4", deep2: "Redo any SQL problem that felt shaky", night: "Self-quiz: trace a fresh recursive function cold" },
+        { d: 6, morning: "—", daytime: "CATCH-UP & BUFFER — finish anything behind. No new material today.", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 7, morning: "—", daytime: "REVIEW — redo 2 problems cold, no notes", deep1: "Preview Week 2's NeetCode category so Monday isn't a cold start", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 2: DSA patterns begin + Linux from zero + ML fundamentals", days: "8-14", tasks: [
         "NeetCode 150 — Arrays & Hashing category, 15 problems, 25-30 min independent attempt before watching solution",
         "OverTheWire Bandit levels 0-15 + read 'Learning the Shell' section of The Linux Command Line",
         "Stat 110 Lectures 5-8 (conditional probability, independence, discrete RVs) + practice",
         "fast.ai Practical Deep Learning for Coders — Lessons 1-2"
-      ], resources: ["neetcode", "bandit", "tlcl", "stat110", "fastai"] },
+      ], resources: ["neetcode", "bandit", "tlcl", "stat110", "fastai"],
+      dailyPlan: [
+        { d: 8, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3 (independent attempt first)", deep1: "fast.ai Lesson 1", deep2: "Bandit levels 0-3", night: "Recap fast.ai Lesson 1" },
+        { d: 9, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3", deep1: "fast.ai Lesson 1 exercises", deep2: "Bandit levels 4-7", night: "Recap" },
+        { d: 10, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3 (9 done)", deep1: "fast.ai Lesson 2", deep2: "Bandit levels 8-11", night: "Recap" },
+        { d: 11, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3 (12 done) + Stat 110 Lecture 5", deep1: "fast.ai Lesson 2 exercises", deep2: "Bandit levels 12-15 (done)", night: "Recap" },
+        { d: 12, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing remaining (15 done) + Stat 110 Lecture 6", deep1: "Stat 110 Lectures 7-8 + practice", deep2: "Read The Linux Command Line — Learning the Shell", night: "Self-quiz: why is a set O(1) and a list O(n)?" },
+        { d: 13, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 14, morning: "—", daytime: "REVIEW — redo 2 Arrays/Hashing problems cold", deep1: "Preview Week 3's Two Pointers/Stack categories", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 3: DSA continues + AI project starts + quant mental math layer", days: "15-21", tasks: [
         "SPACED-REPETITION CHECKPOINT: before anything new, redo every Week 1-2 problem you got wrong or were slow on. Skipping this is how 'progress' turns out to be an illusion.",
         "NeetCode 150 — Two Pointers, Stack, Binary Search categories, 15-20 problems",
         "Start Project 1 (RAG Q&A system) — ingestion + retrieval working",
         "fast.ai Lessons 3-4 + DeepLearning.AI: LangChain for LLM Application Development — HARD RULE: you may not start the next course until the previous one's concept is actually used in Project 1's real code. Watching without applying doesn't count as progress and won't move your skill level.",
         "Daily 15-20 min timed mental math + probability brain-teasers begins"
-      ], resources: ["neetcode", "fastai", "dlai-langchain"] },
+      ], resources: ["neetcode", "fastai", "dlai-langchain"],
+      dailyPlan: [
+        { d: 15, morning: "SPACED-REP: redo Week 1-2 wrong answers", daytime: "NeetCode Two Pointers x4", deep1: "Project 1 — repo setup, pick document set, plan architecture", deep2: "fast.ai Lesson 3", night: "Mental math 15min (starts today)" },
+        { d: 16, morning: "Mental math 15min", daytime: "NeetCode Two Pointers x4 (done) + Stack x2", deep1: "Project 1 — ingestion pipeline", deep2: "fast.ai Lesson 3 exercises", night: "Mental math / probability brainteaser" },
+        { d: 17, morning: "Mental math 15min", daytime: "NeetCode Stack x3 (5 done) + Binary Search x3", deep1: "Project 1 — chunking + embeddings", deep2: "fast.ai Lesson 4", night: "Mental math" },
+        { d: 18, morning: "Mental math 15min", daytime: "NeetCode Binary Search remaining + mixed review", deep1: "Project 1 — vector store wired in", deep2: "DeepLearning.AI: LangChain — then immediately use retrieval in Project 1 (apply-before-advance rule)", night: "Mental math" },
+        { d: 19, morning: "Mental math 15min", daytime: "NeetCode mixed review (15-20 done)", deep1: "Project 1 — get basic retrieval working end to end", deep2: "Debug/fix whatever broke", night: "Mental math + probability brainteaser" },
+        { d: 20, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 21, morning: "—", daytime: "REVIEW — redo 2 problems cold", deep1: "SPACED-REP checkpoint prep for Week 4", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 4: Consolidation + first project ships + cold re-test", days: "22-30", tasks: [
         "NeetCode 150 — Trees, Recursion/Backtracking",
         "DeepLearning.AI: AI Agents in LangGraph + finish + deploy Project 1 — same apply-before-advance rule as Week 3",
         "Stat 110 Lectures 9-12 (expectation, more distributions)",
         "Day 30 cold re-test: fresh Bayes problem, fresh EV problem, define variance/stationarity unaided, debug a fresh buggy loop"
-      ], resources: ["neetcode", "dlai-langgraph"] }
+      ], resources: ["neetcode", "dlai-langgraph"],
+      dailyPlan: [
+        { d: 22, morning: "Mental math", daytime: "NeetCode Trees x4", deep1: "Project 1 — generation wired in", deep2: "DeepLearning.AI: AI Agents in LangGraph — apply immediately after", night: "Mental math" },
+        { d: 23, morning: "Mental math", daytime: "NeetCode Trees x4 (8 done) + Recursion/Backtracking x2", deep1: "Project 1 — basic manual eval", deep2: "Stat 110 Lecture 9", night: "Mental math" },
+        { d: 24, morning: "Mental math", daytime: "NeetCode Recursion/Backtracking x4", deep1: "Project 1 — deploy to Streamlit/HF Spaces", deep2: "Stat 110 Lecture 10", night: "Mental math" },
+        { d: 25, morning: "Mental math", daytime: "NeetCode Recursion/Backtracking remaining (done)", deep1: "Stat 110 Lecture 11 + practice", deep2: "Project 1 — polish + README", night: "Mental math" },
+        { d: 26, morning: "Mental math", daytime: "Light review of everything since Day 1", deep1: "Stat 110 Lecture 12 + practice", deep2: "Project 1 — confirm it's genuinely deployed and working", night: "Mental math" },
+        { d: 27, morning: "—", daytime: "CATCH-UP & BUFFER — get Project 1 actually done if it isn't", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 28, morning: "—", daytime: "Prep for the Day 30 gate — review weak spots honestly", deep1: "Light review only, no cramming new material", deep2: "Same", night: "Rest, sleep properly before the gate" },
+        { d: 29, morning: "—", daytime: "One more light review pass", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 30, morning: "—", daytime: "DAY 30 GATE — cold re-test: fresh Bayes, fresh EV, variance/stationarity unaided, debug a fresh buggy loop", deep1: "Go/No-Go review against the gate criteria", deep2: "Weekly + monthly review in the dashboard", night: "—" }
+      ]}
     ]},
     { phase: "Days 31-60 — Building & Applying", range: [31, 60], weeks: [
       { title: "Week 5: DSA expansion + statistics for ML + real evaluation", days: "31-37", tasks: [
@@ -103,27 +141,65 @@ const DEFAULT_STATE = {
         "Stat 110 Lectures 13-16 (continuous & joint distributions) + Khan Academy hypothesis testing / CI modules",
         "Build a golden 20-30 question eval set for Project 1 — measure retrieval quality + answer correctness systematically",
         "Start Brainstellar puzzles, Easy tier"
-      ], resources: ["neetcode", "stat110", "dlai-accuracy", "brainstellar"] },
+      ], resources: ["neetcode", "stat110", "dlai-accuracy", "brainstellar"],
+      dailyPlan: [
+        { d: 31, morning: "SPACED-REP: redo Week 3-4 wrong answers", daytime: "NeetCode Heaps x3", deep1: "Stat 110 Lecture 13", deep2: "Start Project 1 eval set (5 questions)", night: "Mental math + Brainstellar Easy" },
+        { d: 32, morning: "Mental math", daytime: "NeetCode Heaps x3 (done) + Intervals x2", deep1: "Stat 110 Lecture 14", deep2: "Eval set (10 questions)", night: "Mental math" },
+        { d: 33, morning: "Mental math", daytime: "NeetCode Intervals x4 (~12 done)", deep1: "Stat 110 Lecture 15 + Khan Academy hypothesis testing", deep2: "Eval set (15-20 questions)", night: "Mental math" },
+        { d: 34, morning: "Mental math", daytime: "Khan Academy confidence intervals", deep1: "Stat 110 Lecture 16 + practice", deep2: "Run the eval set against Project 1, measure it for real", night: "Mental math" },
+        { d: 35, morning: "Mental math", daytime: "Fix whatever the eval set exposed in Project 1", deep1: "Review Stat 110 Lectures 13-16", deep2: "Finish eval set (20-30 questions), document results", night: "Mental math + Brainstellar" },
+        { d: 36, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 37, morning: "—", daytime: "REVIEW — redo 2 problems cold", deep1: "Preview Week 6 (system design, graphs)", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 6: Systems foundations + agentic behavior", days: "38-44", tasks: [
         "NeetCode 150 — Greedy, Graphs (BFS/DFS), 15 problems",
         "System Design Primer (GitHub) + Gaurav Sen YouTube — scalability, caching, load balancing, CAP theorem",
         "DeepLearning.AI: Evaluating AI Agents",
         "Turn Project 1 into a real backend: FastAPI endpoints, validation, basic auth, real DB for history, add tool-use/agent behavior"
-      ], resources: ["neetcode", "sysdesign-primer", "dlai-eval-agents"] },
+      ], resources: ["neetcode", "sysdesign-primer", "dlai-eval-agents"],
+      dailyPlan: [
+        { d: 38, morning: "Mental math", daytime: "NeetCode Greedy x4", deep1: "System Design Primer — scalability basics", deep2: "DeepLearning.AI: Evaluating AI Agents — apply after", night: "Mental math" },
+        { d: 39, morning: "Mental math", daytime: "NeetCode Greedy x4 (done) + Graphs BFS/DFS x3", deep1: "System Design Primer — caching, load balancing", deep2: "FastAPI — scaffold Project 1 backend endpoints", night: "Mental math" },
+        { d: 40, morning: "Mental math", daytime: "NeetCode Graphs x4", deep1: "System Design Primer — CAP theorem + Gaurav Sen video", deep2: "FastAPI — request validation + basic auth", night: "Mental math" },
+        { d: 41, morning: "Mental math", daytime: "NeetCode Graphs remaining (15 done)", deep1: "Real DB wired in for chat history", deep2: "Add tool-use/agent behavior to Project 1", night: "Mental math" },
+        { d: 42, morning: "Mental math", daytime: "Review this week's system design topics out loud", deep1: "Debug the agent/backend integration", deep2: "Test the whole backend end to end", night: "Mental math + Brainstellar" },
+        { d: 43, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 44, morning: "—", daytime: "REVIEW", deep1: "Preview Week 7 (DP, Markov chains)", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 7: Stochastic processes gap + interview prep starts", days: "45-51", tasks: [
         "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 5-6",
         "NeetCode 150 — 1-D Dynamic Programming, 12 problems",
         "MIT OCW probability/random processes — Markov chain mechanics only",
         "Brainstellar moves to Medium tier",
         "5-6 STAR behavioral stories written; first timed 30-45 min mock technical interview, self-recorded"
-      ], resources: ["neetcode", "mit-ocw-prob", "brainstellar"] },
+      ], resources: ["neetcode", "mit-ocw-prob", "brainstellar"],
+      dailyPlan: [
+        { d: 45, morning: "SPACED-REP: redo Week 5-6 wrong answers", daytime: "NeetCode 1-D DP x3", deep1: "MIT OCW — Markov chains part 1", deep2: "Write 2 STAR stories", night: "Mental math" },
+        { d: 46, morning: "Mental math", daytime: "NeetCode 1-D DP x3", deep1: "MIT OCW — Markov chains part 2", deep2: "2 more STAR stories (4 done)", night: "Mental math" },
+        { d: 47, morning: "Mental math", daytime: "NeetCode 1-D DP x3 (9 done)", deep1: "Brainstellar Medium x3", deep2: "2 more STAR stories (6 done)", night: "Mental math" },
+        { d: 48, morning: "Mental math", daytime: "NeetCode 1-D DP remaining (12 done)", deep1: "Brainstellar Medium x3", deep2: "Pick a fresh problem for tomorrow's mock — don't preview it", night: "Mental math" },
+        { d: 49, morning: "Mental math", daytime: "Light review", deep1: "FIRST TIMED MOCK TECHNICAL INTERVIEW — 30-45min, self-recorded", deep2: "Review the recording for communication, not just correctness", night: "Mental math" },
+        { d: 50, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 51, morning: "—", daytime: "REVIEW", deep1: "Preview Week 8", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 8: Consolidation, project ships, applications expand", days: "52-60", tasks: [
         "NeetCode 150 — 2-D Dynamic Programming + full mixed review, target ~110-120 cumulative problems",
         "Project 1 final form: evaluated, real backend, deployed, system-design-style README",
         "Expand tracked application list across AI Engineer / SWE / Quant Research targets",
         "Publish one technical post about Project 1's architecture + real eval numbers",
         "Finish and document the Kaggle entry"
-      ], resources: ["neetcode"] }
+      ], resources: ["neetcode"],
+      dailyPlan: [
+        { d: 52, morning: "Mental math", daytime: "NeetCode 2-D DP x3", deep1: "Project 1 — final eval pass", deep2: "Research 5 application targets", night: "Mental math" },
+        { d: 53, morning: "Mental math", daytime: "NeetCode 2-D DP x3", deep1: "Project 1 — system-design-style README", deep2: "Apply to 2-3 targets", night: "Mental math" },
+        { d: 54, morning: "Mental math", daytime: "NeetCode full mixed review x5", deep1: "Project 1 — record the demo", deep2: "Apply to 2-3 more targets", night: "Mental math" },
+        { d: 55, morning: "Mental math", daytime: "NeetCode mixed review x5 (target ~110-120 cumulative)", deep1: "Write the technical post — Project 1 architecture + real eval numbers", deep2: "Publish it", night: "Mental math" },
+        { d: 56, morning: "Mental math", daytime: "Finish/document the Kaggle entry", deep1: "Finish/document the Kaggle entry (cont.)", deep2: "Application follow-ups", night: "Mental math + Brainstellar" },
+        { d: 57, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 58, morning: "—", daytime: "Prep for Day 60 gate — honest self-check against the criteria", deep1: "Light review only", deep2: "Same", night: "Rest" },
+        { d: 59, morning: "—", daytime: "One more light pass", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 60, morning: "—", daytime: "DAY 60 GATE — check against criteria", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", night: "—" }
+      ]}
     ]},
     { phase: "Days 61-90 — Polishing & Interview Prep", range: [61, 90], weeks: [
       { title: "Week 9: DSA final gaps + first full mock cycle", days: "61-67", tasks: [
@@ -132,25 +208,63 @@ const DEFAULT_STATE = {
         "Shift to timed mixed practice (random category, 30-45 min cap)",
         "Pramp: first DSA + system design mock interviews with a live person",
         "Jane Street's official monthly puzzle (current + 2-3 archive) + Brainstellar Hard tier"
-      ], resources: ["neetcode", "pramp", "janestreet-puzzles", "brainstellar"] },
+      ], resources: ["neetcode", "pramp", "janestreet-puzzles", "brainstellar"],
+      dailyPlan: [
+        { d: 61, morning: "SPACED-REP: redo Week 7-8 wrong answers", daytime: "NeetCode Advanced Graphs x3", deep1: "Timed mixed practice, 30-45min cap", deep2: "Jane Street's current puzzle — attempt it", night: "Mental math" },
+        { d: 62, morning: "Mental math", daytime: "NeetCode Tries x3", deep1: "Timed mixed practice", deep2: "Jane Street archive puzzle", night: "Mental math" },
+        { d: 63, morning: "Mental math", daytime: "NeetCode Bit Manipulation x3", deep1: "Timed mixed practice", deep2: "Brainstellar Hard x2", night: "Mental math" },
+        { d: 64, morning: "Mental math", daytime: "NeetCode Union-Find x3 (done)", deep1: "PRAMP: DSA mock interview", deep2: "Debrief — what communication gaps showed up", night: "Mental math" },
+        { d: 65, morning: "Mental math", daytime: "Timed mixed review", deep1: "PRAMP: system design mock interview", deep2: "Debrief", night: "Mental math + Brainstellar" },
+        { d: 66, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 67, morning: "—", daytime: "REVIEW", deep1: "Preview Week 10", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 10: Behavioral prep + project polish + resume audit", days: "68-74", tasks: [
         "Finalize STAR stories, run a behavioral mock via Pramp",
         "Project 1: clean README, short demo recording",
         "Full resume audit — every claim must hold at 3+ under questioning",
         "DSA: re-attempt every previously logged wrong answer"
-      ], resources: ["pramp"] },
+      ], resources: ["pramp"],
+      dailyPlan: [
+        { d: 68, morning: "Mental math", daytime: "Finalize STAR stories, say them out loud", deep1: "PRAMP: behavioral mock", deep2: "Debrief", night: "Mental math" },
+        { d: 69, morning: "Mental math", daytime: "Project 1 — clean up the README fully", deep1: "Project 1 — record the demo", deep2: "Resume audit part 1: Tier 1 skill claims", night: "Mental math" },
+        { d: 70, morning: "Mental math", daytime: "Resume audit part 2: projects, experience", deep1: "DSA — re-attempt logged wrong answers, batch 1", deep2: "Batch 2", night: "Mental math" },
+        { d: 71, morning: "Mental math", daytime: "DSA — re-attempt wrong answers, batch 3", deep1: "Finalize the resume", deep2: "Update the dashboard's Resume/Portfolio tracker with real links", night: "Mental math" },
+        { d: 72, morning: "Mental math", daytime: "Light review of everything so far", deep1: "Self-run behavioral mock #2", deep2: "Application follow-ups", night: "Mental math + Brainstellar" },
+        { d: 73, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 74, morning: "—", daytime: "REVIEW", deep1: "Preview Week 11", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 11: Real interview loops + continued applications", days: "75-81", tasks: [
         "Maintenance-mode timed DSA review",
         "Second full Pramp mock cycle: DSA, system design, behavioral",
         "Keep applying to open postings; follow up on anything quiet 2+ weeks",
         "Cold outreach / referral asks now that there's a real project to show"
-      ], resources: ["pramp"] },
+      ], resources: ["pramp"],
+      dailyPlan: [
+        { d: 75, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "Handle any live interview prep the actual pipeline needs", deep2: "Apply to 2-3 more targets", night: "Mental math" },
+        { d: 76, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "PRAMP: DSA mock, cycle 2", deep2: "Debrief", night: "Mental math" },
+        { d: 77, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "PRAMP: system design mock, cycle 2", deep2: "Debrief", night: "Mental math" },
+        { d: 78, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "PRAMP: behavioral mock, cycle 2", deep2: "Debrief", night: "Mental math" },
+        { d: 79, morning: "Mental math", daytime: "Follow up on anything quiet 2+ weeks", deep1: "Cold outreach — 3 messages using Project 1 as the hook", deep2: "Referral asks", night: "Mental math + Brainstellar" },
+        { d: 80, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 81, morning: "—", daytime: "REVIEW", deep1: "Preview Week 12 (this is the full re-diagnostic week)", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+      ]},
       { title: "Week 12: Full cold re-diagnostic + retrospective", days: "82-90", tasks: [
         "Complete cold re-run of the entire original 10-domain diagnostic, same rigor, no notes",
         "Compare Day 1 vs Day 90 skill matrix",
         "Retrospective: which habits still show up, is Primary/Secondary/Quant split still right",
         "Day 90 Go/No-Go gate — feeds into 6-month and 1-year direction"
-      ], resources: [] }
+      ], resources: [],
+      dailyPlan: [
+        { d: 82, morning: "—", daytime: "Cold re-test: Python domain (Batch 1 style, fresh problems)", deep1: "Cold re-test: DSA domain", deep2: "Cold re-test: Probability & Statistics", night: "No new material" },
+        { d: 83, morning: "—", daytime: "Cold re-test: Linear Algebra & Calculus", deep1: "Cold re-test: Optimization & ML", deep2: "Cold re-test: Deep Learning / AI Engineering", night: "No new material" },
+        { d: 84, morning: "—", daytime: "Cold re-test: SQL & Systems/Linux", deep1: "Cold re-test: Finance & Markets", deep2: "Cold re-test: Stochastic Processes + Mental Math", night: "No new material" },
+        { d: 85, morning: "—", daytime: "Compile the Day 1 vs Day 90 skill matrix comparison", deep1: "Retrospective: which of the 3 cross-cutting habits still show up", deep2: "Retrospective: is Primary/Secondary/Quant still the right split", night: "No new material" },
+        { d: 86, morning: "—", daytime: "Update every dashboard tracker with final real numbers", deep1: "DAY 90 GO/NO-GO GATE DECISION", deep2: "Draft 6-month direction notes", night: "No new material" },
+        { d: 87, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
+        { d: 88, morning: "—", daytime: "Final weekly + monthly review", deep1: "Plan the next phase", deep2: "—", night: "—" },
+        { d: 89, morning: "—", daytime: "Buffer", deep1: "Buffer", deep2: "Buffer", night: "—" },
+        { d: 90, morning: "—", daytime: "Buffer / celebrate what's actually verifiably true, not what feels true", deep1: "—", deep2: "—", night: "—" }
+      ]}
     ]}
   ],
 
@@ -208,6 +322,7 @@ const DEFAULT_STATE = {
   studyLog: [],
   exerciseLog: [],
   pomodoroLog: [],
+  dailyPlanDone: {},
 
   /* -----------------------------------------------------------------
      TIMETABLE — the max-availability daily template

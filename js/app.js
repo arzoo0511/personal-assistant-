@@ -213,13 +213,15 @@ const LEVEL_THRESHOLDS = [0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700];
 
 function totalXP() {
   STATE.pomodoroLog = STATE.pomodoroLog || [];
+  STATE.dailyPlanDone = STATE.dailyPlanDone || {};
   const tasksDone = Object.values(STATE.roadmapDone || {}).filter(Boolean).length;
   const milestonesPassed = STATE.milestones.filter(m => m.status === "passed").length;
   const studyDays = STATE.studyLog.length;
   const projectMilestones = STATE.projects.reduce((a, p) => a + (p.milestones || []).filter(m => m.done).length, 0);
   const exerciseDays = STATE.exerciseLog.filter(e => e.done).length;
   const pomodoroSessions = STATE.pomodoroLog.reduce((a, l) => a + l.count, 0);
-  return tasksDone * 10 + milestonesPassed * 50 + studyDays * 5 + projectMilestones * 15 + exerciseDays * 3 + pomodoroSessions * 8;
+  const dailySlotsDone = Object.values(STATE.dailyPlanDone).filter(Boolean).length;
+  return tasksDone * 10 + milestonesPassed * 50 + studyDays * 5 + projectMilestones * 15 + exerciseDays * 3 + pomodoroSessions * 8 + dailySlotsDone * 4;
 }
 function levelInfo() {
   const xp = totalXP();
@@ -265,9 +267,17 @@ function renderStakesBanner() {
 
 /* ============================================================
    FLOATING FOCUS TIMER (Pomodoro-style)
+   Two work presets (Quick 25 for the interruptible work window,
+   Deep 50 for the evening deep-work blocks) since one fixed length
+   didn't fit both kinds of time in the real schedule. Auto long-break
+   every 4th session, audio + browser notification on completion so
+   it's noticeable even if the tab isn't focused, and a hint pulled
+   from today's actual day-by-day plan instead of a generic label.
    ============================================================ */
-const TIMER_DURATIONS = { work: 25 * 60, break: 5 * 60 };
-let timer = { mode: "work", remaining: TIMER_DURATIONS.work, running: false, intervalId: null };
+const TIMER_DURATIONS = { quick: 25 * 60, deep: 50 * 60, break: 5 * 60, longBreak: 15 * 60 };
+const WORK_TYPES = ["quick", "deep"];
+let timer = { type: "quick", remaining: TIMER_DURATIONS.quick, running: false, intervalId: null };
+let notifyPermissionAsked = false;
 
 function fmtClock(sec) {
   const m = Math.floor(sec / 60).toString().padStart(2, "0");
@@ -286,6 +296,7 @@ function logPomodoroSession() {
   if (entry) entry.count++;
   else STATE.pomodoroLog.push({ date: t, count: 1 });
   saveState();
+  return todayPomodoroCount();
 }
 /* The only path that adds study hours automatically — tied to a real
    completed, timed session, not a typed-in number. This exists because
@@ -303,14 +314,62 @@ function addStudyMinutes(category, minutes) {
   entry.total = Math.round(Object.values(entry.hours).reduce((a, v) => a + v, 0) * 100) / 100;
   saveState();
 }
+
+/* Sound + system notification — a silent toast is easy to miss,
+   especially mid-focus or if the tab isn't in front. */
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [0, 0.18, 0.36].forEach((delay, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.value = i === 2 ? 880 : 660;
+      gain.gain.setValueAtTime(0.001, ctx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.15, ctx.currentTime + delay + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.15);
+      osc.start(ctx.currentTime + delay);
+      osc.stop(ctx.currentTime + delay + 0.16);
+    });
+  } catch (e) { /* Web Audio unavailable — silent no-op, toast still fires */ }
+}
+function notifyCompletion(title, body) {
+  playBeep();
+  if (!("Notification" in window)) return;
+  if (Notification.permission === "granted") {
+    new Notification(title, { body, icon: "" });
+  } else if (Notification.permission !== "denied" && !notifyPermissionAsked) {
+    notifyPermissionAsked = true;
+    Notification.requestPermission().then(p => { if (p === "granted") new Notification(title, { body }); });
+  }
+}
+
+function todayHintFor(type) {
+  const plan = findDayPlan(currentPlanDay());
+  if (!plan) return "";
+  const p = plan.plan;
+  if (type === "quick") return p.daytime && p.daytime !== "—" ? `Today's work-window plan: ${p.daytime}` : "";
+  if (type === "deep") {
+    const parts = [p.deep1, p.deep2].filter(x => x && x !== "—");
+    return parts.length ? `Today's deep work: ${parts.join(" · ")}` : "";
+  }
+  return "";
+}
+function onCategoryChange() {
+  STATE.settings.lastTimerCategory = document.getElementById("ftCategory").value;
+  saveState();
+}
 function updateTimerUI() {
-  const pctElapsed = Math.round(((TIMER_DURATIONS[timer.mode] - timer.remaining) / TIMER_DURATIONS[timer.mode]) * 100);
+  const total = TIMER_DURATIONS[timer.type];
+  const pctElapsed = Math.round(((total - timer.remaining) / total) * 100);
   document.getElementById("ftRing").style.setProperty("--pct", pctElapsed);
   document.getElementById("ftTimeCollapsed").textContent = fmtClock(timer.remaining);
-  document.getElementById("ftLabelCollapsed").textContent = timer.running ? (timer.mode === "work" ? "Focusing…" : "On break…") : "Focus timer";
+  document.getElementById("ftLabelCollapsed").textContent = timer.running ? (WORK_TYPES.includes(timer.type) ? "Focusing…" : "On break…") : "Focus timer";
   document.getElementById("ftBigTime").textContent = fmtClock(timer.remaining);
   document.getElementById("ftStartPause").innerHTML = timer.running ? '<i class="fa-solid fa-pause"></i> Pause' : '<i class="fa-solid fa-play"></i> Start';
-  document.getElementById("ftSessions").textContent = `${todayPomodoroCount()} focus session${todayPomodoroCount() === 1 ? "" : "s"} today`;
+  const n = todayPomodoroCount();
+  document.getElementById("ftSessions").textContent = `${n} focus session${n === 1 ? "" : "s"} today${n > 0 && n % 4 === 0 ? " — long break earned" : ""}`;
+  document.getElementById("ftHint").textContent = todayHintFor(timer.type);
 }
 function toggleTimerExpanded() {
   const el = document.getElementById("focusTimer");
@@ -324,14 +383,23 @@ function collapseTimer(e) {
   document.getElementById("focusTimer").classList.remove("expanded");
   document.getElementById("ftClose").style.display = "none";
 }
-function setTimerMode(mode) {
+function setTimerDuration(type) {
   if (timer.running) return;
-  timer.mode = mode;
-  timer.remaining = TIMER_DURATIONS[mode];
-  document.getElementById("ftModeWork").classList.toggle("active", mode === "work");
-  document.getElementById("ftModeBreak").classList.toggle("active", mode === "break");
-  document.getElementById("ftCategoryField").style.display = mode === "work" ? "flex" : "none";
+  timer.type = type;
+  timer.remaining = TIMER_DURATIONS[type];
+  document.getElementById("ftDurQuick").classList.toggle("active", type === "quick");
+  document.getElementById("ftDurDeep").classList.toggle("active", type === "deep");
+  document.getElementById("ftDurBreak").classList.toggle("active", type === "break" || type === "longBreak");
+  document.getElementById("ftCategoryField").style.display = WORK_TYPES.includes(type) ? "flex" : "none";
   updateTimerUI();
+}
+// Suggests a sensible default the moment the widget is opened, based on
+// the real timetable block the current clock time falls in.
+function suggestTimerDefault() {
+  const h = new Date().getHours() + new Date().getMinutes() / 60;
+  if (h >= 19.5 && h < 23.25) return "deep";   // evening deep-work blocks
+  if (h >= 9.5 && h < 18) return "quick";       // interruptible work window
+  return "quick";
 }
 function startPauseTimer(e) {
   e.stopPropagation();
@@ -345,17 +413,21 @@ function startPauseTimer(e) {
       if (timer.remaining <= 0) {
         clearInterval(timer.intervalId);
         timer.running = false;
-        if (timer.mode === "work") {
-          logPomodoroSession();
+        if (WORK_TYPES.includes(timer.type)) {
+          const count = logPomodoroSession();
           const category = document.getElementById("ftCategory").value;
-          addStudyMinutes(category, TIMER_DURATIONS.work / 60);
+          addStudyMinutes(category, TIMER_DURATIONS[timer.type] / 60);
           if (document.querySelector(".view.active")?.id === "view-studylog") renderStudyLog();
           if (document.querySelector(".view.active")?.id === "view-dashboard") renderDashboard();
-          toast(`${Math.round(TIMER_DURATIONS.work / 60)}min logged to ${category} — real time, not typed in. ` + (Math.random() < 0.5 ? "Take the break." : "Now go update something real."));
-          setTimerMode("break");
+          const mins = Math.round(TIMER_DURATIONS[timer.type] / 60);
+          const isLongBreak = count % 4 === 0;
+          notifyCompletion("Focus session done", `${mins}min logged to ${category}. ${isLongBreak ? "Long break earned." : "Short break."}`);
+          toast(`${mins}min logged to ${category} — real time, not typed in.${isLongBreak ? " Long break earned." : ""}`, isLongBreak);
+          setTimerDuration(isLongBreak ? "longBreak" : "break");
         } else {
+          notifyCompletion("Break's over", "Back to it.");
           toast("Break's over.");
-          setTimerMode("work");
+          setTimerDuration(suggestTimerDefault());
         }
       }
       updateTimerUI();
@@ -367,7 +439,7 @@ function resetTimer(e) {
   e.stopPropagation();
   clearInterval(timer.intervalId);
   timer.running = false;
-  timer.remaining = TIMER_DURATIONS[timer.mode];
+  timer.remaining = TIMER_DURATIONS[timer.type];
   updateTimerUI();
 }
 
@@ -389,6 +461,24 @@ function findCurrentWeek() {
   return null;
 }
 
+function findDayPlan(dayNum) {
+  for (const phase of STATE.roadmap) {
+    for (const w of phase.weeks) {
+      if (!w.dailyPlan) continue;
+      const found = w.dailyPlan.find(d => d.d === dayNum);
+      if (found) return { week: w, plan: found };
+    }
+  }
+  return null;
+}
+function toggleDailyPlanSlot(day, slot) {
+  STATE.dailyPlanDone = STATE.dailyPlanDone || {};
+  const key = `${day}-${slot}`;
+  STATE.dailyPlanDone[key] = !STATE.dailyPlanDone[key];
+  saveState();
+  renderDashboard();
+}
+
 function studyStreak() {
   const days = new Set(STATE.studyLog.map(l => l.date));
   let streak = 0;
@@ -401,6 +491,39 @@ function studyStreak() {
   return streak;
 }
 
+const PLAN_SLOTS = [
+  { key: "morning", label: "Morning (8:30-9:30)", icon: "fa-feather", color: "var(--series-4)" },
+  { key: "daytime", label: "Work window (9:30-18:00)", icon: "fa-shuffle", color: "var(--series-2)" },
+  { key: "deep1", label: "Deep work 1 (19:30-21:30)", icon: "fa-bolt", color: "var(--series-1)" },
+  { key: "deep2", label: "Deep work 2 (21:45-23:15)", icon: "fa-bolt", color: "var(--series-1)" },
+  { key: "night", label: "Night (23:15-23:30)", icon: "fa-moon", color: "var(--series-7)" }
+];
+function renderTodayPlanCard(day, plan) {
+  STATE.dailyPlanDone = STATE.dailyPlanDone || {};
+  const isBufferDay = plan.daytime.includes("CATCH-UP") || plan.daytime.includes("BUFFER");
+  const doneCount = PLAN_SLOTS.filter(s => plan[s.key] !== "—" && STATE.dailyPlanDone[`${day}-${s.key}`]).length;
+  const activeSlots = PLAN_SLOTS.filter(s => plan[s.key] && plan[s.key] !== "—");
+  return `
+    <div class="card mb-16" style="border-color:var(--series-1);">
+      <div class="card-title-row">
+        <h3><i class="fa-solid fa-calendar-day"></i>&nbsp; Today's plan — Day ${day}${isBufferDay ? " (buffer day)" : ""}</h3>
+        <span class="muted">${doneCount}/${activeSlots.length} done</span>
+      </div>
+      ${activeSlots.map(s => {
+        const key = `${day}-${s.key}`;
+        const checked = !!STATE.dailyPlanDone[key];
+        return `
+        <label class="task-row ${checked ? "done" : ""}" style="align-items:flex-start; cursor:pointer;">
+          <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleDailyPlanSlot(${day}, '${s.key}')" style="margin-top:4px;" />
+          <span>
+            <span class="badge" style="background:color-mix(in srgb, ${s.color} 18%, transparent); color:${s.color}; margin-right:6px;"><i class="fa-solid ${s.icon}"></i>${s.label}</span>
+            <span>${escapeHtml(plan[s.key])}</span>
+          </span>
+        </label>`;
+      }).join("")}
+    </div>
+  `;
+}
 function renderDashboard() {
   const day = currentPlanDay();
   const pct = Math.min(100, Math.round((day / 90) * 100));
@@ -413,9 +536,11 @@ function renderDashboard() {
 
   const li = levelInfo();
   const loggedToday = STATE.studyLog.some(l => l.date === todayISO());
+  const todayPlan = findDayPlan(day);
 
   const el = document.getElementById("view-dashboard");
   el.innerHTML = `
+    ${todayPlan ? renderTodayPlanCard(day, todayPlan.plan) : ""}
     ${!loggedToday ? `
     <div class="card nudge-card mb-16">
       <div class="flex-between">
@@ -654,6 +779,24 @@ function renderRoadmap() {
                 const c = STATE.courses.find(c => c.id === rid);
                 return c ? `<a href="${c.url}" target="_blank" rel="noopener">${escapeHtml(c.name)}</a>` : rid;
               }).join(", ")}</div>
+            ` : ""}
+            ${w.dailyPlan ? `
+              <div class="mt-16">
+                <div class="muted" style="font-weight:650; margin-bottom:6px;">Day-by-day (check today's box on the Dashboard, this is reference only)</div>
+                <div class="table-wrap"><table>
+                  <thead><tr><th>Day</th><th>Morning</th><th>Work window</th><th>Deep work 1</th><th>Deep work 2</th><th>Night</th></tr></thead>
+                  <tbody>
+                    ${w.dailyPlan.map(dp => `<tr ${dp.d === day ? 'style="background:color-mix(in srgb, var(--series-1) 8%, transparent);"' : ""}>
+                      <td><b>${dp.d}${dp.d === day ? " (today)" : ""}</b></td>
+                      <td style="font-size:12px;">${escapeHtml(dp.morning)}</td>
+                      <td style="font-size:12px;">${escapeHtml(dp.daytime)}</td>
+                      <td style="font-size:12px;">${escapeHtml(dp.deep1)}</td>
+                      <td style="font-size:12px;">${escapeHtml(dp.deep2)}</td>
+                      <td style="font-size:12px;">${escapeHtml(dp.night)}</td>
+                    </tr>`).join("")}
+                  </tbody>
+                </table></div>
+              </div>
             ` : ""}
           </div>
         </div>
@@ -975,8 +1118,10 @@ function initNav() {
 document.addEventListener("DOMContentLoaded", () => {
   STATE = loadState();
   STATE.pomodoroLog = STATE.pomodoroLog || [];
-  applyTheme(STATE.settings.theme || "system");
+  STATE.dailyPlanDone = STATE.dailyPlanDone || {};
+  applyTheme(STATE.settings.theme || "light");
   initNav();
-  updateTimerUI();
+  if (STATE.settings.lastTimerCategory) document.getElementById("ftCategory").value = STATE.settings.lastTimerCategory;
+  setTimerDuration(suggestTimerDefault());
   goToView("dashboard");
 });

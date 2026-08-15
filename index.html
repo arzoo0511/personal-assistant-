@@ -11,7 +11,7 @@
 <!-- Chart.js (charts) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
-<link rel="stylesheet" href="css/styles.css?v=3" />
+<link rel="stylesheet" href="css/styles.css?v=4" />
 </head>
 <body>
 
@@ -150,12 +150,13 @@
   </div>
   <div class="ft-expanded-body">
     <div class="ft-modes">
-      <button id="ftModeWork" class="active" onclick="setTimerMode('work')">Focus 25</button>
-      <button id="ftModeBreak" onclick="setTimerMode('break')">Break 5</button>
+      <button id="ftDurQuick" class="active" onclick="setTimerDuration('quick')">Quick 25</button>
+      <button id="ftDurDeep" onclick="setTimerDuration('deep')">Deep 50</button>
+      <button id="ftDurBreak" onclick="setTimerDuration('break')">Break</button>
     </div>
-    <div class="field" id="ftCategoryField" style="margin-bottom:8px;">
+    <div class="field" id="ftCategoryField" style="margin-bottom:6px;">
       <label style="font-size:10.5px;">Logging this session as</label>
-      <select id="ftCategory" style="font-size:12.5px; padding:5px 8px;">
+      <select id="ftCategory" onchange="onCategoryChange()" style="font-size:12.5px; padding:5px 8px;">
         <option value="math">Mathematics</option>
         <option value="dsa">DSA</option>
         <option value="quant">Quant</option>
@@ -164,6 +165,7 @@
         <option value="interviewPrep">Interview prep</option>
       </select>
     </div>
+    <div class="muted" id="ftHint" style="font-size:11px; margin-bottom:8px; min-height:14px;"></div>
     <div class="ft-big-time" id="ftBigTime">25:00</div>
     <div class="ft-controls">
       <button class="btn btn-sm btn-primary" id="ftStartPause" onclick="startPauseTimer(event)">Start</button>
@@ -173,9 +175,9 @@
   </div>
 </div>
 
-<script src="js/data.js?v=3"></script>
-<script src="js/trackers.js?v=3"></script>
-<script src="js/charts.js?v=3"></script>
-<script src="js/app.js?v=3"></script>
+<script src="js/data.js?v=4"></script>
+<script src="js/trackers.js?v=4"></script>
+<script src="js/charts.js?v=4"></script>
+<script src="js/app.js?v=4"></script>
 </body>
 </html>
