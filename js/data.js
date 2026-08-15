@@ -213,19 +213,17 @@ const DEFAULT_STATE = {
      TIMETABLE — the max-availability daily template
      ----------------------------------------------------------------- */
   timetable: [
-    { time: "05:30–06:45", block: "Wake, exercise" },
-    { time: "06:45–07:30", block: "Breakfast / buffer" },
-    { time: "07:30–09:30", block: "Deep work 1 — Math (Probability/Stats, rotating Linear Algebra/Calculus)" },
-    { time: "09:45–11:45", block: "Deep work 2 — DSA / coding practice" },
-    { time: "11:45–12:30", block: "Lunch" },
-    { time: "12:30–14:30", block: "Work / internship" },
-    { time: "14:45–16:45", block: "Deep work 3 — AI Engineering project build" },
-    { time: "17:15–18:30", block: "Light study — SQL / Linux / DL theory rotation" },
-    { time: "18:30–19:15", block: "Dinner" },
-    { time: "19:15–20:15", block: "Interview prep / mock problems" },
-    { time: "20:15–21:00", block: "Mental math & quant-puzzle drilling" },
-    { time: "21:00–21:45", block: "Applications / networking / daily review" },
-    { time: "23:30", block: "Sleep (6h)" }
+    { time: "05:30–07:30", block: "Gym", type: "fixed", note: "Non-negotiable, set by you — not up for redesign." },
+    { time: "07:30–08:30", block: "Breakfast & bath", type: "fixed", note: "Non-negotiable." },
+    { time: "08:30–09:30", block: "Buffer / commute — light warm-up", type: "light", note: "Mental math + quick review only. Nothing new or hard here, it's transition time." },
+    { time: "09:30–18:00", block: "WORK WINDOW — flexible study between pings", type: "flexible", note: "You're logged into Teams this whole span but only doing ~2 real work hours, scattered unpredictably. Do NOT plan deep, hard-to-resume work here — it will get shredded by interruptions. Use the floating focus timer in short 25-min sessions for resumable tasks: DSA problems, course lectures/reading, applications, light review. Roughly 6+ hours of real study time hides inside this window if you actually use the gaps instead of doom-scrolling between pings." },
+    { time: "18:00–18:45", block: "Decompress / dinner prep", type: "light" },
+    { time: "18:45–19:30", block: "Dinner", type: "fixed" },
+    { time: "19:30–21:30", block: "DEEP WORK BLOCK 1 — hardest task of the day", type: "deep", note: "Uninterrupted, your best focus window. This is where Math/Probability, hard DSA, or real project-building goes — not the work window." },
+    { time: "21:30–21:45", block: "Break", type: "light" },
+    { time: "21:45–23:15", block: "DEEP WORK BLOCK 2 — project / AI engineering", type: "deep" },
+    { time: "23:15–23:30", block: "Quick review + mental math + plan tomorrow", type: "light" },
+    { time: "23:30", block: "Sleep (~6h) — flag if this bedtime is wrong, wake time is the only anchor you gave me", type: "fixed" }
   ],
 
   /* -----------------------------------------------------------------
@@ -264,7 +262,7 @@ const DEFAULT_STATE = {
     { id: "a1", date: PLAN_START_DATE, title: "Diagnostic complete", description: "Finished the full 10-domain skill diagnostic — the real baseline this whole plan is built on." }
   ],
 
-  settings: { theme: "system" }
+  settings: { theme: "light" }
 };
 
 /* Deep clone helper so the DEFAULT_STATE object is never mutated in place */

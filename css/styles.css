@@ -347,8 +347,24 @@ tr:last-child td { border-bottom: none; }
 .nudge-card { border: 1px dashed var(--series-1); background: color-mix(in srgb, var(--series-1) 6%, var(--surface-1)); }
 
 /* ---------- Toast ---------- */
-#toast { position: fixed; bottom: 20px; right: 20px; background: var(--text-primary); color: var(--page-plane); padding: 10px 16px; border-radius: var(--radius-s); font-size: 13px; z-index: 80; opacity: 0; transform: translateY(8px); transition: all .2s ease; pointer-events: none; }
-#toast.show { opacity: 1; transform: translateY(0); }
+#toast { position: fixed; bottom: 20px; right: 20px; background: var(--text-primary); color: var(--page-plane); padding: 11px 18px; border-radius: 999px; font-size: 13px; font-weight: 600; z-index: 80; opacity: 0; transform: translateY(8px) scale(.92); transition: all .25s cubic-bezier(.34,1.56,.64,1); pointer-events: none; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+#toast.show { opacity: 1; transform: translateY(0) scale(1); }
+#toast.celebrate { background: linear-gradient(135deg, var(--series-1), var(--series-7), var(--series-3)); color: #fff; font-size: 14px; padding: 13px 22px; }
+
+/* ---------- Visual energy: color-coded stat tiles & brand ---------- */
+.sidebar-brand i {
+  width: 30px; height: 30px; border-radius: 9px;
+  background: linear-gradient(135deg, var(--series-1), var(--series-7));
+  color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px;
+}
+.grid-4 .stat-tile, .grid-3 .stat-tile { border-top: 3px solid var(--series-1); }
+.grid-4 .stat-tile:nth-of-type(2), .grid-3 .stat-tile:nth-of-type(2) { border-top-color: var(--series-2); }
+.grid-4 .stat-tile:nth-of-type(3), .grid-3 .stat-tile:nth-of-type(3) { border-top-color: var(--series-3); }
+.grid-4 .stat-tile:nth-of-type(4) { border-top-color: var(--series-4); }
+.stat-tile .value { background: linear-gradient(135deg, var(--text-primary), var(--text-secondary)); -webkit-background-clip: text; background-clip: text; }
+@keyframes popIn { 0% { transform: scale(.85); opacity: 0; } 60% { transform: scale(1.03); } 100% { transform: scale(1); opacity: 1; } }
+.level-card, .earned-badge { animation: popIn .35s ease; }
+.nav-item:hover i { color: var(--series-1); }
 
 /* ---------- Responsive nav ---------- */
 @media (max-width: 900px) {

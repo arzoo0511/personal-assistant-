@@ -32,7 +32,7 @@ function checkLevelUp() {
   if (level > known) {
     STATE.meta.lastKnownLevel = level;
     STATE.achievements.unshift({ id: uid("a"), date: todayISO(), title: `Level ${level}: ${title}`, description: "Earned through logged activity — tasks completed, milestones passed, days shown up." });
-    setTimeout(() => toast(`Level up → ${level}: ${title}`), 50);
+    setTimeout(() => toast(`🚀 Level up → ${level}: ${title}`, true), 50);
   }
 }
 
@@ -63,12 +63,13 @@ function fmtDate(iso) {
 
 /* ---------------------------- Toast ---------------------------- */
 let toastTimer = null;
-function toast(msg) {
+function toast(msg, celebrate) {
   const el = document.getElementById("toast");
   el.textContent = msg;
+  el.classList.toggle("celebrate", !!celebrate);
   el.classList.add("show");
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+  toastTimer = setTimeout(() => el.classList.remove("show"), celebrate ? 3200 : 2200);
 }
 
 /* ---------------------------- Modal ---------------------------- */
@@ -665,28 +666,43 @@ function renderRoadmap() {
 /* ============================================================
    TIMETABLE & CALENDAR
    ============================================================ */
+const TT_TYPE_STYLE = {
+  fixed: { color: "var(--text-muted)", label: "FIXED", icon: "fa-lock" },
+  light: { color: "var(--series-4)", label: "LIGHT", icon: "fa-feather" },
+  flexible: { color: "var(--series-2)", label: "INTERRUPTIBLE", icon: "fa-shuffle" },
+  deep: { color: "var(--series-1)", label: "DEEP WORK", icon: "fa-bolt" }
+};
 function renderTimetable() {
   const el = document.getElementById("view-timetable");
   const monthDays = buildCalendarMonth();
   el.innerHTML = `
-    <div class="grid grid-2 gap-16">
-      <div class="card">
-        <div class="card-title-row"><h3><i class="fa-solid fa-clock"></i>&nbsp; Daily template (max-availability day)</h3></div>
-        <table>
-          <tbody>
-            ${STATE.timetable.map(b => `<tr><td style="width:120px; color:var(--text-muted); font-variant-numeric:tabular-nums;">${escapeHtml(b.time)}</td><td>${escapeHtml(b.block)}</td></tr>`).join("")}
-          </tbody>
-        </table>
-        <p class="muted mt-16">Compress proportionally around classes on lighter-availability days — protect the Math and DSA blocks first.</p>
+    <div class="card mb-16">
+      <div class="card-title-row"><h3><i class="fa-solid fa-clock"></i>&nbsp; Your actual daily structure</h3></div>
+      <p class="muted mb-16">Built from your real schedule, not a generic template. Color = what kind of task belongs in each block — matching that matters more than the exact minutes.</p>
+      <div class="table-wrap"><table>
+        <tbody>
+          ${STATE.timetable.map(b => {
+            const s = TT_TYPE_STYLE[b.type] || TT_TYPE_STYLE.light;
+            return `<tr style="border-left:3px solid ${s.color};">
+              <td style="width:120px; color:var(--text-muted); font-variant-numeric:tabular-nums; white-space:nowrap;">${escapeHtml(b.time)}</td>
+              <td style="width:130px;"><span class="badge" style="background:color-mix(in srgb, ${s.color} 18%, transparent); color:${s.color};"><i class="fa-solid ${s.icon}"></i>${s.label}</span></td>
+              <td>
+                <b>${escapeHtml(b.block)}</b>
+                ${b.note ? `<div class="muted" style="font-size:12px; margin-top:2px;">${escapeHtml(b.note)}</div>` : ""}
+              </td>
+            </tr>`;
+          }).join("")}
+        </tbody>
+      </table></div>
+      <p class="muted mt-16">Use the floating focus timer for anything in an INTERRUPTIBLE block — it's built for exactly this: short, resumable, survives getting pulled away mid-session.</p>
+    </div>
+    <div class="card">
+      <div class="card-title-row"><h3><i class="fa-solid fa-calendar-days"></i>&nbsp; This month — study days logged</h3></div>
+      <div class="streak-cal" style="grid-template-columns: repeat(7, 1fr);">
+        ${monthDays.map(d => `<div class="streak-day ${d.hit ? "hit" : ""}" title="${d.date}${d.hit ? " — logged" : ""}"></div>`).join("")}
       </div>
-      <div class="card">
-        <div class="card-title-row"><h3><i class="fa-solid fa-calendar-days"></i>&nbsp; This month — study days logged</h3></div>
-        <div class="streak-cal" style="grid-template-columns: repeat(7, 1fr);">
-          ${monthDays.map(d => `<div class="streak-day ${d.hit ? "hit" : ""}" title="${d.date}${d.hit ? " — logged" : ""}"></div>`).join("")}
-        </div>
-        <p class="muted mt-16">Filled = a day with a study-log entry. Log daily hours from Study &amp; Exercise Log.</p>
-        <button class="btn btn-sm mt-16" onclick="goToView('studylog')">Go log today <i class="fa-solid fa-arrow-right"></i></button>
-      </div>
+      <p class="muted mt-16">Filled = a day with a study-log entry. Log daily hours from Study &amp; Exercise Log.</p>
+      <button class="btn btn-sm mt-16" onclick="goToView('studylog')">Go log today <i class="fa-solid fa-arrow-right"></i></button>
     </div>
   `;
 }
