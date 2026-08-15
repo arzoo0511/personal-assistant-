@@ -11,14 +11,56 @@ let STATE = null;
 
 /* ---------------------------- State I/O ---------------------------- */
 
+// Bump this any time authored/reference content changes (roadmap, courses,
+// timetable, strategy, milestone text). loadState() uses it to patch an
+// existing save forward without touching the user's own tracked progress
+// (roadmapDone, dailyPlanDone, skills, studyLog, applications, etc.) — a
+// content update from me should never require the user to notice or reset.
+const CONTENT_VERSION = 2;
+
 function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) return migrateContent(JSON.parse(raw));
   } catch (e) { console.warn("Failed to parse saved state, resetting.", e); }
   const fresh = getFreshDefaultState();
+  fresh.meta.contentVersion = CONTENT_VERSION;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
   return fresh;
+}
+
+function migrateContent(saved) {
+  const savedVersion = saved.meta ? (saved.meta.contentVersion || 0) : 0;
+  if (savedVersion >= CONTENT_VERSION) return saved;
+  const fresh = getFreshDefaultState();
+
+  // Pure reference content — no user-editable fields live inside these,
+  // progress is tracked separately (roadmapDone/dailyPlanDone are their
+  // own top-level objects), so a full replace is safe.
+  saved.roadmap = fresh.roadmap;
+  saved.timetable = fresh.timetable;
+  saved.strategy = fresh.strategy;
+
+  // Milestones: title/criteria/dueDay are authored by me, but `status` is
+  // the user's own — preserve it per-id while refreshing the text.
+  saved.milestones = fresh.milestones.map(fm => {
+    const existing = (saved.milestones || []).find(m => m.id === fm.id);
+    return existing ? { ...fm, status: existing.status } : fm;
+  });
+
+  // Courses are fully user-editable (status, notes, even url/name), so this
+  // only ADDS new resources that didn't exist before — never overwrites or
+  // removes anything the user already has.
+  saved.courses = saved.courses || [];
+  fresh.courses.forEach(fc => {
+    if (!saved.courses.find(c => c.id === fc.id)) saved.courses.push(fc);
+  });
+
+  saved.meta = saved.meta || {};
+  saved.meta.contentVersion = CONTENT_VERSION;
+  saved.meta.lastUpdated = todayISO();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+  return saved;
 }
 
 function saveState() {
@@ -476,7 +518,11 @@ function toggleDailyPlanSlot(day, slot) {
   const key = `${day}-${slot}`;
   STATE.dailyPlanDone[key] = !STATE.dailyPlanDone[key];
   saveState();
-  renderDashboard();
+  // Same state feeds the Dashboard card and the Roadmap checklist — refresh
+  // whichever one is actually on screen right now.
+  const activeId = document.querySelector(".view.active")?.id;
+  if (activeId === "view-dashboard") renderDashboard();
+  else if (activeId === "view-roadmap") renderRoadmap();
 }
 
 function studyStreak() {
@@ -521,6 +567,43 @@ function renderTodayPlanCard(day, plan) {
           </span>
         </label>`;
       }).join("")}
+    </div>
+  `;
+}
+// Shared by the Roadmap's day-by-day view and the Dashboard's Today's Plan
+// card — same PLAN_SLOTS, same STATE.dailyPlanDone keys, so checking a box
+// in either place is the same action, not two separate trackers to keep in sync.
+function renderDayChecklist(dp, currentDay, firstRenderThisSession) {
+  STATE.dailyPlanDone = STATE.dailyPlanDone || {};
+  const isToday = dp.d === currentDay;
+  const isBuffer = (dp.daytime || "").includes("CATCH-UP") || (dp.daytime || "").includes("BUFFER");
+  const activeSlots = PLAN_SLOTS.filter(s => dp[s.key] && dp[s.key] !== "—");
+  const doneCount = activeSlots.filter(s => STATE.dailyPlanDone[`${dp.d}-${s.key}`]).length;
+  const bodyId = `dayplan-${dp.d}`;
+  if (firstRenderThisSession && isToday && roadmapOpenIds) roadmapOpenIds.add(bodyId);
+  const isOpen = roadmapOpenIds && roadmapOpenIds.has(bodyId);
+  return `
+    <div class="week-block" style="margin-bottom:6px; ${isToday ? "border-color:var(--series-1);" : ""}">
+      <div class="week-header" onclick="toggleWeekOpen('${bodyId}')" style="padding:9px 12px;">
+        <div class="flex gap-8">
+          <span class="wtitle" style="font-size:12.5px;">Day ${dp.d}${isBuffer ? " · buffer" : ""}</span>
+          ${isToday ? '<span class="badge badge-good">today</span>' : ""}
+        </div>
+        <div class="flex gap-10">
+          <span class="wdays">${doneCount}/${activeSlots.length}</span>
+          <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+        </div>
+      </div>
+      <div class="week-body ${isOpen ? "open" : ""}" id="${bodyId}" style="padding:4px 12px 10px;">
+        ${activeSlots.map(s => {
+          const key = `${dp.d}-${s.key}`;
+          const checked = !!STATE.dailyPlanDone[key];
+          return `<label class="task-row ${checked ? "done" : ""}" style="align-items:flex-start; cursor:pointer;">
+            <input type="checkbox" ${checked ? "checked" : ""} onchange="toggleDailyPlanSlot(${dp.d}, '${s.key}')" style="margin-top:4px;" />
+            <span style="font-size:12.5px;"><b style="color:${s.color};">${s.label.split(" (")[0]}:</b> ${escapeHtml(dp[s.key])}</span>
+          </label>`;
+        }).join("")}
+      </div>
     </div>
   `;
 }
@@ -736,13 +819,24 @@ function toggleTask(phaseIdx, weekIdx, taskIdx) {
   saveState();
   renderRoadmap();
 }
+// Tracks which week/day sections are manually expanded, independent of
+// STATE (this is transient UI state, not saved progress) — so re-rendering
+// after a checkbox click doesn't collapse whatever you had open. Seeded
+// once per page load with sensible defaults (current week, today), then
+// only actual clicks change it.
+let roadmapOpenIds = null;
 function toggleWeekOpen(id) {
   const el = document.getElementById(id);
-  el.classList.toggle("open");
+  const nowOpen = !el.classList.contains("open");
+  el.classList.toggle("open", nowOpen);
+  if (!roadmapOpenIds) roadmapOpenIds = new Set();
+  if (nowOpen) roadmapOpenIds.add(id); else roadmapOpenIds.delete(id);
 }
 function renderRoadmap() {
   STATE.roadmapDone = STATE.roadmapDone || {};
   const day = currentPlanDay();
+  const firstRenderThisSession = roadmapOpenIds === null;
+  if (firstRenderThisSession) roadmapOpenIds = new Set();
   const el = document.getElementById("view-roadmap");
   let html = "";
   STATE.roadmap.forEach((phase, pIdx) => {
@@ -753,6 +847,7 @@ function renderRoadmap() {
       const total = w.tasks.length;
       const done = w.tasks.filter((_, tIdx) => STATE.roadmapDone[`${pIdx}-${wIdx}-${tIdx}`]).length;
       const bodyId = `week-${pIdx}-${wIdx}`;
+      if (firstRenderThisSession && isCurrent) roadmapOpenIds.add(bodyId);
       html += `
         <div class="week-block" ${isCurrent ? 'style="border-color:var(--series-1)"' : ""}>
           <div class="week-header" onclick="toggleWeekOpen('${bodyId}')">
@@ -765,7 +860,7 @@ function renderRoadmap() {
               <i class="fa-solid fa-chevron-down"></i>
             </div>
           </div>
-          <div class="week-body ${isCurrent ? "open" : ""}" id="${bodyId}">
+          <div class="week-body ${roadmapOpenIds.has(bodyId) ? "open" : ""}" id="${bodyId}">
             ${w.tasks.map((t, tIdx) => {
               const key = `${pIdx}-${wIdx}-${tIdx}`;
               const checked = !!STATE.roadmapDone[key];
@@ -782,20 +877,8 @@ function renderRoadmap() {
             ` : ""}
             ${w.dailyPlan ? `
               <div class="mt-16">
-                <div class="muted" style="font-weight:650; margin-bottom:6px;">Day-by-day (check today's box on the Dashboard, this is reference only)</div>
-                <div class="table-wrap"><table>
-                  <thead><tr><th>Day</th><th>Morning</th><th>Work window</th><th>Deep work 1</th><th>Deep work 2</th><th>Night</th></tr></thead>
-                  <tbody>
-                    ${w.dailyPlan.map(dp => `<tr ${dp.d === day ? 'style="background:color-mix(in srgb, var(--series-1) 8%, transparent);"' : ""}>
-                      <td><b>${dp.d}${dp.d === day ? " (today)" : ""}</b></td>
-                      <td style="font-size:12px;">${escapeHtml(dp.morning)}</td>
-                      <td style="font-size:12px;">${escapeHtml(dp.daytime)}</td>
-                      <td style="font-size:12px;">${escapeHtml(dp.deep1)}</td>
-                      <td style="font-size:12px;">${escapeHtml(dp.deep2)}</td>
-                      <td style="font-size:12px;">${escapeHtml(dp.night)}</td>
-                    </tr>`).join("")}
-                  </tbody>
-                </table></div>
+                <div class="muted" style="font-weight:650; margin-bottom:6px;">Day-by-day — check things off here or on the Dashboard, it's the same list either way</div>
+                ${w.dailyPlan.map(dp => renderDayChecklist(dp, day, firstRenderThisSession)).join("")}
               </div>
             ` : ""}
           </div>
