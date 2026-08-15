@@ -286,6 +286,22 @@ function logPomodoroSession() {
   else STATE.pomodoroLog.push({ date: t, count: 1 });
   saveState();
 }
+/* The only path that adds study hours automatically — tied to a real
+   completed, timed session, not a typed-in number. This exists because
+   free-form hour entry is too easy to log wrong or inflate by accident. */
+function addStudyMinutes(category, minutes) {
+  const t = todayISO();
+  let entry = STATE.studyLog.find(l => l.date === t);
+  if (!entry) {
+    entry = { date: t, hours: {}, total: 0 };
+    STATE.studyLog.unshift(entry);
+    STATE.studyLog.sort((a, b) => b.date.localeCompare(a.date));
+  }
+  const added = Math.round((minutes / 60) * 100) / 100;
+  entry.hours[category] = Math.round(((entry.hours[category] || 0) + added) * 100) / 100;
+  entry.total = Math.round(Object.values(entry.hours).reduce((a, v) => a + v, 0) * 100) / 100;
+  saveState();
+}
 function updateTimerUI() {
   const pctElapsed = Math.round(((TIMER_DURATIONS[timer.mode] - timer.remaining) / TIMER_DURATIONS[timer.mode]) * 100);
   document.getElementById("ftRing").style.setProperty("--pct", pctElapsed);
@@ -313,6 +329,7 @@ function setTimerMode(mode) {
   timer.remaining = TIMER_DURATIONS[mode];
   document.getElementById("ftModeWork").classList.toggle("active", mode === "work");
   document.getElementById("ftModeBreak").classList.toggle("active", mode === "break");
+  document.getElementById("ftCategoryField").style.display = mode === "work" ? "flex" : "none";
   updateTimerUI();
 }
 function startPauseTimer(e) {
@@ -329,7 +346,11 @@ function startPauseTimer(e) {
         timer.running = false;
         if (timer.mode === "work") {
           logPomodoroSession();
-          toast("Focus session done — logged. " + (Math.random() < 0.5 ? "Take the break." : "Now go update something real."));
+          const category = document.getElementById("ftCategory").value;
+          addStudyMinutes(category, TIMER_DURATIONS.work / 60);
+          if (document.querySelector(".view.active")?.id === "view-studylog") renderStudyLog();
+          if (document.querySelector(".view.active")?.id === "view-dashboard") renderDashboard();
+          toast(`${Math.round(TIMER_DURATIONS.work / 60)}min logged to ${category} — real time, not typed in. ` + (Math.random() < 0.5 ? "Take the break." : "Now go update something real."));
           setTimerMode("break");
         } else {
           toast("Break's over.");

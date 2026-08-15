@@ -153,6 +153,17 @@
       <button id="ftModeWork" class="active" onclick="setTimerMode('work')">Focus 25</button>
       <button id="ftModeBreak" onclick="setTimerMode('break')">Break 5</button>
     </div>
+    <div class="field" id="ftCategoryField" style="margin-bottom:8px;">
+      <label style="font-size:10.5px;">Logging this session as</label>
+      <select id="ftCategory" style="font-size:12.5px; padding:5px 8px;">
+        <option value="math">Mathematics</option>
+        <option value="dsa">DSA</option>
+        <option value="quant">Quant</option>
+        <option value="ai">AI / Projects work</option>
+        <option value="projects">Other project time</option>
+        <option value="interviewPrep">Interview prep</option>
+      </select>
+    </div>
     <div class="ft-big-time" id="ftBigTime">25:00</div>
     <div class="ft-controls">
       <button class="btn btn-sm btn-primary" id="ftStartPause" onclick="startPauseTimer(event)">Start</button>

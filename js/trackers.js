@@ -449,17 +449,23 @@ function renderCompetitions() {
 /* ============================================================
    STUDY & EXERCISE LOG
    ============================================================ */
+const STUDY_CATS = [
+  ["math", "Mathematics"], ["dsa", "DSA"], ["quant", "Quant"],
+  ["ai", "AI / Projects work"], ["projects", "Other project time"], ["interviewPrep", "Interview prep"]
+];
+// Primary path — ALWAYS today, no date field to fat-finger. Manual numbers here
+// are an adjustment on top of whatever the focus timer already auto-logged,
+// not the primary way hours get recorded.
 function logToday() {
-  const cats = ["math", "dsa", "quant", "ai", "projects", "interviewPrep"];
+  const date = todayISO();
   const hours = {};
   let total = 0;
-  cats.forEach(c => {
+  STUDY_CATS.forEach(([c]) => {
     const v = parseFloat(document.getElementById("h-" + c).value) || 0;
     hours[c] = v; total += v;
   });
-  const date = document.getElementById("log-date").value || todayISO();
   const existingIdx = STATE.studyLog.findIndex(l => l.date === date);
-  const entry = { date, hours, total: Math.round(total * 10) / 10 };
+  const entry = { date, hours, total: Math.round(total * 100) / 100 };
   if (existingIdx >= 0) STATE.studyLog[existingIdx] = entry;
   else STATE.studyLog.push(entry);
   STATE.studyLog.sort((a, b) => b.date.localeCompare(a.date));
@@ -471,21 +477,59 @@ function logToday() {
 
   saveState();
   renderStudyLog();
-  toast("Logged " + entry.total + "h for " + fmtDate(date));
+  toast("Logged " + entry.total + "h for today");
 }
 function deleteLogEntry(date) {
   STATE.studyLog = STATE.studyLog.filter(l => l.date !== date);
   saveState(); renderStudyLog();
+}
+// Deliberate, separate path for correcting a past day — not reachable by
+// accident from the main "log today" flow.
+function openBackfillModal() {
+  openModal(`
+    <div class="modal-header"><h3>Backfill a previous day</h3><button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
+    <p class="muted">Use this only for genuinely correcting a past day. It will not touch today's entry.</p>
+    <div class="field" style="max-width:200px;"><label>Date</label><input type="date" id="bf-date" max="${todayISO()}" /></div>
+    <div class="form-row">
+      ${STUDY_CATS.map(([id, label]) => `<div class="field"><label>${label} (hrs)</label><input type="number" step="0.25" min="0" max="14" id="bf-h-${id}" value="0" /></div>`).join("")}
+    </div>
+    <label class="flex gap-8" style="font-size:13px; margin:10px 0;"><input type="checkbox" id="bf-exercise" /> Exercised that day</label>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBackfill()">Save correction</button>
+    </div>
+  `);
+}
+function saveBackfill() {
+  const date = document.getElementById("bf-date").value;
+  if (!date) { toast("Pick a date"); return; }
+  if (date === todayISO()) { toast("That's today — use the main log form instead"); return; }
+  const hours = {};
+  let total = 0;
+  STUDY_CATS.forEach(([c]) => {
+    const v = parseFloat(document.getElementById("bf-h-" + c).value) || 0;
+    hours[c] = v; total += v;
+  });
+  const existingIdx = STATE.studyLog.findIndex(l => l.date === date);
+  const entry = { date, hours, total: Math.round(total * 100) / 100 };
+  if (existingIdx >= 0) STATE.studyLog[existingIdx] = entry;
+  else STATE.studyLog.push(entry);
+  STATE.studyLog.sort((a, b) => b.date.localeCompare(a.date));
+
+  const exercised = document.getElementById("bf-exercise").checked;
+  const exIdx = STATE.exerciseLog.findIndex(l => l.date === date);
+  if (exIdx >= 0) STATE.exerciseLog[exIdx].done = exercised;
+  else STATE.exerciseLog.push({ date, done: exercised, notes: "" });
+
+  saveState(); closeModal(); renderStudyLog();
+  toast("Corrected " + fmtDate(date));
 }
 function renderStudyLog() {
   const el = document.getElementById("view-studylog");
   const today = todayISO();
   const todayEntry = STATE.studyLog.find(l => l.date === today) || { hours: {} };
   const todayExercise = STATE.exerciseLog.find(l => l.date === today);
-  const cats = [
-    ["math", "Mathematics"], ["dsa", "DSA"], ["quant", "Quant"],
-    ["ai", "AI / Projects work"], ["projects", "Other project time"], ["interviewPrep", "Interview prep"]
-  ];
+  const todaySessions = todayPomodoroCount();
   const totalLogged = STATE.studyLog.reduce((a, l) => a + l.total, 0);
   const streak = studyStreak();
 
@@ -496,16 +540,16 @@ function renderStudyLog() {
       <div class="card stat-tile"><div class="value">${STATE.exerciseLog.filter(e => e.done).length}</div><div class="label">Exercise days logged</div></div>
     </div>
     <div class="card mb-16">
-      <div class="card-title-row"><h3><i class="fa-solid fa-plus"></i>&nbsp; Log a day</h3></div>
-      <div class="field" style="max-width:200px;"><label>Date</label><input type="date" id="log-date" value="${today}" /></div>
+      <div class="card-title-row"><h3><i class="fa-solid fa-plus"></i>&nbsp; Today — ${fmtDate(today)}</h3></div>
+      <p class="muted">${todaySessions} focus-timer session${todaySessions === 1 ? "" : "s"} already logged today automatically. Numbers below are pre-filled from those — only touch them to add untimed work, not to guess a bigger number.</p>
       <div class="form-row">
-        ${cats.map(([id, label]) => `<div class="field"><label>${label} (hrs)</label><input type="number" step="0.25" min="0" max="14" id="h-${id}" value="${todayEntry.hours[id] || 0}" /></div>`).join("")}
+        ${STUDY_CATS.map(([id, label]) => `<div class="field"><label>${label} (hrs)</label><input type="number" step="0.25" min="0" max="14" id="h-${id}" value="${todayEntry.hours[id] || 0}" /></div>`).join("")}
       </div>
       <label class="flex gap-8" style="font-size:13px; margin:10px 0;"><input type="checkbox" id="log-exercise" ${todayExercise && todayExercise.done ? "checked" : ""} /> Exercised today</label>
       <button class="btn btn-primary" onclick="logToday()"><i class="fa-solid fa-check"></i> Save today's log</button>
     </div>
     <div class="card">
-      <div class="card-title-row"><h3><i class="fa-solid fa-clock-rotate-left"></i>&nbsp; History</h3></div>
+      <div class="card-title-row"><h3><i class="fa-solid fa-clock-rotate-left"></i>&nbsp; History</h3><button class="btn btn-sm" onclick="openBackfillModal()"><i class="fa-solid fa-clock-rotate-left"></i> Backfill a previous day</button></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Date</th><th>Math</th><th>DSA</th><th>Quant</th><th>AI</th><th>Projects</th><th>Interview</th><th>Total</th><th></th></tr></thead>
         <tbody>
