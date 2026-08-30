@@ -4,14 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Career OS — Personal Dashboard</title>
-<meta name="description" content="90-day / long-term career operating system: skills, roadmap, projects, applications, and reviews in one place." />
+<meta name="description" content="Career operating system: skills, roadmap, projects, applications, and reviews in one place." />
 
 <!-- Font Awesome (icons) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
 <!-- Chart.js (charts) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
-<link rel="stylesheet" href="css/styles.css?v=7" />
+<link rel="stylesheet" href="css/styles.css?v=9" />
 </head>
 <body>
 
@@ -28,7 +28,7 @@
     <nav id="navList">
       <div class="nav-group-label">Overview</div>
       <button class="nav-item" data-view="dashboard"><i class="fa-solid fa-gauge-high"></i>Dashboard</button>
-      <button class="nav-item" data-view="mastersheet"><i class="fa-solid fa-table-list"></i>90-Day Master Sheet</button>
+      <button class="nav-item" data-view="mastersheet"><i class="fa-solid fa-table-list"></i>Master Sheet</button>
       <button class="nav-item" data-view="roadmap"><i class="fa-solid fa-route"></i>Roadmap</button>
       <button class="nav-item" data-view="timetable"><i class="fa-solid fa-calendar-days"></i>Timetable &amp; Calendar</button>
 
@@ -66,7 +66,7 @@
         <button class="btn mobile-toggle" id="mobileToggle"><i class="fa-solid fa-bars"></i></button>
         <div>
           <h1 id="viewTitle">Dashboard</h1>
-          <div class="sub" id="viewSub">Day <span id="dayCounterInline">–</span> of your 90-day plan</div>
+          <div class="sub" id="viewSub">Loading…</div>
         </div>
       </div>
       <button class="btn" id="themeToggle"><i class="fa-solid fa-circle-half-stroke"></i> Theme</button>
@@ -175,9 +175,9 @@
   </div>
 </div>
 
-<script src="js/data.js?v=7"></script>
-<script src="js/trackers.js?v=7"></script>
-<script src="js/charts.js?v=7"></script>
-<script src="js/app.js?v=7"></script>
+<script src="js/data.js?v=9"></script>
+<script src="js/trackers.js?v=9"></script>
+<script src="js/charts.js?v=9"></script>
+<script src="js/app.js?v=9"></script>
 </body>
 </html>

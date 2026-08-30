@@ -138,13 +138,13 @@ function renderCumulativeChart() {
 function renderProgress() {
   const el = document.getElementById("view-progress");
   const day = currentPlanDay();
-  const remaining = Math.max(0, 90 - day);
+  const remaining = Math.max(0, TOTAL_PLAN_DAYS - day);
   const totalHours = STATE.studyLog.reduce((a, l) => a + l.total, 0);
   const avgPerDay = STATE.studyLog.length ? (totalHours / STATE.studyLog.length).toFixed(1) : "0";
 
   el.innerHTML = `
     <div class="grid grid-4 mb-16">
-      <div class="card stat-tile"><div class="value">${day}/90</div><div class="label">Days elapsed</div></div>
+      <div class="card stat-tile"><div class="value">${day}/${TOTAL_PLAN_DAYS}</div><div class="label">Days elapsed</div></div>
       <div class="card stat-tile"><div class="value">${remaining}</div><div class="label">Days remaining</div></div>
       <div class="card stat-tile"><div class="value">${totalHours.toFixed(1)}h</div><div class="label">Total study hours logged</div></div>
       <div class="card stat-tile"><div class="value">${avgPerDay}h</div><div class="label">Average per logged day</div></div>

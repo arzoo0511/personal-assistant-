@@ -1,18 +1,28 @@
 /* =========================================================================
    data.js — Default seed data for the Career OS dashboard.
-   This is the REAL Phase 1-5 output from the career strategy engagement
-   (diagnostic results, chosen strategy, 90-day roadmap, verified free
-   resources). It is only used to initialize localStorage the FIRST time
-   the app runs — after that, everything the user edits lives in
-   localStorage and this file is never read again (see app.js `loadState`).
+   This is the REAL output of an ongoing career strategy engagement. It is
+   only used to initialize localStorage the FIRST time the app runs — after
+   that, everything the user edits lives in localStorage and this file is
+   never read again except for the version-gated content migration in
+   app.js's loadState()/migrateContent().
+
+   PIVOT LOG: on 2026-08-30 (Day 16 of the original 90-day plan) the user
+   pivoted from an AI-Engineer-primary strategy to Quant/Algorithmic-Trading-
+   primary, driven by a warm-but-unconfirmed introduction to a friend-of-
+   sister's quant trading startup and a hard external deadline of Dec 1,
+   2026 (Deloitte internship end date). This required a CONTENT_VERSION bump
+   in app.js (2 -> 3) that also does a one-time reset of the user's plan
+   start date to the day this update is first loaded — a deliberate restart,
+   not the normal pattern for routine content edits. See js/app.js's
+   migrateContent() for exactly what that migration does and does not touch.
    ========================================================================= */
 
-const PLAN_START_DATE = "2026-08-15";
+const PLAN_START_DATE = "2026-08-30";
 
 const DEFAULT_STATE = {
   meta: {
     startDate: PLAN_START_DATE,
-    createdAt: PLAN_START_DATE,
+    createdAt: "2026-08-15",
     lastUpdated: PLAN_START_DATE,
     schemaVersion: 1
   },
@@ -21,249 +31,273 @@ const DEFAULT_STATE = {
      STRATEGY — read-only reference, shown on Dashboard / Roadmap
      ----------------------------------------------------------------- */
   strategy: {
-    primary: "AI Engineer / ML Engineer",
-    secondary: "High-paying Software Engineer",
-    aggressiveParallel: "Quant Research (math/Python-heavy track — not Trading or Developer, no C++)",
-    option: "Fintech / AI hybrid (layer onto an AI Engineer project later, no separate curriculum)",
-    deprioritized: "Quant Trading, Quant Developer — fallback: revisit via a quant-adjacent master's 2-3 years post-grad if still of interest",
-    notes: "Institute (Bennett University) does not feed India's IIT-first quant-prop campus pipeline — off-campus/portfolio route required for any quant path. C++ and competitive programming are explicitly out of scope for the chosen paths."
+    primary: "Quant / Algorithmic Trading — research & strategy track (probability, time-series/stochastic modeling, backtesting methodology, Python/pandas). NOT the C++/HFT-infrastructure track — that stays explicitly excluded.",
+    secondary: "AI Engineer/ML Engineer & Software Engineer — a real hedge, not dropped. DSA and Python fundamentals are kept in full because they're shared infrastructure with the quant track anyway. The RAG project is cut to a minimal stub (no backend, no agent tool-use, no deployment) — enough to defensibly discuss RAG basics in an AI-Eng interview, not pursued as a differentiator.",
+    aggressiveParallel: "None as a separate track. Deploying a validated strategy to Alpaca paper trading is a stretch bonus layered onto the Primary track once a strategy is real (Week 9+), not a third curriculum competing for the same hours.",
+    option: "Fintech / trading-adjacent tech roles (market-data platforms, trading-software vendors) — a natural bridge if neither a pure quant shop nor a pure AI-Eng/SWE role lands. Draws on both tracks as-is, no separate curriculum.",
+    deprioritized: "Quant Developer / HFT infrastructure (C++, low-latency systems) — stays excluded per research: small/boutique quant shops hire on Python + probability/stats + mental math + hustle, not C++/HFT infra or pedigree. Also deprioritized: AI-Engineer differentiator depth (deep RAG/agent systems, the old DeepLearning.AI course sequence, dedicated System Design Primer study) — kept only as a minimal hedge stub; Pramp's system-design mocks alone cover the SWE hedge's needs.",
+    notes: "Pivoted from AI-Engineer-primary to Quant-Trading-primary on Day 16 of the original plan (2026-08-30), driven by a warm-but-UNCONFIRMED introduction to a friend-of-sister's quant trading startup, and a hard Dec 1, 2026 deadline (Deloitte internship end date) — 94 days from the restart date, not compressed from the original plan, re-weighted using an extra evening hour (5h sleep floor vs 6h) instead. Target bar is explicitly 'credible, trainable-junior working knowledge' — built and validated at least one backtested strategy, knows lookahead bias/survivorship bias/overfitting cold — NOT mastery, which research confirmed isn't reachable from this baseline in this window; don't let this quietly reinflate later. Because the opportunity is unconfirmed, the curriculum builds general, transferable quant-trading credibility usable for other small/boutique shops too, not a bet on one contact. Bennett University still doesn't feed the IIT-first quant-prop pipeline — off-campus/portfolio route required, unchanged from before. Sleep floor is 5 hours (talked down from an initial 4-hour proposal — 4h was assessed as actively counterproductive given already-disclosed ADHD; this is a hard floor with zero slack, not a target to erode further)."
   },
 
   /* -----------------------------------------------------------------
-     SKILLS — the real diagnostic baseline (0-6 scale), evidence-based
+     SKILLS — evidence-based, 0-6 scale. Baselines are the original
+     diagnostic (2026-08-15); targets revised for the quant-primary pivot.
      ----------------------------------------------------------------- */
   skills: [
-    { id: "python", name: "Python Fundamentals", category: "Core CS", level: 1, target: 4,
-      note: "Root cause: doesn't mentally simulate own code before trusting it. Recurring list/tuple mutability misconception.",
-      history: [{ date: PLAN_START_DATE, level: 1, note: "Initial diagnostic (Batch 1)" }] },
-    { id: "dsa", name: "DSA Fundamentals", category: "Core CS", level: 1.6, target: 4,
-      note: "Stack/queue tracing solid (4/6). Recursion never independently completed. Hash-based O(1) vs O(n) reasoning weak.",
-      history: [{ date: PLAN_START_DATE, level: 1.6, note: "Initial diagnostic (Batch 2)" }] },
-    { id: "probstat", name: "Probability & Statistics", category: "Math / Quant", level: 1.7, target: 4,
-      note: "Individual pieces often right, combination step (Bayes denominator, finishing an EV calc) keeps dropping.",
-      history: [{ date: PLAN_START_DATE, level: 1.7, note: "Initial diagnostic (Batch 3)" }] },
+    { id: "python", name: "Python Fundamentals", category: "Core CS", level: 1, target: 4.5,
+      note: "Now the single toolkit both tracks depend on daily (pandas/numpy backtesting code, not just occasional scripting) — needs more fluency than the old AI-Eng plan required, not less.",
+      history: [{ date: "2026-08-15", level: 1, note: "Initial diagnostic (Batch 1)" }] },
+    { id: "dsa", name: "DSA Fundamentals", category: "Core CS", level: 1.6, target: 3.5,
+      note: "Hedge-only now. Enough for a junior SWE screen, not chasing deep pattern mastery — NeetCode volume target drops from 110-120 to ~80-85 cumulative.",
+      history: [{ date: "2026-08-15", level: 1.6, note: "Initial diagnostic (Batch 2)" }] },
+    { id: "probstat", name: "Probability & Statistics", category: "Math / Quant", level: 1.7, target: 4.5,
+      note: "Now genuinely central, not incidental — price-process modeling, hypothesis-testing intuition for backtest validity, Bayesian reasoning about signals. Raised despite the pivot because it's load-bearing for the primary track.",
+      history: [{ date: "2026-08-15", level: 1.7, note: "Initial diagnostic (Batch 3)" }] },
     { id: "linalg", name: "Linear Algebra & Calculus", category: "Math / Quant", level: 3.7, target: 4.5,
-      note: "Strongest 'rule-based execution' domain. Score corrected down from 5/6 after user self-disclosed 2 assisted answers.",
-      history: [{ date: PLAN_START_DATE, level: 3.7, note: "Initial diagnostic (Batch 4, corrected)" }] },
+      note: "Maintained mostly through applied use in strategy code (covariance, portfolio-optimization intuition), not dedicated study time.",
+      history: [{ date: "2026-08-15", level: 3.7, note: "Initial diagnostic (Batch 4, corrected)" }] },
     { id: "mlopt", name: "Optimization & ML Fundamentals", category: "AI", level: 4, target: 4.5,
-      note: "Strong grasp of bias/variance, loss functions, train/test split. Weak on learning-rate mechanics.",
-      history: [{ date: PLAN_START_DATE, level: 4, note: "Initial diagnostic (Batch 5)" }] },
-    { id: "dlai", name: "Deep Learning / AI Engineering", category: "AI", level: 2, target: 4,
-      note: "Weakest domain that is also the PRIMARY path's core differentiator (RAG, attention, fine-tuning vs prompting, tokens). Priority.",
-      history: [{ date: PLAN_START_DATE, level: 2, note: "Initial diagnostic (Batch 6)" }] },
-    { id: "sql_sys", name: "SQL & Systems / Linux", category: "Core CS", level: 1.6, target: 3.5,
-      note: "Single-table GROUP BY solid; JOINs a real gap despite 'comfortable' self-report. Linux confirmed genuine 0/6.",
-      history: [{ date: PLAN_START_DATE, level: 1.6, note: "Initial diagnostic (Batch 7)" }] },
-    { id: "finance", name: "Finance & Markets", category: "Quant", level: 1.4, target: 2.5,
-      note: "Matches self-report accurately. Low priority by design — not gated at Quant Research entry level.",
-      history: [{ date: PLAN_START_DATE, level: 1.4, note: "Initial diagnostic (Batch 8)" }] },
-    { id: "stochastic", name: "Stochastic Processes", category: "Quant", level: 0.5, target: 2,
-      note: "Near-zero, matches self-report ('essentially unknown'). Light coverage planned (Markov chains only).",
-      history: [{ date: PLAN_START_DATE, level: 0.5, note: "Initial diagnostic (Batch 9)" }] },
+      note: "Bias-variance/overfitting concepts transfer almost for free to 'why is my backtest lying to me' — real synergy with the primary track, no extra dedicated time needed.",
+      history: [{ date: "2026-08-15", level: 4, note: "Initial diagnostic (Batch 5)" }] },
+    { id: "dlai", name: "Deep Learning / AI Engineering", category: "AI", level: 2, target: 2.5,
+      note: "No longer the differentiator — RAG project cut to a stub. Target reflects 'won't embarrass yourself if asked about RAG/tokens/embeddings,' not depth.",
+      history: [{ date: "2026-08-15", level: 2, note: "Initial diagnostic (Batch 6)" }] },
+    { id: "sql_sys", name: "SQL & Systems / Linux", category: "Core CS", level: 1.6, target: 3,
+      note: "Hedge maintained (SQLZoo, Bandit) but System Design Primer depth is cut, slightly lowering the realistic ceiling.",
+      history: [{ date: "2026-08-15", level: 1.6, note: "Initial diagnostic (Batch 7)" }] },
+    { id: "finance", name: "Finance & Markets", category: "Quant", level: 1.4, target: 4,
+      note: "Was explicitly deprioritized before ('not gated at Quant Research entry'). Now actively taught through GT CS7646 (market mechanics, EMH, CAPM) — needs to be a real number, not a token one.",
+      history: [{ date: "2026-08-15", level: 1.4, note: "Initial diagnostic (Batch 8)" }] },
+    { id: "stochastic", name: "Stochastic Processes", category: "Quant", level: 0.5, target: 3,
+      note: "4/6 = 'can explain and simulate a random walk, codes the Markov property from real transition-probability data, distinguishes mean-reversion from random-walk price behavior and can test for it empirically.' Deliberately NOT claiming stochastic calculus (Brownian motion/Itô/SDEs) — that needs measure-theory prerequisites this plan isn't building, and chasing it would cannibalize probability/backtesting time for worse ROI against the actual bar.",
+      history: [{ date: "2026-08-15", level: 0.5, note: "Initial diagnostic (Batch 9)" }] },
     { id: "mentalmath", name: "Mental Math & Quant Reasoning", category: "Quant", level: 5, target: 5.5,
-      note: "Genuine standout strength — 4/5 exact, fast, no calculator. Lean into this for Quant Research interview prep.",
-      history: [{ date: PLAN_START_DATE, level: 5, note: "Initial diagnostic (Batch 9)" }] }
+      note: "Already near-ceiling and a genuine strength — protect, don't rebuild. Daily 10-15 min maintenance only, zero dedicated study time.",
+      history: [{ date: "2026-08-15", level: 5, note: "Initial diagnostic (Batch 9)" }] },
+    { id: "algo_trading", name: "Algorithmic Trading / Backtesting", category: "Quant", level: 0, target: 4,
+      note: "New track, zero baseline. 4/6 = 'credible working knowledge': has independently built 2+ backtested strategies, applied walk-forward validation, can point to a specific lookahead-bias fix in their own code, understands transaction-cost impact on results. NOT claiming production-grade deployment or multi-asset-class breadth — that's a 5-6, explicitly out of scope for this window.",
+      history: [{ date: PLAN_START_DATE, level: 0, note: "New skill added at the quant-primary pivot" }] },
+    { id: "microstructure", name: "Market Microstructure & Trading Vocabulary", category: "Quant", level: 0.3, target: 4,
+      note: "Operationalizes the stated success bar directly: 4/6 = can define and correctly use, unprompted, to an interviewer: bid-ask spread, market/limit/stop orders, slippage, liquidity, lookahead bias, survivorship bias, overfitting, walk-forward validation, Sharpe ratio, max drawdown, alpha, beta, mean reversion, random walk, Markov property. Distinct from Finance & Markets (broader/macro) — this is the cold-recall vocabulary layer specifically.",
+      history: [{ date: PLAN_START_DATE, level: 0.3, note: "New skill added at the quant-primary pivot" }] }
   ],
 
   /* -----------------------------------------------------------------
-     ROADMAP — the real 90-day plan, week by week
+     ROADMAP — 94 days to Dec 1, 2026 (Day 1 = restart date). Same proven
+     pattern throughout: 5 active days + 1 no-new-material buffer day +
+     1 review day per week.
      ----------------------------------------------------------------- */
   roadmap: [
-    { phase: "Days 1-30 — Foundation & Acceleration", range: [1, 30], weeks: [
-      { title: "Week 1: Python discipline + Probability foundations + SQL fix", days: "1-7", tasks: [
-        "10 LeetCode Easy problems using the trace-before-you-run protocol (pseudocode -> hand-trace 2 cases -> verify in Python Tutor -> run)",
-        "Recursion remediation, TWO passes not one: factorial, sum of digits, Fibonacci, string reversal, sum of list, then a second harder set (reverse a linked list, subsets/power set) — trace call stack in Python Tutor for each. This WILL be spot-checked cold later without warning.",
-        "SQLZoo JOIN tutorial, then 10 LeetCode SQL Medium problems using joins",
-        "Stat 110 Lectures 1-4 (probability & counting, Bayes' rule) + Strategic Practice sets"
-      ], resources: ["python-tutor", "stat110", "sqlzoo", "neetcode"],
+    { phase: "Days 1-28 — Quant Onboarding + Foundations Continue", range: [1, 28], weeks: [
+      { title: "Week 1: DSA/Probability continue + Quant onboarding begins", days: "1-7", tasks: [
+        "NeetCode 150 — Two Pointers, Stack, Binary Search, ~12 problems",
+        "Create a QuantConnect account and complete its own Boot Camp tutorial — run a first template backtest end to end",
+        "Stat 110 lectures continue from wherever you actually left off + MIT OCW Markov-chain intro (moved up specifically because it's now load-bearing, not an afterthought)",
+        "Daily quant-vocabulary flashcards begin (bid-ask spread, market/limit/stop order, slippage, liquidity, lookahead bias, survivorship bias, overfitting, Sharpe ratio, max drawdown, mean reversion) + mental math + Brainstellar Easy begin"
+      ], resources: ["neetcode", "quantconnect", "stat110", "mit-ocw-prob", "brainstellar"],
       dailyPlan: [
-        { d: 1, morning: "Read Python Tutor's interface, don't skip this", daytime: "3 LeetCode Easy — trace protocol", deep1: "Stat 110 Lecture 1 + practice", deep2: "SQLZoo JOIN tutorial, part 1", night: "Recap today in 2 sentences" },
-        { d: 2, morning: "Quick arithmetic warm-up", daytime: "3 more LeetCode Easy", deep1: "Stat 110 Lecture 2 + practice", deep2: "SQLZoo JOIN tutorial part 2 + 3 SQL Medium", night: "Explain Bayes' rule out loud, no notes" },
-        { d: 3, morning: "Quick arithmetic warm-up", daytime: "4 LeetCode Easy (10 done) + recursion set A: factorial, digit sum, Fibonacci", deep1: "Stat 110 Lecture 3 + practice", deep2: "4 more SQL Medium", night: "Re-trace one recursion problem cold" },
-        { d: 4, morning: "Quick arithmetic warm-up", daytime: "Recursion set A finish (string reversal, sum of list) + set B start (reverse a linked list)", deep1: "Stat 110 Lecture 4 + practice", deep2: "Remaining SQL Medium (10 done)", night: "Write Bayes' theorem from memory" },
-        { d: 5, morning: "Quick arithmetic warm-up", daytime: "Recursion set B finish (subsets/power set)", deep1: "Strategic Practice catch-up for Lectures 1-4", deep2: "Redo any SQL problem that felt shaky", night: "Self-quiz: trace a fresh recursive function cold" },
-        { d: 6, morning: "—", daytime: "CATCH-UP & BUFFER — finish anything behind. No new material today.", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 7, morning: "—", daytime: "REVIEW — redo 2 problems cold, no notes", deep1: "Preview Week 2's NeetCode category so Monday isn't a cold start", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+        { d: 1, morning: "Create QuantConnect account; quick Python Tutor refresher", daytime: "NeetCode Two Pointers x3", deep1: "Stat 110 — next lecture + practice", deep2: "QuantConnect Boot Camp, part 1", deep3: "—", night: "Vocab flashcards, set 1 (5 terms) + recap today in 2 sentences" },
+        { d: 2, morning: "Vocab flashcards review", daytime: "NeetCode Two Pointers x3 (6 done)", deep1: "Stat 110 — next lecture + practice", deep2: "QuantConnect Boot Camp, part 2 — run first template backtest end to end", deep3: "—", night: "Mental math 15min (starts today)" },
+        { d: 3, morning: "Vocab + mental math", daytime: "NeetCode Stack x3", deep1: "Stat 110 — next lecture + practice", deep2: "MIT OCW — Markov chains, intro (transition probabilities)", deep3: "—", night: "Mental math" },
+        { d: 4, morning: "Vocab + mental math", daytime: "NeetCode Binary Search x3", deep1: "Stat 110 — next lecture + practice", deep2: "MIT OCW — Markov chains, continued", deep3: "Skim QuantConnect docs on strategy structure (Initialize/OnData)", night: "Mental math + Brainstellar Easy" },
+        { d: 5, morning: "Vocab + mental math", daytime: "NeetCode mixed review (~12 done)", deep1: "Strategic Practice catch-up on recent Stat 110 lectures", deep2: "Read 2-3 example strategies in QuantConnect's algorithm library", deep3: "Note down anything you don't understand yet — don't skip past confusion", night: "Self-quiz: explain lookahead bias in your own words, no notes" },
+        { d: 6, morning: "—", daytime: "CATCH-UP & BUFFER — no new material", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 7, morning: "—", daytime: "REVIEW — cold-recall all 10 vocab terms, redo 2 NeetCode problems cold", deep1: "Preview Week 2 (GT CS7646 begins)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
       ]},
-      { title: "Week 2: DSA patterns begin + Linux from zero + ML fundamentals", days: "8-14", tasks: [
-        "NeetCode 150 — Arrays & Hashing category, 15 problems, 25-30 min independent attempt before watching solution",
-        "OverTheWire Bandit levels 0-15 + read 'Learning the Shell' section of The Linux Command Line",
-        "Stat 110 Lectures 5-8 (conditional probability, independence, discrete RVs) + practice",
-        "fast.ai Practical Deep Learning for Coders — Lessons 1-2"
-      ], resources: ["neetcode", "bandit", "tlcl", "stat110", "fastai"],
+      { title: "Week 2: Georgia Tech CS7646 begins + first trivial QuantConnect algorithm", days: "8-14", tasks: [
+        "NeetCode 150 — Trees, Recursion, ~8 problems (reduced volume, hedge-only now)",
+        "Georgia Tech CS7646 (free, YouTube + lucylabs.gatech.edu/ml4t) — market mechanics, reading financial data, technical-analysis intro",
+        "Stat 110 continues",
+        "Build a trivial 'Buy & Hold' QuantConnect algorithm end to end — this is mechanics warm-up, not a real strategy yet"
+      ], resources: ["neetcode", "gt-cs7646", "stat110", "quantconnect"],
       dailyPlan: [
-        { d: 8, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3 (independent attempt first)", deep1: "fast.ai Lesson 1", deep2: "Bandit levels 0-3", night: "Recap fast.ai Lesson 1" },
-        { d: 9, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3", deep1: "fast.ai Lesson 1 exercises", deep2: "Bandit levels 4-7", night: "Recap" },
-        { d: 10, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3 (9 done)", deep1: "fast.ai Lesson 2", deep2: "Bandit levels 8-11", night: "Recap" },
-        { d: 11, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing x3 (12 done) + Stat 110 Lecture 5", deep1: "fast.ai Lesson 2 exercises", deep2: "Bandit levels 12-15 (done)", night: "Recap" },
-        { d: 12, morning: "Quick arithmetic warm-up", daytime: "NeetCode Arrays & Hashing remaining (15 done) + Stat 110 Lecture 6", deep1: "Stat 110 Lectures 7-8 + practice", deep2: "Read The Linux Command Line — Learning the Shell", night: "Self-quiz: why is a set O(1) and a list O(n)?" },
-        { d: 13, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 14, morning: "—", daytime: "REVIEW — redo 2 Arrays/Hashing problems cold", deep1: "Preview Week 3's Two Pointers/Stack categories", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+        { d: 8, morning: "Vocab + mental math", daytime: "NeetCode Trees x3", deep1: "GT CS7646 — reading financial data", deep2: "Stat 110 — next lecture", deep3: "—", night: "Mental math" },
+        { d: 9, morning: "Vocab + mental math", daytime: "NeetCode Trees x3 (6 done)", deep1: "GT CS7646 — market mechanics", deep2: "Stat 110 — next lecture", deep3: "—", night: "Mental math" },
+        { d: 10, morning: "Vocab + mental math", daytime: "NeetCode Recursion x3", deep1: "GT CS7646 — technical analysis intro", deep2: "Scaffold 'Buy & Hold' QuantConnect algorithm — Initialize() only", deep3: "—", night: "Mental math" },
+        { d: 11, morning: "Vocab + mental math", daytime: "NeetCode Recursion x2 (done, ~8)", deep1: "Stat 110 continues", deep2: "Finish Buy & Hold algorithm — OnData(), run first backtest", deep3: "Read the output report — note every metric shown even if you don't understand it yet", night: "Mental math" },
+        { d: 12, morning: "Vocab + mental math", daytime: "NeetCode mixed review", deep1: "Review this week's GT CS7646 material out loud", deep2: "Re-run Buy & Hold on a different asset/date range, compare", deep3: "Write down what changed and why", night: "Mental math + Brainstellar" },
+        { d: 13, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 14, morning: "—", daytime: "REVIEW — cold-recall vocab, explain Buy & Hold results out loud", deep1: "Preview Week 3 (backtesting pitfalls)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
       ]},
-      { title: "Week 3: DSA continues + AI project starts + quant mental math layer", days: "15-21", tasks: [
-        "SPACED-REPETITION CHECKPOINT: before anything new, redo every Week 1-2 problem you got wrong or were slow on. Skipping this is how 'progress' turns out to be an illusion.",
-        "NeetCode 150 — Two Pointers, Stack, Binary Search categories, 15-20 problems",
-        "Start Project 1 (RAG Q&A system) — ingestion + retrieval working",
-        "fast.ai Lessons 3-4 + DeepLearning.AI: LangChain for LLM Application Development — HARD RULE: you may not start the next course until the previous one's concept is actually used in Project 1's real code. Watching without applying doesn't count as progress and won't move your skill level.",
-        "Daily 15-20 min timed mental math + probability brain-teasers begins"
-      ], resources: ["neetcode", "fastai", "dlai-langchain"],
+      { title: "Week 3: Backtesting pitfalls cold + Markov chain mini-project", days: "15-21", tasks: [
+        "SPACED-REPETITION CHECKPOINT: redo every Week 1-2 problem you got wrong or were slow on",
+        "NeetCode 150 — Heaps, Intervals, ~10 problems",
+        "QuantStart's FREE articles (not their paid ebooks) on lookahead bias, survivorship bias, overfitting — read each and write your own one-paragraph example. This is what operationalizes 'knows the pitfalls cold,' not passive reading.",
+        "MIT OCW Markov chains: transition matrices, stationary distributions — then code a 2-state Markov chain simulator on real historical price data"
+      ], resources: ["neetcode", "quantstart-articles", "mit-ocw-prob"],
       dailyPlan: [
-        { d: 15, morning: "SPACED-REP: redo Week 1-2 wrong answers", daytime: "NeetCode Two Pointers x4", deep1: "Project 1 — repo setup, pick document set, plan architecture", deep2: "fast.ai Lesson 3", night: "Mental math 15min (starts today)" },
-        { d: 16, morning: "Mental math 15min", daytime: "NeetCode Two Pointers x4 (done) + Stack x2", deep1: "Project 1 — ingestion pipeline", deep2: "fast.ai Lesson 3 exercises", night: "Mental math / probability brainteaser" },
-        { d: 17, morning: "Mental math 15min", daytime: "NeetCode Stack x3 (5 done) + Binary Search x3", deep1: "Project 1 — chunking + embeddings", deep2: "fast.ai Lesson 4", night: "Mental math" },
-        { d: 18, morning: "Mental math 15min", daytime: "NeetCode Binary Search remaining + mixed review", deep1: "Project 1 — vector store wired in", deep2: "DeepLearning.AI: LangChain — then immediately use retrieval in Project 1 (apply-before-advance rule)", night: "Mental math" },
-        { d: 19, morning: "Mental math 15min", daytime: "NeetCode mixed review (15-20 done)", deep1: "Project 1 — get basic retrieval working end to end", deep2: "Debug/fix whatever broke", night: "Mental math + probability brainteaser" },
-        { d: 20, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 21, morning: "—", daytime: "REVIEW — redo 2 problems cold", deep1: "SPACED-REP checkpoint prep for Week 4", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+        { d: 15, morning: "SPACED-REP: redo Week 1-2 wrong answers", daytime: "NeetCode Heaps x3", deep1: "QuantStart — lookahead bias article, write your own example", deep2: "MIT OCW — transition matrices", deep3: "—", night: "Mental math" },
+        { d: 16, morning: "Vocab + mental math", daytime: "NeetCode Heaps x3 (done)", deep1: "QuantStart — survivorship bias, write your own example", deep2: "MIT OCW — stationary distributions", deep3: "—", night: "Mental math" },
+        { d: 17, morning: "Vocab + mental math", daytime: "NeetCode Intervals x3", deep1: "QuantStart — overfitting, write your own example", deep2: "Start coding a 2-state Markov chain simulator (up/down days) in Python", deep3: "Pull real historical price data for the simulator (QuantConnect or a free source)", night: "Mental math + Brainstellar" },
+        { d: 18, morning: "Vocab + mental math", daytime: "NeetCode Intervals x3 (done, ~10)", deep1: "Estimate real transition probabilities from historical returns", deep2: "Finish the Markov simulator, validate it against real data", deep3: "Document what you found", night: "Mental math" },
+        { d: 19, morning: "Vocab + mental math", daytime: "NeetCode mixed review", deep1: "Review this week's 3 pitfall articles cold — explain each out loud, no notes", deep2: "Polish the Markov chain script and write-up", deep3: "—", night: "Mental math" },
+        { d: 20, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 21, morning: "—", daytime: "REVIEW — cold-explain lookahead/survivorship/overfitting to an imaginary interviewer", deep1: "Preview Week 4", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
       ]},
-      { title: "Week 4: Consolidation + first project ships + cold re-test", days: "22-30", tasks: [
-        "NeetCode 150 — Trees, Recursion/Backtracking",
-        "DeepLearning.AI: AI Agents in LangGraph + finish + deploy Project 1 — same apply-before-advance rule as Week 3",
-        "Stat 110 Lectures 9-12 (expectation, more distributions)",
-        "Day 30 cold re-test: fresh Bayes problem, fresh EV problem, define variance/stationarity unaided, debug a fresh buggy loop"
-      ], resources: ["neetcode", "dlai-langgraph"],
-      dailyPlan: [
-        { d: 22, morning: "Mental math", daytime: "NeetCode Trees x4", deep1: "Project 1 — generation wired in", deep2: "DeepLearning.AI: AI Agents in LangGraph — apply immediately after", night: "Mental math" },
-        { d: 23, morning: "Mental math", daytime: "NeetCode Trees x4 (8 done) + Recursion/Backtracking x2", deep1: "Project 1 — basic manual eval", deep2: "Stat 110 Lecture 9", night: "Mental math" },
-        { d: 24, morning: "Mental math", daytime: "NeetCode Recursion/Backtracking x4", deep1: "Project 1 — deploy to Streamlit/HF Spaces", deep2: "Stat 110 Lecture 10", night: "Mental math" },
-        { d: 25, morning: "Mental math", daytime: "NeetCode Recursion/Backtracking remaining (done)", deep1: "Stat 110 Lecture 11 + practice", deep2: "Project 1 — polish + README", night: "Mental math" },
-        { d: 26, morning: "Mental math", daytime: "Light review of everything since Day 1", deep1: "Stat 110 Lecture 12 + practice", deep2: "Project 1 — confirm it's genuinely deployed and working", night: "Mental math" },
-        { d: 27, morning: "—", daytime: "CATCH-UP & BUFFER — get Project 1 actually done if it isn't", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 28, morning: "—", daytime: "Prep for the Day 30 gate — review weak spots honestly", deep1: "Light review only, no cramming new material", deep2: "Same", night: "Rest, sleep properly before the gate" },
-        { d: 29, morning: "—", daytime: "One more light review pass", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 30, morning: "—", daytime: "DAY 30 GATE — cold re-test: fresh Bayes, fresh EV, variance/stationarity unaided, debug a fresh buggy loop", deep1: "Go/No-Go review against the gate criteria", deep2: "Weekly + monthly review in the dashboard", night: "—" }
-      ]}
-    ]},
-    { phase: "Days 31-60 — Building & Applying", range: [31, 60], weeks: [
-      { title: "Week 5: DSA expansion + statistics for ML + real evaluation", days: "31-37", tasks: [
-        "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 3-4 before starting new categories",
-        "NeetCode 150 — Heaps/Priority Queues, Intervals, 12-15 problems",
-        "Stat 110 Lectures 13-16 (continuous & joint distributions) + Khan Academy hypothesis testing / CI modules",
-        "Build a golden 20-30 question eval set for Project 1 — measure retrieval quality + answer correctness systematically",
-        "Start Brainstellar puzzles, Easy tier"
-      ], resources: ["neetcode", "stat110", "dlai-accuracy", "brainstellar"],
-      dailyPlan: [
-        { d: 31, morning: "SPACED-REP: redo Week 3-4 wrong answers", daytime: "NeetCode Heaps x3", deep1: "Stat 110 Lecture 13", deep2: "Start Project 1 eval set (5 questions)", night: "Mental math + Brainstellar Easy" },
-        { d: 32, morning: "Mental math", daytime: "NeetCode Heaps x3 (done) + Intervals x2", deep1: "Stat 110 Lecture 14", deep2: "Eval set (10 questions)", night: "Mental math" },
-        { d: 33, morning: "Mental math", daytime: "NeetCode Intervals x4 (~12 done)", deep1: "Stat 110 Lecture 15 + Khan Academy hypothesis testing", deep2: "Eval set (15-20 questions)", night: "Mental math" },
-        { d: 34, morning: "Mental math", daytime: "Khan Academy confidence intervals", deep1: "Stat 110 Lecture 16 + practice", deep2: "Run the eval set against Project 1, measure it for real", night: "Mental math" },
-        { d: 35, morning: "Mental math", daytime: "Fix whatever the eval set exposed in Project 1", deep1: "Review Stat 110 Lectures 13-16", deep2: "Finish eval set (20-30 questions), document results", night: "Mental math + Brainstellar" },
-        { d: 36, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 37, morning: "—", daytime: "REVIEW — redo 2 problems cold", deep1: "Preview Week 6 (system design, graphs)", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 6: Systems foundations + agentic behavior", days: "38-44", tasks: [
-        "NeetCode 150 — Greedy, Graphs (BFS/DFS), 15 problems",
-        "System Design Primer (GitHub) + Gaurav Sen YouTube — scalability, caching, load balancing, CAP theorem",
-        "DeepLearning.AI: Evaluating AI Agents",
-        "Turn Project 1 into a real backend: FastAPI endpoints, validation, basic auth, real DB for history, add tool-use/agent behavior"
-      ], resources: ["neetcode", "sysdesign-primer", "dlai-eval-agents"],
-      dailyPlan: [
-        { d: 38, morning: "Mental math", daytime: "NeetCode Greedy x4", deep1: "System Design Primer — scalability basics", deep2: "DeepLearning.AI: Evaluating AI Agents — apply after", night: "Mental math" },
-        { d: 39, morning: "Mental math", daytime: "NeetCode Greedy x4 (done) + Graphs BFS/DFS x3", deep1: "System Design Primer — caching, load balancing", deep2: "FastAPI — scaffold Project 1 backend endpoints", night: "Mental math" },
-        { d: 40, morning: "Mental math", daytime: "NeetCode Graphs x4", deep1: "System Design Primer — CAP theorem + Gaurav Sen video", deep2: "FastAPI — request validation + basic auth", night: "Mental math" },
-        { d: 41, morning: "Mental math", daytime: "NeetCode Graphs remaining (15 done)", deep1: "Real DB wired in for chat history", deep2: "Add tool-use/agent behavior to Project 1", night: "Mental math" },
-        { d: 42, morning: "Mental math", daytime: "Review this week's system design topics out loud", deep1: "Debug the agent/backend integration", deep2: "Test the whole backend end to end", night: "Mental math + Brainstellar" },
-        { d: 43, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 44, morning: "—", daytime: "REVIEW", deep1: "Preview Week 7 (DP, Markov chains)", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 7: Stochastic processes gap + interview prep starts", days: "45-51", tasks: [
-        "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 5-6",
-        "NeetCode 150 — 1-D Dynamic Programming, 12 problems",
-        "MIT OCW probability/random processes — Markov chain mechanics only",
-        "Brainstellar moves to Medium tier",
-        "5-6 STAR behavioral stories written; first timed 30-45 min mock technical interview, self-recorded"
-      ], resources: ["neetcode", "mit-ocw-prob", "brainstellar"],
-      dailyPlan: [
-        { d: 45, morning: "SPACED-REP: redo Week 5-6 wrong answers", daytime: "NeetCode 1-D DP x3", deep1: "MIT OCW — Markov chains part 1", deep2: "Write 2 STAR stories", night: "Mental math" },
-        { d: 46, morning: "Mental math", daytime: "NeetCode 1-D DP x3", deep1: "MIT OCW — Markov chains part 2", deep2: "2 more STAR stories (4 done)", night: "Mental math" },
-        { d: 47, morning: "Mental math", daytime: "NeetCode 1-D DP x3 (9 done)", deep1: "Brainstellar Medium x3", deep2: "2 more STAR stories (6 done)", night: "Mental math" },
-        { d: 48, morning: "Mental math", daytime: "NeetCode 1-D DP remaining (12 done)", deep1: "Brainstellar Medium x3", deep2: "Pick a fresh problem for tomorrow's mock — don't preview it", night: "Mental math" },
-        { d: 49, morning: "Mental math", daytime: "Light review", deep1: "FIRST TIMED MOCK TECHNICAL INTERVIEW — 30-45min, self-recorded", deep2: "Review the recording for communication, not just correctness", night: "Mental math" },
-        { d: 50, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 51, morning: "—", daytime: "REVIEW", deep1: "Preview Week 8", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 8: Consolidation, project ships, applications expand", days: "52-60", tasks: [
-        "NeetCode 150 — 2-D Dynamic Programming + full mixed review, target ~110-120 cumulative problems",
-        "Project 1 final form: evaluated, real backend, deployed, system-design-style README",
-        "Expand tracked application list across AI Engineer / SWE / Quant Research targets",
-        "Publish one technical post about Project 1's architecture + real eval numbers",
-        "Finish and document the Kaggle entry"
+      { title: "Week 4: Consolidation + Gate 1", days: "22-28", tasks: [
+        "NeetCode 150 — Greedy, ~6 problems",
+        "Full review pass across everything covered in Phase 1 — Stat 110, GT CS7646, the Markov project, the Buy & Hold algorithm",
+        "Day 28 Gate: cold-define lookahead bias/survivorship bias/overfitting, explain Sharpe ratio and max drawdown conceptually, fresh Bayes/EV problem solved unaided, QuantConnect account active with a template run end to end, NeetCode cumulative >= 25"
       ], resources: ["neetcode"],
       dailyPlan: [
-        { d: 52, morning: "Mental math", daytime: "NeetCode 2-D DP x3", deep1: "Project 1 — final eval pass", deep2: "Research 5 application targets", night: "Mental math" },
-        { d: 53, morning: "Mental math", daytime: "NeetCode 2-D DP x3", deep1: "Project 1 — system-design-style README", deep2: "Apply to 2-3 targets", night: "Mental math" },
-        { d: 54, morning: "Mental math", daytime: "NeetCode full mixed review x5", deep1: "Project 1 — record the demo", deep2: "Apply to 2-3 more targets", night: "Mental math" },
-        { d: 55, morning: "Mental math", daytime: "NeetCode mixed review x5 (target ~110-120 cumulative)", deep1: "Write the technical post — Project 1 architecture + real eval numbers", deep2: "Publish it", night: "Mental math" },
-        { d: 56, morning: "Mental math", daytime: "Finish/document the Kaggle entry", deep1: "Finish/document the Kaggle entry (cont.)", deep2: "Application follow-ups", night: "Mental math + Brainstellar" },
-        { d: 57, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 58, morning: "—", daytime: "Prep for Day 60 gate — honest self-check against the criteria", deep1: "Light review only", deep2: "Same", night: "Rest" },
-        { d: 59, morning: "—", daytime: "One more light pass", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 60, morning: "—", daytime: "DAY 60 GATE — check against criteria", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", night: "—" }
+        { d: 22, morning: "Vocab + mental math", daytime: "NeetCode Greedy x3", deep1: "Review Stat 110 material covered so far", deep2: "Review GT CS7646 material covered so far", deep3: "—", night: "Mental math" },
+        { d: 23, morning: "Vocab + mental math", daytime: "NeetCode Greedy x3 (done)", deep1: "Re-explain the Markov chain project cold, no notes", deep2: "Re-explain the QuantConnect Buy & Hold algorithm cold", deep3: "—", night: "Mental math" },
+        { d: 24, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Full vocab cold-recall drill, all terms so far", deep2: "Fresh Bayes problem + fresh EV problem, solved cold", deep3: "—", night: "Mental math" },
+        { d: 25, morning: "Vocab + mental math", daytime: "Light review", deep1: "Define Sharpe ratio and max drawdown conceptually, unaided, no notes", deep2: "Review anything flagged as shaky this month", deep3: "—", night: "Mental math" },
+        { d: 26, morning: "—", daytime: "Light review only — no new material, no cramming", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 27, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest, sleep properly before the gate" },
+        { d: 28, morning: "—", daytime: "GATE 1 — full review against criteria above", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", deep3: "—", night: "—" }
       ]}
     ]},
-    { phase: "Days 61-90 — Polishing & Interview Prep", range: [61, 90], weeks: [
-      { title: "Week 9: DSA final gaps + first full mock cycle", days: "61-67", tasks: [
-        "SPACED-REPETITION CHECKPOINT: redo every problem logged wrong in Weeks 7-8",
-        "NeetCode 150 — Advanced Graphs, Tries, Bit Manipulation, Union-Find",
-        "Shift to timed mixed practice (random category, 30-45 min cap)",
-        "Pramp: first DSA + system design mock interviews with a live person",
-        "Jane Street's official monthly puzzle (current + 2-3 archive) + Brainstellar Hard tier"
-      ], resources: ["neetcode", "pramp", "janestreet-puzzles", "brainstellar"],
+    { phase: "Days 29-56 — Core Quant Build: First Real Strategy", range: [29, 56], weeks: [
+      { title: "Week 5: Strategy 1 — SMA crossover, built and backtested", days: "29-35", tasks: [
+        "NeetCode 150 — Graphs BFS/DFS, ~8 problems",
+        "Build Strategy 1 (SMA crossover) on QuantConnect, run over 5+ years of real historical data",
+        "Read the output (Sharpe, max drawdown, CAGR) and write your own definition of each next to your own numbers",
+        "Audit your own code for at least one concrete lookahead-bias risk and fix it; add QuantConnect's transaction-cost model and compare before/after"
+      ], resources: ["neetcode", "quantconnect"],
       dailyPlan: [
-        { d: 61, morning: "SPACED-REP: redo Week 7-8 wrong answers", daytime: "NeetCode Advanced Graphs x3", deep1: "Timed mixed practice, 30-45min cap", deep2: "Jane Street's current puzzle — attempt it", night: "Mental math" },
-        { d: 62, morning: "Mental math", daytime: "NeetCode Tries x3", deep1: "Timed mixed practice", deep2: "Jane Street archive puzzle", night: "Mental math" },
-        { d: 63, morning: "Mental math", daytime: "NeetCode Bit Manipulation x3", deep1: "Timed mixed practice", deep2: "Brainstellar Hard x2", night: "Mental math" },
-        { d: 64, morning: "Mental math", daytime: "NeetCode Union-Find x3 (done)", deep1: "PRAMP: DSA mock interview", deep2: "Debrief — what communication gaps showed up", night: "Mental math" },
-        { d: 65, morning: "Mental math", daytime: "Timed mixed review", deep1: "PRAMP: system design mock interview", deep2: "Debrief", night: "Mental math + Brainstellar" },
-        { d: 66, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 67, morning: "—", daytime: "REVIEW", deep1: "Preview Week 10", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+        { d: 29, morning: "Vocab + mental math", daytime: "NeetCode Graphs BFS x3", deep1: "QuantConnect — scaffold Strategy 1 (SMA crossover), Initialize()", deep2: "Wire up OnData(), get it running on 1 year of data", deep3: "—", night: "Mental math" },
+        { d: 30, morning: "Vocab + mental math", daytime: "NeetCode Graphs DFS x3", deep1: "Extend Strategy 1 to 5+ years of data", deep2: "Run first full backtest", deep3: "—", night: "Mental math" },
+        { d: 31, morning: "Vocab + mental math", daytime: "NeetCode Graphs x2 (done, ~8)", deep1: "Read the backtest report line by line", deep2: "Write your own 1-line definition of Sharpe/drawdown/CAGR next to your actual numbers", deep3: "—", night: "Mental math + Brainstellar" },
+        { d: 32, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Audit your own Strategy 1 code for lookahead bias, line by line", deep2: "Fix anything found", deep3: "—", night: "Mental math" },
+        { d: 33, morning: "Vocab + mental math", daytime: "Light review", deep1: "Re-run the backtest after the fix — note how results changed", deep2: "Add QuantConnect's built-in transaction-cost/fee model", deep3: "—", night: "Mental math" },
+        { d: 34, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 35, morning: "—", daytime: "REVIEW — explain Strategy 1 end to end out loud, cold", deep1: "Preview Week 6", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
       ]},
-      { title: "Week 10: Behavioral prep + project polish + resume audit", days: "68-74", tasks: [
-        "Finalize STAR stories, run a behavioral mock via Pramp",
-        "Project 1: clean README, short demo recording",
-        "Full resume audit — every claim must hold at 3+ under questioning",
-        "DSA: re-attempt every previously logged wrong answer"
+      { title: "Week 6: Strategy 1 hardening + GitHub repo starts", days: "36-42", tasks: [
+        "NeetCode 150 — 1-D Dynamic Programming, ~6 problems",
+        "Compare Strategy 1 with vs. without realistic transaction costs — document the gap honestly",
+        "Start the GitHub repo — methodology-first README, real commit history",
+        "Re-test Strategy 1 on a different asset and document how results differ"
+      ], resources: ["neetcode"],
+      dailyPlan: [
+        { d: 36, morning: "Vocab + mental math", daytime: "NeetCode 1-D DP x3", deep1: "Re-run Strategy 1 with the fee model, compare before/after honestly", deep2: "Document the gap in a findings note", deep3: "—", night: "Mental math" },
+        { d: 37, morning: "Vocab + mental math", daytime: "NeetCode 1-D DP x3 (done)", deep1: "Start GitHub repo — README skeleton", deep2: "Write the methodology section of the README", deep3: "—", night: "Mental math" },
+        { d: 38, morning: "Vocab + mental math", daytime: "Light review", deep1: "Re-test Strategy 1 on a different asset", deep2: "Document how results differ", deep3: "—", night: "Mental math + Brainstellar" },
+        { d: 39, morning: "Vocab + mental math", daytime: "Light review", deep1: "Clean up Strategy 1 code for readability", deep2: "Push to GitHub with real commit history", deep3: "—", night: "Mental math" },
+        { d: 40, morning: "Vocab + mental math", daytime: "Light review", deep1: "Full cold-explain of Strategy 1 to an imaginary interviewer", deep2: "Note weak points in your own explanation", deep3: "—", night: "Mental math" },
+        { d: 41, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 42, morning: "—", daytime: "REVIEW", deep1: "Preview Week 7 (walk-forward validation)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
+      ]},
+      { title: "Week 7: Walk-forward validation + STAR stories begin", days: "43-49", tasks: [
+        "NeetCode 150 — 2-D Dynamic Programming, ~9 problems",
+        "Walk-forward split on Strategy 1: train on one window, test only on a held-out later window, report the test performance honestly even if it's worse",
+        "5-6 STAR behavioral stories written (unchanged from the original plan's approach)",
+        "Brainstellar moves to Medium tier"
+      ], resources: ["neetcode", "brainstellar"],
+      dailyPlan: [
+        { d: 43, morning: "Vocab + mental math", daytime: "NeetCode 2-D DP x3", deep1: "Set up a walk-forward split for Strategy 1 — train window only", deep2: "Write 2 STAR stories from past projects/internship", deep3: "—", night: "Mental math" },
+        { d: 44, morning: "Vocab + mental math", daytime: "NeetCode 2-D DP x3", deep1: "Run Strategy 1 on the held-out test window", deep2: "2 more STAR stories (4 done)", deep3: "—", night: "Mental math" },
+        { d: 45, morning: "Vocab + mental math", daytime: "NeetCode 2-D DP x3 (done, ~9)", deep1: "Report test-window performance honestly, even if worse than train", deep2: "2 more STAR stories (6 done)", deep3: "—", night: "Mental math + Brainstellar Medium" },
+        { d: 46, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Write up the walk-forward findings — what changed test vs. train, and why", deep2: "Brainstellar Medium x3", deep3: "—", night: "Mental math" },
+        { d: 47, morning: "Vocab + mental math", daytime: "Light review", deep1: "Cold-explain walk-forward validation and why it matters", deep2: "Brainstellar Medium x3", deep3: "—", night: "Mental math" },
+        { d: 48, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 49, morning: "—", daytime: "REVIEW", deep1: "Preview Week 8 (Strategy 2 + Gate 2)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
+      ]},
+      { title: "Week 8: Strategy 2 + comparison + Gate 2", days: "50-56", tasks: [
+        "NeetCode 150 — 2-D DP finish + mixed review",
+        "Build Strategy 2 (RSI/mean-reversion, single asset — deliberately not pairs trading, which needs cointegration testing that's out of scope for this window)",
+        "Compute and compare Sharpe, Sortino, max drawdown, alpha, beta across both strategies",
+        "Day 56 Gate: at least one independently-built, walk-forward-validated strategy with documented lookahead-bias fix; NeetCode cumulative >= 50"
+      ], resources: ["neetcode"],
+      dailyPlan: [
+        { d: 50, morning: "Vocab + mental math", daytime: "NeetCode mixed review x4", deep1: "QuantConnect — scaffold Strategy 2 (RSI mean-reversion)", deep2: "Get Strategy 2 running on 1 year of data", deep3: "—", night: "Mental math" },
+        { d: 51, morning: "Vocab + mental math", daytime: "NeetCode mixed review x4", deep1: "Extend Strategy 2 to 5+ years, run full backtest", deep2: "Apply the walk-forward split to Strategy 2 too", deep3: "—", night: "Mental math" },
+        { d: 52, morning: "Vocab + mental math", daytime: "Light review", deep1: "Compute Sortino ratio and alpha/beta for both strategies", deep2: "Build a comparison table: Strategy 1 vs. Strategy 2, all metrics", deep3: "—", night: "Mental math + Brainstellar" },
+        { d: 53, morning: "Vocab + mental math", daytime: "Light review", deep1: "Audit Strategy 2 for lookahead/survivorship bias", deep2: "Fix anything found, re-run", deep3: "—", night: "Mental math" },
+        { d: 54, morning: "Vocab + mental math", daytime: "Light review", deep1: "Full cold-explain: which strategy is 'better' and why, using the actual numbers", deep2: "Update the GitHub repo with Strategy 2 + the comparison", deep3: "—", night: "Mental math" },
+        { d: 55, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest, sleep properly before the gate" },
+        { d: 56, morning: "—", daytime: "GATE 2 — full review against criteria above", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", deep3: "—", night: "—" }
+      ]}
+    ]},
+    { phase: "Days 57-77 — Strategy Iteration, Validation & Interview Readiness", range: [57, 77], weeks: [
+      { title: "Week 9: Parameter sensitivity + Pramp resumes + Alpaca deploy", days: "57-63", tasks: [
+        "NeetCode 150 — Advanced Graphs, Tries, ~6 problems",
+        "Parameter-sensitivity testing on both strategies — the classic 'only works for one magic number' overfitting tell",
+        "Pramp DSA + system-design mocks resume (unchanged rotation from the original plan)",
+        "Alpaca paper-trading account setup, deploy Strategy 1 to paper trading; Jane Street's monthly puzzle + Brainstellar Hard tier begin"
+      ], resources: ["neetcode", "pramp", "alpaca", "janestreet-puzzles", "brainstellar"],
+      dailyPlan: [
+        { d: 57, morning: "Vocab + mental math", daytime: "NeetCode Advanced Graphs x3", deep1: "Parameter-sensitivity test — vary Strategy 1's moving-average windows, does it still work", deep2: "Document what you find: fragile or robust?", deep3: "—", night: "Mental math" },
+        { d: 58, morning: "Vocab + mental math", daytime: "NeetCode Tries x3", deep1: "Same sensitivity test on Strategy 2's RSI thresholds", deep2: "Document findings", deep3: "—", night: "Mental math" },
+        { d: 59, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "PRAMP — DSA mock interview", deep2: "Debrief — what communication gaps showed up", deep3: "—", night: "Mental math + Brainstellar Hard" },
+        { d: 60, morning: "Vocab + mental math", daytime: "Light review", deep1: "PRAMP — system design mock", deep2: "Debrief", deep3: "Create Alpaca paper-trading account", night: "Mental math" },
+        { d: 61, morning: "Vocab + mental math", daytime: "Light review", deep1: "Deploy Strategy 1 to Alpaca paper trading", deep2: "Confirm it's actually placing simulated trades correctly", deep3: "Jane Street's current puzzle — attempt it", night: "Mental math" },
+        { d: 62, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 63, morning: "—", daytime: "REVIEW", deep1: "Preview Week 10", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
+      ]},
+      { title: "Week 10: Cross-asset testing + first quant mock + behavioral mock", days: "64-70", tasks: [
+        "DSA shifts to maintenance-mode timed review",
+        "Re-run the best strategy across 2-3 different assets/periods — document where it breaks",
+        "First self-run timed quant mock: explain full methodology + all pitfalls out loud, recorded",
+        "Pramp behavioral mock"
       ], resources: ["pramp"],
       dailyPlan: [
-        { d: 68, morning: "Mental math", daytime: "Finalize STAR stories, say them out loud", deep1: "PRAMP: behavioral mock", deep2: "Debrief", night: "Mental math" },
-        { d: 69, morning: "Mental math", daytime: "Project 1 — clean up the README fully", deep1: "Project 1 — record the demo", deep2: "Resume audit part 1: Tier 1 skill claims", night: "Mental math" },
-        { d: 70, morning: "Mental math", daytime: "Resume audit part 2: projects, experience", deep1: "DSA — re-attempt logged wrong answers, batch 1", deep2: "Batch 2", night: "Mental math" },
-        { d: 71, morning: "Mental math", daytime: "DSA — re-attempt wrong answers, batch 3", deep1: "Finalize the resume", deep2: "Update the dashboard's Resume/Portfolio tracker with real links", night: "Mental math" },
-        { d: 72, morning: "Mental math", daytime: "Light review of everything so far", deep1: "Self-run behavioral mock #2", deep2: "Application follow-ups", night: "Mental math + Brainstellar" },
-        { d: 73, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 74, morning: "—", daytime: "REVIEW", deep1: "Preview Week 11", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
+        { d: 64, morning: "Vocab + mental math", daytime: "Maintenance DSA review x3", deep1: "Re-run the best strategy on a second asset", deep2: "Document results", deep3: "—", night: "Mental math" },
+        { d: 65, morning: "Vocab + mental math", daytime: "Maintenance DSA review x3", deep1: "Re-run on a third asset/period", deep2: "Document where/why it breaks, if it does", deep3: "—", night: "Mental math" },
+        { d: 66, morning: "Vocab + mental math", daytime: "Maintenance review", deep1: "PRAMP — behavioral mock", deep2: "Debrief", deep3: "—", night: "Mental math + Brainstellar" },
+        { d: 67, morning: "Vocab + mental math", daytime: "Maintenance review", deep1: "Self-run timed quant mock — explain full methodology + all pitfalls out loud, 30min, recorded", deep2: "Review the recording honestly", deep3: "—", night: "Mental math" },
+        { d: 68, morning: "Vocab + mental math", daytime: "Light review", deep1: "Fix whatever the mock exposed as weak", deep2: "Update the GitHub repo with cross-asset findings", deep3: "—", night: "Mental math" },
+        { d: 69, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 70, morning: "—", daytime: "REVIEW", deep1: "Preview Week 11 (Gate 3)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
       ]},
-      { title: "Week 11: Real interview loops + continued applications", days: "75-81", tasks: [
-        "Maintenance-mode timed DSA review",
-        "Second full Pramp mock cycle: DSA, system design, behavioral",
-        "Keep applying to open postings; follow up on anything quiet 2+ weeks",
-        "Cold outreach / referral asks now that there's a real project to show"
-      ], resources: ["pramp"],
-      dailyPlan: [
-        { d: 75, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "Handle any live interview prep the actual pipeline needs", deep2: "Apply to 2-3 more targets", night: "Mental math" },
-        { d: 76, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "PRAMP: DSA mock, cycle 2", deep2: "Debrief", night: "Mental math" },
-        { d: 77, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "PRAMP: system design mock, cycle 2", deep2: "Debrief", night: "Mental math" },
-        { d: 78, morning: "Mental math", daytime: "Maintenance DSA review x3", deep1: "PRAMP: behavioral mock, cycle 2", deep2: "Debrief", night: "Mental math" },
-        { d: 79, morning: "Mental math", daytime: "Follow up on anything quiet 2+ weeks", deep1: "Cold outreach — 3 messages using Project 1 as the hook", deep2: "Referral asks", night: "Mental math + Brainstellar" },
-        { d: 80, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 81, morning: "—", daytime: "REVIEW", deep1: "Preview Week 12 (this is the full re-diagnostic week)", deep2: "Weekly review in the dashboard", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 12: Full cold re-diagnostic + retrospective", days: "82-90", tasks: [
-        "Complete cold re-run of the entire original 10-domain diagnostic, same rigor, no notes",
-        "Compare Day 1 vs Day 90 skill matrix",
-        "Retrospective: which habits still show up, is Primary/Secondary/Quant split still right",
-        "Day 90 Go/No-Go gate — feeds into 6-month and 1-year direction"
+      { title: "Week 11: Portfolio combination + resume audit + Gate 3", days: "71-77", tasks: [
+        "Combine both strategies into a simple equal-weight portfolio view + a basic position-sizing/stop-loss concept",
+        "Finalize the GitHub repo README — methodology-first, honest about limitations",
+        "Full resume audit — every quant claim AND every hedge (DSA/Python) claim must hold under questioning",
+        "Day 77 Gate: 2 strategies compared on Sharpe/Sortino/drawdown/alpha/beta, defensible under adversarial questioning, deployed to Alpaca, real repo, applications active on both tracks"
       ], resources: [],
       dailyPlan: [
-        { d: 82, morning: "—", daytime: "Cold re-test: Python domain (Batch 1 style, fresh problems)", deep1: "Cold re-test: DSA domain", deep2: "Cold re-test: Probability & Statistics", night: "No new material" },
-        { d: 83, morning: "—", daytime: "Cold re-test: Linear Algebra & Calculus", deep1: "Cold re-test: Optimization & ML", deep2: "Cold re-test: Deep Learning / AI Engineering", night: "No new material" },
-        { d: 84, morning: "—", daytime: "Cold re-test: SQL & Systems/Linux", deep1: "Cold re-test: Finance & Markets", deep2: "Cold re-test: Stochastic Processes + Mental Math", night: "No new material" },
-        { d: 85, morning: "—", daytime: "Compile the Day 1 vs Day 90 skill matrix comparison", deep1: "Retrospective: which of the 3 cross-cutting habits still show up", deep2: "Retrospective: is Primary/Secondary/Quant still the right split", night: "No new material" },
-        { d: 86, morning: "—", daytime: "Update every dashboard tracker with final real numbers", deep1: "DAY 90 GO/NO-GO GATE DECISION", deep2: "Draft 6-month direction notes", night: "No new material" },
-        { d: 87, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", night: "Rest" },
-        { d: 88, morning: "—", daytime: "Final weekly + monthly review", deep1: "Plan the next phase", deep2: "—", night: "—" },
-        { d: 89, morning: "—", daytime: "Buffer", deep1: "Buffer", deep2: "Buffer", night: "—" },
-        { d: 90, morning: "—", daytime: "Buffer / celebrate what's actually verifiably true, not what feels true", deep1: "—", deep2: "—", night: "—" }
+        { d: 71, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Combine Strategy 1+2 into a simple equal-weight portfolio view", deep2: "Compute combined Sharpe/drawdown", deep3: "—", night: "Mental math" },
+        { d: 72, morning: "Vocab + mental math", daytime: "Light review", deep1: "Add a basic position-sizing/stop-loss concept to the portfolio", deep2: "Re-run the portfolio with the addition", deep3: "—", night: "Mental math" },
+        { d: 73, morning: "Vocab + mental math", daytime: "Light review", deep1: "Finalize the GitHub repo README — methodology-first, honest about limitations", deep2: "Resume audit part 1: every quant claim must hold under questioning", deep3: "—", night: "Mental math + Brainstellar" },
+        { d: 74, morning: "Vocab + mental math", daytime: "Light review", deep1: "Resume audit part 2: AI-Eng/SWE hedge claims (DSA, Python) — must also hold", deep2: "Update the dashboard's Resume/Portfolio tracker with real links", deep3: "—", night: "Mental math" },
+        { d: 75, morning: "Vocab + mental math", daytime: "Light review", deep1: "Full cold walk-through of the whole portfolio project, recorded", deep2: "Review the recording, fix weak spots", deep3: "—", night: "Mental math" },
+        { d: 76, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest, sleep properly before the gate" },
+        { d: 77, morning: "—", daytime: "GATE 3 — full review against criteria above", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", deep3: "—", night: "—" }
+      ]}
+    ]},
+    { phase: "Days 78-94 — Portfolio, Outreach & Final Gate", range: [78, 94], weeks: [
+      { title: "Week 12: Outreach + broad applications", days: "78-84", tasks: [
+        "Warm-intro outreach using the finished project as the hook — NOT the only bet, per the plan's own 'unconfirmed opportunity' framing",
+        "Broad applications to other small/boutique quant shops in parallel",
+        "Continued AI-Eng/SWE hedge applications",
+        "Second full Pramp mock cycle: DSA, system design, behavioral"
+      ], resources: ["pramp"],
+      dailyPlan: [
+        { d: 78, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Draft the outreach message for the warm intro, the project as the hook", deep2: "Research 5 other small/boutique quant shop targets", deep3: "—", night: "Mental math" },
+        { d: 79, morning: "Vocab + mental math", daytime: "Light review", deep1: "Send the warm-intro outreach", deep2: "Apply to 2-3 other quant shop targets", deep3: "—", night: "Mental math" },
+        { d: 80, morning: "Vocab + mental math", daytime: "Light review", deep1: "PRAMP — DSA mock, cycle 2", deep2: "Debrief", deep3: "—", night: "Mental math + Brainstellar" },
+        { d: 81, morning: "Vocab + mental math", daytime: "Light review", deep1: "PRAMP — behavioral mock, cycle 2", deep2: "Continue AI-Eng/SWE hedge applications", deep3: "—", night: "Mental math" },
+        { d: 82, morning: "Vocab + mental math", daytime: "Light review", deep1: "Follow up on anything quiet 2+ weeks", deep2: "More quant-shop + AI-Eng/SWE applications", deep3: "—", night: "Mental math" },
+        { d: 83, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 84, morning: "—", daytime: "REVIEW — preview the full re-diagnostic week", deep1: "Weekly review in the dashboard", deep2: "—", deep3: "—", night: "Plan tomorrow" }
+      ]},
+      { title: "Week 13: Full cold re-diagnostic + targeted remediation", days: "85-91", tasks: [
+        "Complete cold re-run across all 10 original domains PLUS the 2 new quant skills, same rigor as the original diagnostic, no notes",
+        "Compare Day 1 (2026-08-15, original) vs. today's skill matrix honestly",
+        "Targeted remediation of whatever the re-diagnostic shows is weakest — not more of everything, specifically the weak points",
+        "Update every dashboard tracker with real final numbers"
+      ], resources: [],
+      dailyPlan: [
+        { d: 85, morning: "—", daytime: "Cold re-test: Python + DSA domains", deep1: "Cold re-test: Probability & Statistics", deep2: "Cold re-test: Linear Algebra & Calculus", deep3: "—", night: "No new material" },
+        { d: 86, morning: "—", daytime: "Cold re-test: Optimization & ML + Deep Learning/AI Engineering", deep1: "Cold re-test: SQL & Systems/Linux", deep2: "Cold re-test: Finance & Markets", deep3: "—", night: "No new material" },
+        { d: 87, morning: "—", daytime: "Cold re-test: Stochastic Processes + Mental Math", deep1: "Cold re-test: Algorithmic Trading/Backtesting — explain a strategy cold", deep2: "Cold re-test: Market Microstructure vocabulary — all terms, unprompted", deep3: "—", night: "No new material" },
+        { d: 88, morning: "—", daytime: "Compile the full skill matrix comparison, honestly", deep1: "Identify the single weakest area", deep2: "Targeted remediation session on that weakest area", deep3: "—", night: "No new material" },
+        { d: 89, morning: "—", daytime: "Second-weakest-area remediation", deep1: "Update every dashboard tracker with real final numbers", deep2: "Retrospective: is quant-primary still the right call, what's next regardless of outcome", deep3: "—", night: "No new material" },
+        { d: 90, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
+        { d: 91, morning: "—", daytime: "REVIEW — final weekly + monthly review", deep1: "Preview the final days", deep2: "—", deep3: "—", night: "Plan tomorrow" }
+      ]},
+      { title: "Week 14: Final polish + Dec 1 gate", days: "92-94", tasks: [
+        "Final resume/portfolio audit — every claim on both tracks must hold under questioning",
+        "Final self-run mock: explain lookahead bias/survivorship bias/overfitting cold, walk through the portfolio project end to end, recorded",
+        "Day 94 / Dec 1 FINAL GATE — full honest review, not a pass/fail performance"
+      ], resources: [],
+      dailyPlan: [
+        { d: 92, morning: "—", daytime: "Final resume/portfolio audit — every claim holds under questioning", deep1: "Re-read your own strategy write-up cold, check every number", deep2: "Update the dashboard one last time", deep3: "—", night: "Rest" },
+        { d: 93, morning: "—", daytime: "Buffer", deep1: "Final self-run mock — explain lookahead/survivorship/overfitting cold + walk through the portfolio project end to end, recorded", deep2: "Review the recording", deep3: "—", night: "Rest, sleep properly before the gate" },
+        { d: 94, morning: "—", daytime: "FINAL GATE (DEC 1) — full review against criteria above", deep1: "Weekly + monthly + full-plan review in the dashboard", deep2: "Honest retrospective: what's actually, verifiably true now vs. Day 1", deep3: "—", night: "—" }
       ]}
     ]}
   ],
@@ -273,36 +307,43 @@ const DEFAULT_STATE = {
      ----------------------------------------------------------------- */
   courses: [
     { id: "python-tutor", name: "Python Tutor — Visualize Code Execution", url: "https://pythontutor.com/visualize.html", category: "Python", cost: "Free", status: "not-started", notes: "Mandatory tool: trace every problem here before trusting your code." },
-    { id: "neetcode", name: "NeetCode 150", url: "https://neetcode.io/practice", category: "DSA", cost: "Free", status: "not-started", notes: "Full 150-problem list + video explanations are free." },
-    { id: "stat110", name: "Harvard Stat 110 (Blitzstein)", url: "https://www.edx.org/learn/probability/harvard-university-introduction-to-probability", category: "Probability & Statistics", cost: "Free to audit", status: "not-started", notes: "Also free on YouTube; textbook free at probabilitybook.net." },
+    { id: "neetcode", name: "NeetCode 150", url: "https://neetcode.io/practice", category: "DSA", cost: "Free", status: "not-started", notes: "Full 150-problem list + video explanations are free. Hedge-only now — target ~80-85 cumulative, not 110-120." },
+    { id: "stat110", name: "Harvard Stat 110 (Blitzstein)", url: "https://www.edx.org/learn/probability/harvard-university-introduction-to-probability", category: "Probability & Statistics", cost: "Free to audit", status: "not-started", notes: "Also free on YouTube; textbook free at probabilitybook.net. Now load-bearing for the primary track, not just the hedge." },
     { id: "sqlzoo", name: "SQLZoo — JOIN tutorial", url: "https://sqlzoo.net/wiki/The_JOIN_operation", category: "SQL", cost: "Free", status: "not-started", notes: "" },
-    { id: "bandit", name: "OverTheWire: Bandit", url: "https://overthewire.org/wargames/bandit/", category: "Linux", cost: "Free", status: "not-started", notes: "Gamified, hands-on via SSH. Levels 0-15 target for Week 2." },
-    { id: "tlcl", name: "The Linux Command Line (Shotts)", url: "https://linuxcommand.org/tlcl.php", category: "Linux", cost: "Free (CC-licensed)", status: "not-started", notes: "Read 'Learning the Shell' section alongside Bandit." },
-    { id: "fastai", name: "fast.ai: Practical Deep Learning for Coders", url: "https://course.fast.ai/", category: "AI / Deep Learning", cost: "Free", status: "not-started", notes: "~30 hrs video, teaches needed calculus/linalg inline." },
-    { id: "dlai-langchain", name: "DeepLearning.AI: LangChain for LLM Application Development", url: "https://www.deeplearning.ai/courses/langchain", category: "AI Engineering", cost: "Free", status: "not-started", notes: "" },
-    { id: "dlai-langgraph", name: "DeepLearning.AI: AI Agents in LangGraph", url: "https://www.deeplearning.ai/courses/ai-agents-in-langgraph", category: "AI Engineering", cost: "Free", status: "not-started", notes: "" },
-    { id: "dlai-accuracy", name: "DeepLearning.AI: Improving Accuracy of LLM Applications", url: "https://www.deeplearning.ai/short-courses/improving-accuracy-of-llm-applications/", category: "AI Engineering", cost: "Free (platform beta — verify)", status: "not-started", notes: "Free during DeepLearning.AI's platform beta at time of research — re-verify before relying on it." },
-    { id: "dlai-eval-agents", name: "DeepLearning.AI: Evaluating AI Agents", url: "https://www.deeplearning.ai/courses/evaluating-ai-agents", category: "AI Engineering", cost: "Free (platform beta — verify)", status: "not-started", notes: "Same beta caveat as above." },
-    { id: "sysdesign-primer", name: "System Design Primer (GitHub)", url: "https://github.com/donnemartin/system-design-primer", category: "Systems", cost: "Free (CC-licensed)", status: "not-started", notes: "270k+ stars, includes Anki flashcards." },
-    { id: "mit-ocw-prob", name: "MIT OCW — Probability & Random Processes", url: "https://ocw.mit.edu/", category: "Quant", cost: "Free", status: "not-started", notes: "Markov chain basics only — not a full stochastic calculus treatment." },
+    { id: "bandit", name: "OverTheWire: Bandit", url: "https://overthewire.org/wargames/bandit/", category: "Linux", cost: "Free", status: "not-started", notes: "Gamified, hands-on via SSH." },
+    { id: "tlcl", name: "The Linux Command Line (Shotts)", url: "https://linuxcommand.org/tlcl.php", category: "Linux", cost: "Free (CC-licensed)", status: "not-started", notes: "" },
+    { id: "mit-ocw-prob", name: "MIT OCW — Probability & Random Processes", url: "https://ocw.mit.edu/", category: "Quant", cost: "Free", status: "not-started", notes: "Markov chain basics only — not a full stochastic calculus treatment (deliberately out of scope, see the stochastic skill note)." },
     { id: "brainstellar", name: "Brainstellar — Quant Interview Puzzles", url: "https://brainstellar.com/", category: "Quant", cost: "Free", status: "not-started", notes: "Organized Easy -> Deadly, by category." },
     { id: "janestreet-puzzles", name: "Jane Street Puzzles", url: "https://www.janestreet.com/puzzles/", category: "Quant", cost: "Free", status: "not-started", notes: "Official, straight from a target firm. New puzzle roughly monthly." },
-    { id: "pramp", name: "Pramp (Exponent)", url: "https://www.pramp.com/", category: "Interview Prep", cost: "Free (5 credits/month)", status: "not-started", notes: "Peer mock interviews — DSA, system design, behavioral. ~1-in-5 sessions no-show; real limitation, not a reason to skip it." }
+    { id: "pramp", name: "Pramp (Exponent)", url: "https://www.pramp.com/", category: "Interview Prep", cost: "Free (5 credits/month)", status: "not-started", notes: "Peer mock interviews — DSA, system design, behavioral. ~1-in-5 sessions no-show; real limitation, not a reason to skip it." },
+    { id: "quantconnect", name: "QuantConnect (Algorithm Lab + free historical data)", url: "https://www.quantconnect.com/", category: "Quant / Algo Trading", cost: "Free, no card required", status: "not-started", notes: "Primary hands-on backtesting platform — Python/C#, 400TB+ historical data, unlimited free backtesting. Boot Camp tutorial first (Week 1), real strategy building from Week 5." },
+    { id: "zipline", name: "zipline-reloaded", url: "https://github.com/stefan-jansen/zipline-reloaded", category: "Quant / Algo Trading", cost: "Free / open-source", status: "not-started", notes: "Local/offline backtesting alternative — a backup if QuantConnect has an outage, not the primary platform." },
+    { id: "alpaca", name: "Alpaca (paper trading API)", url: "https://alpaca.markets/learn/start-paper-trading", category: "Quant / Algo Trading", cost: "Free paper trading account", status: "not-started", notes: "Deploy a validated strategy to live-simulated execution — used from Week 9, after a strategy is real, not before." },
+    { id: "gt-cs7646", name: "Georgia Tech CS7646 — Machine Learning for Trading", url: "https://lucylabs.gatech.edu/ml4t/", category: "Quant / Algo Trading", cost: "Free (full lecture set on YouTube + free materials)", status: "not-started", notes: "Core theory spine: market mechanics, CAPM/portfolio theory, technical indicators, backtesting." },
+    { id: "quantstart-articles", name: "QuantStart — free articles", url: "https://www.quantstart.com/articles/", category: "Quant / Algo Trading", cost: "Free (articles only)", status: "not-started", notes: "Best free explanation of lookahead bias/survivorship bias/overfitting. Do NOT buy their ebooks ($39-79) — everything required is in the free articles." }
   ],
 
   /* -----------------------------------------------------------------
      PROJECTS
      ----------------------------------------------------------------- */
   projects: [
-    { id: "proj-rag", name: "RAG Q&A System", status: "planned", progress: 0,
-      description: "Retrieval-augmented Q&A system over a real document set. Evolves across all 90 days: Month 1 core RAG, Month 2 real evaluation + agent tool-use + FastAPI backend, Month 3 polish + system-design write-up. Deliberately one deep project instead of several shallow ones.",
+    { id: "proj-quant", name: "Quant Trading Strategy Portfolio", status: "planned", progress: 0,
+      description: "The primary portfolio piece for the pivot: 2 independently-built, backtested trading strategies (SMA crossover, RSI mean-reversion) on QuantConnect, validated with walk-forward testing and honest lookahead/survivorship-bias auditing, compared on Sharpe/Sortino/drawdown/alpha/beta, at least one deployed to Alpaca paper trading, documented in a methodology-first GitHub repo. This is the actual evidence behind the 'credible working knowledge' claim — not a resume line, a real artifact.",
       milestones: [
-        { title: "Document ingestion + chunking + embeddings + vector store working", done: false, dueWeek: 3 },
-        { title: "Generation wired in, basic manual eval, deployed (Streamlit/HF Spaces)", done: false, dueWeek: 4 },
-        { title: "Golden 20-30 question eval set built, retrieval + correctness measured", done: false, dueWeek: 5 },
-        { title: "FastAPI backend: real endpoints, validation, auth, DB-backed history", done: false, dueWeek: 6 },
-        { title: "Agent/tool-use added (search, calculator, structured lookups)", done: false, dueWeek: 6 },
-        { title: "Final polish: README, demo recording, system-design write-up", done: false, dueWeek: 10 }
+        { title: "QuantConnect account active, Boot Camp complete, first template backtest run", done: false, dueWeek: 1 },
+        { title: "Markov-chain mini-project done on real transition-probability data", done: false, dueWeek: 3 },
+        { title: "Strategy 1 (SMA crossover) built, backtested 5+ years, lookahead-bias audited and fixed", done: false, dueWeek: 5 },
+        { title: "Strategy 1 walk-forward validated, results reported honestly", done: false, dueWeek: 7 },
+        { title: "Strategy 2 (RSI mean-reversion) built and compared against Strategy 1 on Sharpe/Sortino/drawdown/alpha/beta", done: false, dueWeek: 8 },
+        { title: "Strategy deployed to Alpaca paper trading and confirmed working", done: false, dueWeek: 9 },
+        { title: "GitHub repo finalized — methodology-first README, honest about limitations", done: false, dueWeek: 11 }
+      ],
+      links: { repo: "", demo: "" } },
+    { id: "proj-rag", name: "RAG Q&A System (AI-Eng hedge stub)", status: "planned", progress: 0,
+      description: "Deliberately minimized after the quant pivot — a 3-4 day stub, not a multi-week build. Enough to defensibly discuss RAG basics (retrieval, chunking, embeddings) in an AI-Eng interview. No FastAPI backend, no agent tool-use, no deployment — those were cut entirely, not deferred.",
+      milestones: [
+        { title: "Basic document ingestion + chunking + embeddings + retrieval working locally", done: false, dueWeek: 6 },
+        { title: "Can explain the architecture and trade-offs out loud, unaided", done: false, dueWeek: 6 }
       ],
       links: { repo: "", demo: "" } }
   ],
@@ -313,7 +354,7 @@ const DEFAULT_STATE = {
   applications: [],
   interviews: [],
   competitions: [
-    { id: "comp-kaggle-1", name: "First Kaggle competition (beginner-friendly, well-documented)", platform: "Kaggle", status: "not-started", url: "https://www.kaggle.com/competitions", notes: "Goal: finish and document end-to-end, not to win. 1-2 well-documented entries beat a long history." }
+    { id: "comp-kaggle-1", name: "First Kaggle competition (beginner-friendly, well-documented)", platform: "Kaggle", status: "not-started", url: "https://www.kaggle.com/competitions", notes: "Lower priority after the pivot — only pursue if time genuinely allows after the quant portfolio work. Goal if pursued: finish and document end-to-end, not win." }
   ],
 
   /* -----------------------------------------------------------------
@@ -325,20 +366,26 @@ const DEFAULT_STATE = {
   dailyPlanDone: {},
 
   /* -----------------------------------------------------------------
-     TIMETABLE — the max-availability daily template
+     TIMETABLE — revised for a 5-hour sleep floor (talked down from an
+     initial 4-hour proposal). Gym/breakfast stay non-negotiable; the
+     Deloitte work window is unchanged (internship-imposed, not a choice).
+     The actual trade is bedtime moving 1 hour later, not the evening
+     getting compressed.
      ----------------------------------------------------------------- */
   timetable: [
     { time: "05:30–07:30", block: "Gym", type: "fixed", note: "Non-negotiable, set by you — not up for redesign." },
     { time: "07:30–08:30", block: "Breakfast & bath", type: "fixed", note: "Non-negotiable." },
-    { time: "08:30–09:30", block: "Buffer / commute — light warm-up", type: "light", note: "Mental math + quick review only. Nothing new or hard here, it's transition time." },
-    { time: "09:30–18:00", block: "WORK WINDOW — flexible study between pings", type: "flexible", note: "You're logged into Teams this whole span but only doing ~2 real work hours, scattered unpredictably. Do NOT plan deep, hard-to-resume work here — it will get shredded by interruptions. Use the floating focus timer in short 25-min sessions for resumable tasks: DSA problems, course lectures/reading, applications, light review. Roughly 6+ hours of real study time hides inside this window if you actually use the gaps instead of doom-scrolling between pings." },
+    { time: "08:30–09:30", block: "Buffer / commute — light warm-up", type: "light", note: "Quant-vocabulary flashcards + quick mental math. Nothing new or hard here, it's transition time." },
+    { time: "09:30–18:00", block: "WORK WINDOW — flexible study between pings", type: "flexible", note: "Deloitte internship — you're logged in this whole span but only doing ~2 real work hours, scattered unpredictably. Do NOT plan deep, hard-to-resume work here. Use the floating focus timer in short 25-min sessions for resumable tasks: DSA problems, GT CS7646/QuantStart reading, applications." },
     { time: "18:00–18:45", block: "Decompress / dinner prep", type: "light" },
     { time: "18:45–19:30", block: "Dinner", type: "fixed" },
-    { time: "19:30–21:30", block: "DEEP WORK BLOCK 1 — hardest task of the day", type: "deep", note: "Uninterrupted, your best focus window. This is where Math/Probability, hard DSA, or real project-building goes — not the work window." },
+    { time: "19:30–21:30", block: "DEEP WORK 1 — hardest task of the day", type: "deep", note: "Uninterrupted, your best focus window. Quant theory (probability, stochastic processes, backtesting concepts) most days; DSA only ~2x/week." },
     { time: "21:30–21:45", block: "Break", type: "light" },
-    { time: "21:45–23:15", block: "DEEP WORK BLOCK 2 — project / AI engineering", type: "deep" },
-    { time: "23:15–23:30", block: "Quick review + mental math + plan tomorrow", type: "light" },
-    { time: "23:30", block: "Sleep (~6h) — flag if this bedtime is wrong, wake time is the only anchor you gave me", type: "fixed" }
+    { time: "21:45–23:15", block: "DEEP WORK 2 — applied coding", type: "deep", note: "The quant strategy project (was the RAG project pre-pivot)." },
+    { time: "23:15–23:30", block: "Break", type: "light" },
+    { time: "23:30–00:15", block: "DEEP WORK 3 — Quant Lab", type: "deep", note: "New block, 45min, ring-fenced specifically for QuantConnect/backtesting hands-on execution so it never gets silently displaced by DSA or hedge content. Deliberately lower-cognitive-load than Deep Work 1 — iteration, not new theory, since it's 11:30pm." },
+    { time: "00:15–00:30", block: "Quick review + mental math + plan tomorrow", type: "light" },
+    { time: "00:30", block: "Sleep (~5h to 05:30 wake)", type: "fixed", note: "Hard floor, zero slack. Talked down from an initial 4-hour proposal — chronic slippage past 00:30 should trigger a schedule renegotiation at the next gate, not a silent further cut." }
   ],
 
   /* -----------------------------------------------------------------
@@ -347,15 +394,18 @@ const DEFAULT_STATE = {
   reviews: { weekly: [], monthly: [] },
 
   /* -----------------------------------------------------------------
-     MILESTONES — the real gates from the plan
+     MILESTONES — the real gates, quant-primary, "credible working
+     knowledge" bar throughout, not mastery
      ----------------------------------------------------------------- */
   milestones: [
-    { id: "m30", title: "Day 30 Go/No-Go Gate", dueDay: 30, status: "pending",
-      criteria: "Cold re-test shows real movement on Python (traces/debugs unaided) and Probability (finishes a Bayes/EV problem unprompted). NeetCode progress >= 40 problems. RAG project deployed and functional." },
-    { id: "m60", title: "Day 60 Go/No-Go Gate", dueDay: 60, status: "pending",
-      criteria: "~110-120 DSA problems logged with genuine independent-attempt-first discipline. Project 1 is a deployed, evaluated, backend-real system. At least one real mock technical interview completed and reviewed for communication. Stochastic processes moved off near-zero." },
-    { id: "m90", title: "Day 90 Go/No-Go Gate", dueDay: 90, status: "pending",
-      criteria: "Re-tested skill matrix shows real, verifiable movement across Tier 1 domains. Project 1 is genuinely resume-ready. At least 2 full mock interview cycles completed. Applications active in a real pipeline." }
+    { id: "gate1", title: "Day 28 Gate — Phase 1 Complete", dueDay: 28, status: "pending",
+      criteria: "Cold-define lookahead bias, survivorship bias, and overfitting correctly and unprompted. Explain what a Sharpe ratio and max drawdown measure, conceptually, without notes. Fresh Bayes/EV problem solved unaided. QuantConnect account active, at least one template algorithm run end to end. NeetCode cumulative >= 25 problems." },
+    { id: "gate2", title: "Day 56 Gate — Phase 2 Complete", dueDay: 56, status: "pending",
+      criteria: "At least one genuinely independently-built backtested strategy on QuantConnect with real multi-year results (Sharpe, drawdown, CAGR documented). Can point to a specific lookahead-bias fix made in your own code and explain why it mattered. Walk-forward validation applied at least once, with honest reporting even where test performance dropped. Markov-chain transition-probability mini-project done on real data. NeetCode cumulative >= 50." },
+    { id: "gate3", title: "Day 77 Gate — Phase 3 Complete", dueDay: 77, status: "pending",
+      criteria: "2 distinct backtested strategies built and compared on Sharpe/Sortino/max drawdown/alpha/beta. Can defend either strategy under adversarial questioning — what would break it, why isn't this overfit. Strategy deployed to Alpaca paper trading at least once. Real GitHub repo with an honest, methodology-first README. Applications active for both quant-shop targets generally (not just the warm intro) and AI-Eng/SWE hedge targets. NeetCode cumulative >= 70-75." },
+    { id: "gate4", title: "Day 94 / Dec 1 — FINAL GATE", dueDay: 94, status: "pending",
+      criteria: "Full cold re-diagnostic complete across all 10 original domains plus the 2 new quant skills, compared honestly against the original Day 1 baseline. Can explain, cold and unprompted, all core vocabulary/pitfalls (lookahead bias, survivorship bias, overfitting, walk-forward validation, Sharpe ratio, max drawdown, alpha, beta, mean reversion, random walk, Markov property) to a nontechnical-ish interviewer. At least one backtested strategy is genuinely finished, validated, and resume-ready — not a toy, not claimed-but-fragile. NeetCode cumulative >= 80-85 (hedge intact, not abandoned). This is a 'credible, trainable junior' bar, not mastery — the gate is honesty about what's actually true, not a pass/fail performance." }
   ],
 
   /* -----------------------------------------------------------------
@@ -367,14 +417,16 @@ const DEFAULT_STATE = {
     claims: [
       { skill: "Python", claimedLevel: "Strong understanding", verifiedLevel: 1, defensible: false, note: "Do not claim above level 3 until re-tested and holding up." },
       { skill: "SQL", claimedLevel: "Comfortable", verifiedLevel: 1.6, defensible: false, note: "JOINs are a real gap — fix before claiming this." },
-      { skill: "NumPy/Pandas", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic — verify before relying on the claim." },
-      { skill: "Git/GitHub", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic." }
+      { skill: "NumPy/Pandas", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic — verify before relying on the claim. Now genuinely load-bearing for the quant track." },
+      { skill: "Git/GitHub", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic." },
+      { skill: "Algorithmic Trading", claimedLevel: "N/A yet", verifiedLevel: 0, defensible: false, note: "Do not claim ANY quant-trading skill on a resume until the Strategy 1/2 portfolio is real and verifiable — this is the whole point of the pivot's evidence-based framing." }
     ],
     portfolioLinks: []
   },
 
   achievements: [
-    { id: "a1", date: PLAN_START_DATE, title: "Diagnostic complete", description: "Finished the full 10-domain skill diagnostic — the real baseline this whole plan is built on." }
+    { id: "a1", date: "2026-08-15", title: "Diagnostic complete", description: "Finished the full 10-domain skill diagnostic — the real baseline this whole plan is built on." },
+    { id: "a2", date: PLAN_START_DATE, title: "Quant pivot — evidence-based, not impulsive", description: "Researched the real timeline/hiring-bar evidence before committing, got talked down from a 4-hour-sleep plan to a sustainable 5-hour floor, and set 'credible working knowledge' instead of 'mastery' as the actual target. That's the harder, more useful decision than just saying yes to the deadline." }
   ],
 
   settings: { theme: "light" }

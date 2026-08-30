@@ -16,7 +16,14 @@ let STATE = null;
 // existing save forward without touching the user's own tracked progress
 // (roadmapDone, dailyPlanDone, skills, studyLog, applications, etc.) — a
 // content update from me should never require the user to notice or reset.
-const CONTENT_VERSION = 2;
+//
+// v3 (2026-08-30): the quant-primary pivot. This one ALSO resets
+// meta.startDate to today — a deliberate one-time restart (the plan is
+// substantively different, not just updated), gated so it only fires once
+// per save via the `savedVersion < 3` check below. Do not repeat this
+// startDate-reset pattern for ordinary future content bumps.
+const CONTENT_VERSION = 3;
+const TOTAL_PLAN_DAYS = 94; // Day 94 = Dec 1, 2026 from the v3 restart date
 
 function loadState() {
   try {
@@ -24,6 +31,7 @@ function loadState() {
     if (raw) return migrateContent(JSON.parse(raw));
   } catch (e) { console.warn("Failed to parse saved state, resetting.", e); }
   const fresh = getFreshDefaultState();
+  fresh.meta.startDate = todayISO(); // dynamic — a true first-ever load always starts on the day it actually happens, not the static seed date
   fresh.meta.contentVersion = CONTENT_VERSION;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
   return fresh;
@@ -55,6 +63,23 @@ function migrateContent(saved) {
   fresh.courses.forEach(fc => {
     if (!saved.courses.find(c => c.id === fc.id)) saved.courses.push(fc);
   });
+
+  // Skills are user-tracked (level/target get edited as real progress is
+  // made) but new skill entries need the same additive-only treatment as
+  // courses — this was missing before v3 and is why new skills would
+  // otherwise never appear on an existing save.
+  saved.skills = saved.skills || [];
+  fresh.skills.forEach(fs => {
+    if (!saved.skills.find(s => s.id === fs.id)) saved.skills.push(fs);
+  });
+
+  // v3-only, one-time: the quant pivot is a genuine restart, not a content
+  // patch — Day 1 becomes whenever this migration actually runs. Gated so
+  // it never re-fires for a save already past v3 on some future v4+.
+  if (savedVersion < 3) {
+    saved.meta = saved.meta || {};
+    saved.meta.startDate = todayISO();
+  }
 
   saved.meta = saved.meta || {};
   saved.meta.contentVersion = CONTENT_VERSION;
@@ -169,18 +194,18 @@ function escapeHtml(str) {
    ============================================================ */
 const VIEW_TITLES = {
   dashboard: ["Dashboard", "Your career operating system, at a glance"],
-  mastersheet: ["90-Day Master Sheet", "Everything on one page — weeks, milestones, and the skill matrix"],
-  roadmap: ["90-Day Roadmap", "Days 1-30 · 31-60 · 61-90, week by week"],
+  mastersheet: ["Master Sheet", "Everything on one page — weeks, milestones, and the skill matrix"],
+  roadmap: ["Roadmap", "4 phases to Dec 1 — week by week"],
   timetable: ["Timetable & Calendar", "The daily template + a study-day log"],
   skills: ["Skill Trackers", "AI · Quant · Math · DSA · Finance — evidence-based, 0-6 scale"],
-  progress: ["Progress & Charts", "Skill growth, DSA volume, study hours, 90-day pace"],
+  progress: ["Progress & Charts", "Skill growth, backtested strategies, study hours, pace to Dec 1"],
   projects: ["Projects", "Portfolio pieces in progress"],
   courses: ["Courses & Resources", "The verified free-resource library"],
   applications: ["Applications", "Internship / job pipeline"],
   interviews: ["Interviews", "Rounds, prep notes, outcomes"],
   competitions: ["Competitions", "Kaggle, hackathons, and the rest"],
   studylog: ["Study & Exercise Log", "Daily hours by category + streaks"],
-  milestones: ["Milestones", "Day 30 / 60 / 90 gates and weekly checkpoints"],
+  milestones: ["Milestones", "Day 28 / 56 / 77 / 94 gates and weekly checkpoints"],
   reviews: ["Weekly / Monthly Review", "What got done, what didn't, why"],
   notes: ["Notes", "Freeform, tagged"],
   resume: ["Resume & Portfolio", "Only claim what you can demonstrate at 3+"],
@@ -198,7 +223,7 @@ function goToView(name) {
   if (navBtn) navBtn.classList.add("active");
   const [title, sub] = VIEW_TITLES[name] || [name, ""];
   document.getElementById("viewTitle").textContent = title;
-  document.getElementById("viewSub").innerHTML = sub + ` &nbsp;·&nbsp; Day <b>${currentPlanDay()}</b> of 90`;
+  document.getElementById("viewSub").innerHTML = sub + ` &nbsp;·&nbsp; Day <b>${currentPlanDay()}</b> of ${TOTAL_PLAN_DAYS}`;
   renderView(name);
   renderStakesBanner();
   document.getElementById("sidebar").classList.remove("open");
@@ -297,12 +322,17 @@ function renderStakesBanner() {
   }).length : 0;
   const onTrack = weekTasksTotal > 0 && weekTasksDone === weekTasksTotal;
 
+  // Strategy text style has changed over time (short phrase vs. full
+  // sentence) — take just the first clause of `primary` so this banner
+  // can't break again if the wording style shifts once more.
+  const primaryHeadline = STATE.strategy.primary.split(/[—.]/)[0].trim();
+
   el.className = "stakes-banner" + (onTrack ? " on-track" : "");
   el.innerHTML = `
     <i class="fa-solid ${onTrack ? "fa-fire" : "fa-triangle-exclamation"} sb-icon"></i>
     <div>
-      <b>TARGET: ${escapeHtml(STATE.strategy.primary)}</b> ${escapeHtml("+ a real " + STATE.strategy.aggressiveParallel.split(" (")[0] + " shot")} — before 2027 graduation.
-      <span class="sb-sub">&nbsp;Day ${day}/90 ${daysToGate != null ? `· ${daysToGate <= 0 ? "GATE DUE NOW" : daysToGate + " days to " + nextGate.title} ` : ""}· weakest right now: ${escapeHtml(weakest.name)} (${weakest.level}/6, needs ${weakest.target}/6)${onTrack ? " · this week's tasks: done" : ""}</span>
+      <b>TARGET: ${escapeHtml(primaryHeadline)}</b> — before 2027 graduation.
+      <span class="sb-sub">&nbsp;Day ${day}/${TOTAL_PLAN_DAYS} ${daysToGate != null ? `· ${daysToGate <= 0 ? "GATE DUE NOW" : daysToGate + " days to " + nextGate.title} ` : ""}· weakest right now: ${escapeHtml(weakest.name)} (${weakest.level}/6, needs ${weakest.target}/6)${onTrack ? " · this week's tasks: done" : ""}</span>
     </div>
   `;
 }
@@ -392,7 +422,7 @@ function todayHintFor(type) {
   const p = plan.plan;
   if (type === "quick") return p.daytime && p.daytime !== "—" ? `Today's work-window plan: ${p.daytime}` : "";
   if (type === "deep") {
-    const parts = [p.deep1, p.deep2].filter(x => x && x !== "—");
+    const parts = [p.deep1, p.deep2, p.deep3].filter(x => x && x !== "—");
     return parts.length ? `Today's deep work: ${parts.join(" · ")}` : "";
   }
   return "";
@@ -437,9 +467,13 @@ function setTimerDuration(type) {
 }
 // Suggests a sensible default the moment the widget is opened, based on
 // the real timetable block the current clock time falls in.
+// The deep-work span now runs 19:30 through 00:15, crossing midnight — a
+// naive upper-bound extension (e.g. "h < 24.25") would never fire, because
+// Date().getHours() resets to 0 after midnight rather than continuing past
+// 23.99. Needs an explicit OR for the post-midnight slice instead.
 function suggestTimerDefault() {
   const h = new Date().getHours() + new Date().getMinutes() / 60;
-  if (h >= 19.5 && h < 23.25) return "deep";   // evening deep-work blocks
+  if (h >= 19.5 || h < 0.25) return "deep";     // 19:30-00:15, spans midnight — Deep Work 1/2/3
   if (h >= 9.5 && h < 18) return "quick";       // interruptible work window
   return "quick";
 }
@@ -542,7 +576,8 @@ const PLAN_SLOTS = [
   { key: "daytime", label: "Work window (9:30-18:00)", icon: "fa-shuffle", color: "var(--series-2)" },
   { key: "deep1", label: "Deep work 1 (19:30-21:30)", icon: "fa-bolt", color: "var(--series-1)" },
   { key: "deep2", label: "Deep work 2 (21:45-23:15)", icon: "fa-bolt", color: "var(--series-1)" },
-  { key: "night", label: "Night (23:15-23:30)", icon: "fa-moon", color: "var(--series-7)" }
+  { key: "deep3", label: "Quant Lab (23:30-00:15)", icon: "fa-flask", color: "var(--series-1)" },
+  { key: "night", label: "Night (00:15-00:30)", icon: "fa-moon", color: "var(--series-7)" }
 ];
 function renderTodayPlanCard(day, plan) {
   STATE.dailyPlanDone = STATE.dailyPlanDone || {};
@@ -609,7 +644,7 @@ function renderDayChecklist(dp, currentDay, firstRenderThisSession) {
 }
 function renderDashboard() {
   const day = currentPlanDay();
-  const pct = Math.min(100, Math.round((day / 90) * 100));
+  const pct = Math.min(100, Math.round((day / TOTAL_PLAN_DAYS) * 100));
   const cw = findCurrentWeek();
   const avgSkill = (STATE.skills.reduce((a, s) => a + s.level, 0) / STATE.skills.length).toFixed(1);
   const dsaHours = STATE.studyLog.reduce((a, l) => a + (l.hours.dsa || 0), 0);
@@ -647,7 +682,7 @@ function renderDashboard() {
 
     <div class="grid grid-4 mb-16">
       <div class="card stat-tile">
-        <div class="value">${day} <small style="font-size:14px;color:var(--text-muted)">/ 90</small></div>
+        <div class="value">${day} <small style="font-size:14px;color:var(--text-muted)">/ ${TOTAL_PLAN_DAYS}</small></div>
         <div class="label">Day of plan</div>
         <div class="meter mt-16"><span style="width:${pct}%"></span></div>
       </div>
@@ -772,12 +807,12 @@ function renderMasterSheet() {
 
   el.innerHTML = `
     <div class="flex-between mb-16">
-      <p class="muted">Day ${day} of 90 · Plan start ${fmtDate(STATE.meta.startDate)} · Generated ${fmtDate(todayISO())}</p>
+      <p class="muted">Day ${day} of ${TOTAL_PLAN_DAYS} · Plan start ${fmtDate(STATE.meta.startDate)} · Generated ${fmtDate(todayISO())}</p>
       <button class="btn btn-sm" onclick="window.print()"><i class="fa-solid fa-print"></i> Print this page</button>
     </div>
 
     <div class="grid grid-4 mb-16">
-      <div class="card stat-tile"><div class="value">${day}/90</div><div class="label">Day of plan</div></div>
+      <div class="card stat-tile"><div class="value">${day}/${TOTAL_PLAN_DAYS}</div><div class="label">Day of plan</div></div>
       <div class="card stat-tile"><div class="value">${weeksDone}/${weeksTotal}</div><div class="label">Weeks fully complete</div></div>
       <div class="card stat-tile"><div class="value">${STATE.milestones.filter(m => m.status === "passed").length}/${STATE.milestones.length}</div><div class="label">Gates passed</div></div>
       <div class="card stat-tile"><div class="value">${(STATE.skills.reduce((a, s) => a + s.level, 0) / STATE.skills.length).toFixed(1)}/6</div><div class="label">Average skill level</div></div>
@@ -1139,8 +1174,10 @@ function importData(evt) {
   evt.target.value = "";
 }
 function resetAll() {
-  if (!confirm("This wipes all local data and reloads the original 90-day plan. Export a backup first if you want to keep anything. Continue?")) return;
+  if (!confirm(`This wipes all local data and reloads the ${TOTAL_PLAN_DAYS}-day quant-primary plan from scratch (Day 1 resets to today). Export a backup first if you want to keep anything. Continue?`)) return;
   STATE = getFreshDefaultState();
+  STATE.meta.startDate = todayISO(); // dynamic, not the static seed constant — Day 1 is genuinely today, whenever "today" is
+  STATE.meta.contentVersion = CONTENT_VERSION;
   saveState();
   toast("Reset to default plan");
   goToView("dashboard");
@@ -1174,7 +1211,7 @@ function renderSettings() {
       <div class="card" style="grid-column: span 2;">
         <div class="card-title-row"><h3><i class="fa-solid fa-circle-info"></i>&nbsp; About this plan</h3></div>
         <p style="font-size:13px;">Plan start date: <b>${fmtDate(STATE.meta.startDate)}</b> · Last updated: <b>${fmtDate(STATE.meta.lastUpdated)}</b></p>
-        <p style="font-size:12.5px;">Built from a full Phase 1-5 career strategy engagement: 2026 market research, a 10-domain forced-problem-solving diagnostic (not self-report), evidence-based path selection, a skill-gap analysis, and this 90-day plan. Edit skill levels honestly as you re-test — the whole point of this tool is that it reflects demonstrated ability, not how you feel about your progress.</p>
+        <p style="font-size:12.5px;">Built from a full Phase 1-5 career strategy engagement: 2026 market research, a 10-domain forced-problem-solving diagnostic (not self-report), evidence-based path selection, a skill-gap analysis, and this ${TOTAL_PLAN_DAYS}-day plan (restructured 2026-08-30 for a quant-primary pivot with a hard Dec 1 deadline). Edit skill levels honestly as you re-test — the whole point of this tool is that it reflects demonstrated ability, not how you feel about your progress.</p>
       </div>
     </div>
   `;
