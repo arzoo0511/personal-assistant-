@@ -6,18 +6,38 @@
    never read again except for the version-gated content migration in
    app.js's loadState()/migrateContent().
 
-   PIVOT LOG: on 2026-08-30 (Day 16 of the original 90-day plan) the user
-   pivoted from an AI-Engineer-primary strategy to Quant/Algorithmic-Trading-
-   primary, driven by a warm-but-unconfirmed introduction to a friend-of-
-   sister's quant trading startup and a hard external deadline of Dec 1,
-   2026 (Deloitte internship end date). This required a CONTENT_VERSION bump
-   in app.js (2 -> 3) that also does a one-time reset of the user's plan
-   start date to the day this update is first loaded — a deliberate restart,
-   not the normal pattern for routine content edits. See js/app.js's
-   migrateContent() for exactly what that migration does and does not touch.
+   PIVOT LOG:
+   - 2026-08-30: AI-Engineer-primary -> Quant/Algorithmic-Trading-primary
+     (CONTENT_VERSION 2 -> 3).
+   - 2026-10-01: Quant-primary -> Germany MS (CS/AI, Winter 2027/28) as the
+     single primary lane (CONTENT_VERSION 3 -> 4). The quant plan is parked,
+     not deleted — app.js's v4 migration moves the quant skills, courses,
+     projects and progress into STATE.archive.quant.
+
+   Unlike earlier versions, this plan is CALENDAR-ANCHORED: admission and
+   exam deadlines are fixed dates, so Day 1 is always 2026-10-01 and
+   Day N always maps to the same date (see PLAN_START_DATE).
    ========================================================================= */
 
-const PLAN_START_DATE = "2026-08-30";
+const PLAN_START_DATE = "2026-10-01";
+
+/* Weekly template helper. Index = JS Date.getDay() (0 = Sun ... 6 = Sat).
+   `overrides` lets a specific weekday differ from the standard weekday
+   (e.g. { 2: { deep2: "AWA essay" } } changes Tuesday's deep2 only). */
+function weekTemplate(weekday, sat, sun, overrides) {
+  const arr = [sun, weekday, weekday, weekday, weekday, weekday, sat];
+  Object.entries(overrides || {}).forEach(([k, v]) => { arr[k] = { ...weekday, ...v }; });
+  return arr;
+}
+
+const BUFFER_SUNDAY = {
+  morning: "—",
+  daytime: "CATCH-UP & BUFFER — no new material, finish what slipped",
+  deep1: "Weekly review in Career OS — re-rate skills honestly, tick roadmap tasks",
+  deep2: "Plan next week + check d-mat.de (dMAT date), DAAD/Erasmus/uni pages for changes",
+  deep3: "—",
+  night: "Rest"
+};
 
 const DEFAULT_STATE = {
   meta: {
@@ -31,330 +51,355 @@ const DEFAULT_STATE = {
      STRATEGY — read-only reference, shown on Dashboard / Roadmap
      ----------------------------------------------------------------- */
   strategy: {
-    primary: "Quant / Algorithmic Trading — research & strategy track (probability, time-series/stochastic modeling, backtesting methodology, Python/pandas). NOT the C++/HFT-infrastructure track — that stays explicitly excluded.",
-    secondary: "AI Engineer/ML Engineer & Software Engineer — a real hedge, not dropped. DSA and Python fundamentals are kept in full because they're shared infrastructure with the quant track anyway. The RAG project is cut to a minimal stub (no backend, no agent tool-use, no deployment) — enough to defensibly discuss RAG basics in an AI-Eng interview, not pursued as a differentiator.",
-    aggressiveParallel: "None as a separate track. Deploying a validated strategy to Alpaca paper trading is a stretch bonus layered onto the Primary track once a strategy is real (Week 9+), not a third curriculum competing for the same hours.",
-    option: "Fintech / trading-adjacent tech roles (market-data platforms, trading-software vendors) — a natural bridge if neither a pure quant shop nor a pure AI-Eng/SWE role lands. Draws on both tracks as-is, no separate curriculum.",
-    deprioritized: "Quant Developer / HFT infrastructure (C++, low-latency systems) — stays excluded per research: small/boutique quant shops hire on Python + probability/stats + mental math + hustle, not C++/HFT infra or pedigree. Also deprioritized: AI-Engineer differentiator depth (deep RAG/agent systems, the old DeepLearning.AI course sequence, dedicated System Design Primer study) — kept only as a minimal hedge stub; Pramp's system-design mocks alone cover the SWE hedge's needs.",
-    notes: "Pivoted from AI-Engineer-primary to Quant-Trading-primary on Day 16 of the original plan (2026-08-30), driven by a warm-but-UNCONFIRMED introduction to a friend-of-sister's quant trading startup, and a hard Dec 1, 2026 deadline (Deloitte internship end date) — 94 days from the restart date, not compressed from the original plan, re-weighted using an extra evening hour (5h sleep floor vs 6h) instead. Target bar is explicitly 'credible, trainable-junior working knowledge' — built and validated at least one backtested strategy, knows lookahead bias/survivorship bias/overfitting cold — NOT mastery, which research confirmed isn't reachable from this baseline in this window; don't let this quietly reinflate later. Because the opportunity is unconfirmed, the curriculum builds general, transferable quant-trading credibility usable for other small/boutique shops too, not a bet on one contact. Bennett University still doesn't feed the IIT-first quant-prop pipeline — off-campus/portfolio route required, unchanged from before. Sleep floor is 5 hours (talked down from an initial 4-hour proposal — 4h was assessed as actively counterproductive given already-disclosed ADHD; this is a hard floor with zero slack, not a target to erode further)."
+    primary: "Germany MS in CS/AI, Winter 2027/28 — public universities. Reach: TUM Informatics, Saarland CS/DSAI. Target: KIT CS, TU Darmstadt CS, RWTH SSE/Data Science (only if APS is ready by 1 Mar), Tübingen ML (only if converted grade ≤ 2.0). Target–safe: Passau AI Engineering, FAU AI (GATE route). Safe-ish: TU Berlin CS. Apply to 7–9.",
+    secondary: "Funding layered onto the same goal, not a second lane: DAAD Study Scholarship (deadline mid-Oct 2026), Erasmus Mundus scholarship round — max 2–3 AI/data programs (EMAI, CYBERSURE, CoDaS with TU Braunschweig, EDISS, DEAI), accept only if fully funded — and Deutschlandstipendium after enrolment.",
+    aggressiveParallel: "None. German A1 → B1 runs inside this plan (it's part of the Germany lane, not a separate one). Werkstudent readiness (portfolio project, DSA, LinkedIn) only gets real hours from Phase 4, after the application crunch.",
+    option: "Quant / algo-trading plan — PARKED on 2026-10-01 (archived in Settings data, nothing deleted). Zero hours allocated. Reopen only by an explicit decision, never by drift. No-admit contingency: Summer 2028 intake with the same scores (GRE valid 5 yrs, GATE 3 yrs, dMAT indefinitely).",
+    deprioritized: "GRE Mathematics Subject Test (GATE CS replaces it at FAU). Goethe A2 exam (₹10,600, no legal value — sit A1 and B1 only). US programs. telc German certificates (not on the German Missions' student-visa list — use Goethe or ÖSD).",
+    notes: "Pivoted 2026-10-01 from Quant-primary to Germany-MS-primary after a full research cycle (global university comparison, scholarships, tests/prep, applications, Werkstudent market). Day 1 = 1 Oct 2026, Day 355 = 20 Sept 2027 (arrival) — calendar-anchored because the deadlines don't move. The real constraint is not the 8.08 CGPA, it's the dMAT → APS → uni-assist VPD chain: a dMAT by ~20 Feb keeps the 31 May deadlines (TUM/FAU/Passau) safe; later than that, KIT (15 Jun), TU Darmstadt (15 Jul) and TU Berlin (~31 Aug) carry the cycle. GRE General is the primary test (book 1–10 Dec); GATE CS is a ₹2,000 hedge that also replaces FAU's GRE requirement. German B1 by Sept 2027 shortens Blue Card settlement from 27 to 21 months and fixes the #1 hiring complaint German IT employers report (Bitkom 2026: 47% cite weak German). TUM excludes applications written with AI tools — every statement and essay is your own writing. Sleep: the 5h floor stays your call, but the research (AASM: ≤6h is inadequate; sleep consolidates new vocabulary) says drop the 23:30 light block, at minimum in the 7 days before each exam."
   },
 
   /* -----------------------------------------------------------------
-     SKILLS — evidence-based, 0-6 scale. Baselines are the original
-     diagnostic (2026-08-15); targets revised for the quant-primary pivot.
+     SKILLS — 0-6 scale. 0 none · 1 aware · 2 basics with help ·
+     3 independent on standard problems · 4 at the exam/admission
+     threshold · 5 consistently above threshold · 6 could teach it.
+     Levels marked PROVISIONAL are estimates until the Day 1-21
+     diagnostics (IELTS mock, POWERPREP Test 1 cold, NPTEL quiz)
+     replace them with real numbers.
      ----------------------------------------------------------------- */
   skills: [
-    { id: "python", name: "Python Fundamentals", category: "Core CS", level: 1, target: 4.5,
-      note: "Now the single toolkit both tracks depend on daily (pandas/numpy backtesting code, not just occasional scripting) — needs more fluency than the old AI-Eng plan required, not less.",
-      history: [{ date: "2026-08-15", level: 1, note: "Initial diagnostic (Batch 1)" }] },
-    { id: "dsa", name: "DSA Fundamentals", category: "Core CS", level: 1.6, target: 3.5,
-      note: "Hedge-only now. Enough for a junior SWE screen, not chasing deep pattern mastery — NeetCode volume target drops from 110-120 to ~80-85 cumulative.",
-      history: [{ date: "2026-08-15", level: 1.6, note: "Initial diagnostic (Batch 2)" }] },
-    { id: "probstat", name: "Probability & Statistics", category: "Math / Quant", level: 1.7, target: 4.5,
-      note: "Now genuinely central, not incidental — price-process modeling, hypothesis-testing intuition for backtest validity, Bayesian reasoning about signals. Raised despite the pivot because it's load-bearing for the primary track.",
-      history: [{ date: "2026-08-15", level: 1.7, note: "Initial diagnostic (Batch 3)" }] },
-    { id: "linalg", name: "Linear Algebra & Calculus", category: "Math / Quant", level: 3.7, target: 4.5,
-      note: "Maintained mostly through applied use in strategy code (covariance, portfolio-optimization intuition), not dedicated study time.",
+    { id: "german", name: "German (CEFR)", category: "German", level: 0, target: 4,
+      note: "4/6 = Goethe B1 passed, all 4 modules (Modellsatz ≥60% per module before booking). True zero baseline on 1 Oct 2026. ~350–450 hours to B1 → 8–10 h/week average.",
+      history: [{ date: PLAN_START_DATE, level: 0, note: "Starting from zero" }] },
+    { id: "gre_quant", name: "GRE Quant", category: "Exams", level: 3, target: 5,
+      note: "5/6 = Q ≥165 (TU Darmstadt's bar; TUM/KIT need 164). PROVISIONAL — mental math is a diagnosed strength (5/6), so the gap is likely format + speed. Replace with your POWERPREP Test 1 (cold) result on Day 10.",
+      history: [{ date: PLAN_START_DATE, level: 3, note: "Provisional estimate" }] },
+    { id: "gre_verbal", name: "GRE Verbal + AWA", category: "Exams", level: 2.5, target: 4,
+      note: "4/6 = V ≥155 and AWA ≥4.0 (clears TUD 155, KIT 151, TUM/KIT AWA 4.0). PROVISIONAL until POWERPREP Test 1.",
+      history: [{ date: PLAN_START_DATE, level: 2.5, note: "Provisional estimate" }] },
+    { id: "english_test", name: "IELTS Academic", category: "Exams", level: 3.5, target: 5,
+      note: "5/6 = 7.0 overall, no band below 6.5 (Tübingen, Saarland, TU Darmstadt ask for 7.0). PROVISIONAL until the Day 2 full mock.",
+      history: [{ date: PLAN_START_DATE, level: 3.5, note: "Provisional estimate" }] },
+    { id: "dmat", name: "dMAT Core speed", category: "Exams", level: 2.5, target: 4,
+      note: "Core Module = figure sequences, mathematical equations, Latin squares — 20 items / 25 min each, NO note-taking. That's a working-memory load: practise exactly that format, and consider requesting ADHD accommodations (≥10 weeks before the test).",
+      history: [{ date: PLAN_START_DATE, level: 2.5, note: "Provisional estimate" }] },
+    { id: "toc", name: "Theory of Computation", category: "CS Foundations", level: 1, target: 4,
+      note: "Feeds the TUM written test (area c), GATE CS and TU Darmstadt's exam. Check = NPTEL weekly assignments ≥70%. MOOCs do NOT add ECTS — this is for tests/interviews, not credit matching.",
+      history: [{ date: PLAN_START_DATE, level: 1, note: "Provisional estimate" }] },
+    { id: "probstat", name: "Discrete Maths & Probability", category: "CS Foundations", level: 1.7, target: 4,
+      note: "TUM test area (b) + GATE. MIT 6.042J problem sets as the check.",
+      history: [{ date: "2026-08-15", level: 1.7, note: "Initial diagnostic (Batch 3 — Probability & Statistics)" }] },
+    { id: "linalg", name: "Linear Algebra & Analysis", category: "CS Foundations", level: 3.7, target: 4,
+      note: "Already close — maintain via GATE practice, no dedicated block.",
       history: [{ date: "2026-08-15", level: 3.7, note: "Initial diagnostic (Batch 4, corrected)" }] },
-    { id: "mlopt", name: "Optimization & ML Fundamentals", category: "AI", level: 4, target: 4.5,
-      note: "Bias-variance/overfitting concepts transfer almost for free to 'why is my backtest lying to me' — real synergy with the primary track, no extra dedicated time needed.",
-      history: [{ date: "2026-08-15", level: 4, note: "Initial diagnostic (Batch 5)" }] },
-    { id: "dlai", name: "Deep Learning / AI Engineering", category: "AI", level: 2, target: 2.5,
-      note: "No longer the differentiator — RAG project cut to a stub. Target reflects 'won't embarrass yourself if asked about RAG/tokens/embeddings,' not depth.",
-      history: [{ date: "2026-08-15", level: 2, note: "Initial diagnostic (Batch 6)" }] },
-    { id: "sql_sys", name: "SQL & Systems / Linux", category: "Core CS", level: 1.6, target: 3,
-      note: "Hedge maintained (SQLZoo, Bandit) but System Design Primer depth is cut, slightly lowering the realistic ceiling.",
-      history: [{ date: "2026-08-15", level: 1.6, note: "Initial diagnostic (Batch 7)" }] },
-    { id: "finance", name: "Finance & Markets", category: "Quant", level: 1.4, target: 4,
-      note: "Was explicitly deprioritized before ('not gated at Quant Research entry'). Now actively taught through GT CS7646 (market mechanics, EMH, CAPM) — needs to be a real number, not a token one.",
-      history: [{ date: "2026-08-15", level: 1.4, note: "Initial diagnostic (Batch 8)" }] },
-    { id: "stochastic", name: "Stochastic Processes", category: "Quant", level: 0.5, target: 3,
-      note: "4/6 = 'can explain and simulate a random walk, codes the Markov property from real transition-probability data, distinguishes mean-reversion from random-walk price behavior and can test for it empirically.' Deliberately NOT claiming stochastic calculus (Brownian motion/Itô/SDEs) — that needs measure-theory prerequisites this plan isn't building, and chasing it would cannibalize probability/backtesting time for worse ROI against the actual bar.",
-      history: [{ date: "2026-08-15", level: 0.5, note: "Initial diagnostic (Batch 9)" }] },
-    { id: "mentalmath", name: "Mental Math & Quant Reasoning", category: "Quant", level: 5, target: 5.5,
-      note: "Already near-ceiling and a genuine strength — protect, don't rebuild. Daily 10-15 min maintenance only, zero dedicated study time.",
-      history: [{ date: "2026-08-15", level: 5, note: "Initial diagnostic (Batch 9)" }] },
-    { id: "algo_trading", name: "Algorithmic Trading / Backtesting", category: "Quant", level: 0, target: 4,
-      note: "New track, zero baseline. 4/6 = 'credible working knowledge': has independently built 2+ backtested strategies, applied walk-forward validation, can point to a specific lookahead-bias fix in their own code, understands transaction-cost impact on results. NOT claiming production-grade deployment or multi-asset-class breadth — that's a 5-6, explicitly out of scope for this window.",
-      history: [{ date: PLAN_START_DATE, level: 0, note: "New skill added at the quant-primary pivot" }] },
-    { id: "microstructure", name: "Market Microstructure & Trading Vocabulary", category: "Quant", level: 0.3, target: 4,
-      note: "Operationalizes the stated success bar directly: 4/6 = can define and correctly use, unprompted, to an interviewer: bid-ask spread, market/limit/stop orders, slippage, liquidity, lookahead bias, survivorship bias, overfitting, walk-forward validation, Sharpe ratio, max drawdown, alpha, beta, mean reversion, random walk, Markov property. Distinct from Finance & Markets (broader/macro) — this is the cold-recall vocabulary layer specifically.",
-      history: [{ date: PLAN_START_DATE, level: 0.3, note: "New skill added at the quant-primary pivot" }] }
+    { id: "db_arch", name: "Databases & Computer Architecture", category: "CS Foundations", level: 2.5, target: 4,
+      note: "TUM test area (d) + GATE DBMS/COA sections. Databases are a real-project strength (Postgres EXCLUDE constraints, locking); architecture is the gap.",
+      history: [{ date: PLAN_START_DATE, level: 2.5, note: "Provisional estimate" }] },
+    { id: "dsa", name: "DSA Fundamentals", category: "Career", level: 1.6, target: 4,
+      note: "Werkstudent online assessments are LeetCode easy–medium (SAP, Zalando). NeetCode 150 from Phase 4. Diagnostic score kept as the honest baseline even though LeetCode rating is 1655 — re-test before claiming more.",
+      history: [{ date: "2026-08-15", level: 1.6, note: "Initial diagnostic (Batch 2)" }] },
+    { id: "dlai", name: "Applied AI / MLOps", category: "Career", level: 2, target: 5,
+      note: "5/6 = one deployed project with CI, tests and monitoring that you can defend end to end in a German Werkstudent interview. Made With ML is the spine.",
+      history: [{ date: "2026-08-15", level: 2, note: "Initial diagnostic (Batch 6 — Deep Learning / AI Engineering)" }] },
+    { id: "app_docs", name: "Application documents", category: "Applications", level: 1, target: 5,
+      note: "5/6 = motivation letter + TUM statement/essay + tabular CV reviewed by two humans (not AI) and mapped to each program's modules. TUM excludes AI-written applications.",
+      history: [{ date: PLAN_START_DATE, level: 1, note: "Starting point" }] },
+    { id: "interview", name: "Admission interview readiness", category: "Applications", level: 1.5, target: 4,
+      note: "4/6 = would score ≥30/60 on KIT's interview (motivation + technical depth on your own projects). Two recorded mock orals before June.",
+      history: [{ date: PLAN_START_DATE, level: 1.5, note: "Provisional estimate" }] }
   ],
 
   /* -----------------------------------------------------------------
-     ROADMAP — 94 days to Dec 1, 2026 (Day 1 = restart date). Same proven
-     pattern throughout: 5 active days + 1 no-new-material buffer day +
-     1 review day per week.
+     ROADMAP — 6 phases, Day 1 = 1 Oct 2026 → Day 355 = 20 Sep 2027.
+     Explicit day-by-day plans for Days 1–21; every other day falls back
+     to its phase's weekly template (dayTemplate, indexed by weekday).
      ----------------------------------------------------------------- */
   roadmap: [
-    { phase: "Days 1-28 — Quant Onboarding + Foundations Continue", range: [1, 28], weeks: [
-      { title: "Week 1: DSA/Probability continue + Quant onboarding begins", days: "1-7", tasks: [
-        "NeetCode 150 — Two Pointers, Stack, Binary Search, ~12 problems",
-        "Create a QuantConnect account and complete its own Boot Camp tutorial — run a first template backtest end to end",
-        "Stat 110 lectures continue from wherever you actually left off + MIT OCW Markov-chain intro (moved up specifically because it's now load-bearing, not an afterthought)",
-        "Daily quant-vocabulary flashcards begin (bid-ask spread, market/limit/stop order, slippage, liquidity, lookahead bias, survivorship bias, overfitting, Sharpe ratio, max drawdown, mean reversion) + mental math + Brainstellar Easy begin"
-      ], resources: ["neetcode", "quantconnect", "stat110", "mit-ocw-prob", "brainstellar"],
+    { phase: "Phase 0 — Lock-in (1–14 Oct 2026)", range: [1, 14], weeks: [
+      { title: "Week 1 (1–7 Oct): Register GATE, book IELTS + GRE, DAAD draft", days: "1-7", tasks: [
+        "Open the DAAD portal, select India, write down the exact deadline; email DAAD New Delhi to confirm (working deadline: 15 Oct)",
+        "Register for GATE 2027 — paper CS, DigiLocker, ₹2,000 — before 5 Oct (late fee window to 12 Oct)",
+        "Book IELTS Academic (computer-delivered) for ~8–10 Oct and the GRE General for 1–10 Dec",
+        "Email 2 professors for recommendation letters; email Bennett for the module handbook, CGPA→% rule, minimum pass grade and a class-rank letter",
+        "DAAD motivation letter v1 + tabular CV (≤3 pages) — your own words, no AI"
+      ], resources: ["daad-scholarship", "gate2027", "ielts-idp", "daad-letter-guide"],
       dailyPlan: [
-        { d: 1, morning: "Create QuantConnect account; quick Python Tutor refresher", daytime: "NeetCode Two Pointers x3", deep1: "Stat 110 — next lecture + practice", deep2: "QuantConnect Boot Camp, part 1", deep3: "—", night: "Vocab flashcards, set 1 (5 terms) + recap today in 2 sentences" },
-        { d: 2, morning: "Vocab flashcards review", daytime: "NeetCode Two Pointers x3 (6 done)", deep1: "Stat 110 — next lecture + practice", deep2: "QuantConnect Boot Camp, part 2 — run first template backtest end to end", deep3: "—", night: "Mental math 15min (starts today)" },
-        { d: 3, morning: "Vocab + mental math", daytime: "NeetCode Stack x3", deep1: "Stat 110 — next lecture + practice", deep2: "MIT OCW — Markov chains, intro (transition probabilities)", deep3: "—", night: "Mental math" },
-        { d: 4, morning: "Vocab + mental math", daytime: "NeetCode Binary Search x3", deep1: "Stat 110 — next lecture + practice", deep2: "MIT OCW — Markov chains, continued", deep3: "Skim QuantConnect docs on strategy structure (Initialize/OnData)", night: "Mental math + Brainstellar Easy" },
-        { d: 5, morning: "Vocab + mental math", daytime: "NeetCode mixed review (~12 done)", deep1: "Strategic Practice catch-up on recent Stat 110 lectures", deep2: "Read 2-3 example strategies in QuantConnect's algorithm library", deep3: "Note down anything you don't understand yet — don't skip past confusion", night: "Self-quiz: explain lookahead bias in your own words, no notes" },
-        { d: 6, morning: "—", daytime: "CATCH-UP & BUFFER — no new material", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 7, morning: "—", daytime: "REVIEW — cold-recall all 10 vocab terms, redo 2 NeetCode problems cold", deep1: "Preview Week 2 (GT CS7646 begins)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
+        { d: 1, morning: "Open DAAD portal → select India → note the exact deadline; email DAAD New Delhi", daytime: "Emails: 2 professors (LORs) + Bennett registrar (module handbook, CGPA→% rule, min pass grade, rank letter)", deep1: "GATE 2027 registration — CS paper, DigiLocker, ₹2,000 (deadline 5 Oct)", deep2: "Book IELTS Academic (computer) for ~8–10 Oct + GRE General for 1–10 Dec", deep3: "Install Anki, add the Goethe A1 deck", night: "Recap today in 2 sentences + log hours" },
+        { d: 2, morning: "DW Nicos Weg A1 — episode 1", daytime: "Read the DAAD letter-of-motivation guide; outline your letter in bullets", deep1: "IELTS full practice test, timed — this is your diagnostic", deep2: "DAAD motivation letter draft v1 (your own words — no AI)", deep3: "Anki 10 min", night: "Score the IELTS mock → update the IELTS skill level" },
+        { d: 3, morning: "—", daytime: "IELTS Writing Task 1 + Task 2 practice, then Speaking (record yourself, 3 parts)", deep1: "DAAD CV — tabular, ≤3 pages, month/year dates", deep2: "German: Nicos Weg episodes 2–3", deep3: "—", night: "Rest" },
+        { d: 4, morning: "—", daytime: "CATCH-UP & BUFFER — finish anything from Days 1–3", deep1: "Confirm GATE registration is fully submitted (fee paid, PDF saved)", deep2: "Weekly review: self-rate every skill 0–6 in Skill Trackers", deep3: "—", night: "Rest" },
+        { d: 5, morning: "Nicos Weg ep 4 + Anki", daytime: "GATE regular deadline TODAY — last check; IELTS Reading set (timed) in 25-min chunks", deep1: "IELTS Listening + weakest-band drill", deep2: "DAAD motivation letter v2", deep3: "Anki", night: "Recap + log" },
+        { d: 6, morning: "Nicos Weg ep 5 + Anki", daytime: "Collect DAAD documents: transcripts, passport scan, certificates", deep1: "IELTS full mock #2, timed", deep2: "Review mock #2 mistakes; Writing Task 2 rewrite", deep3: "Anki", night: "Recap + log" },
+        { d: 7, morning: "Nicos Weg ep 6 + Anki", daytime: "Send DAAD letter v2 to one human reviewer (professor/sister) — not an AI tool", deep1: "IELTS Speaking: full mock with a friend or recorded", deep2: "Goethe online discount GDW4D26 (valid to 14 Oct): check if any A1 batch fits evenings/weekends — book or consciously skip", deep3: "Anki", night: "Recap + log" }
       ]},
-      { title: "Week 2: Georgia Tech CS7646 begins + first trivial QuantConnect algorithm", days: "8-14", tasks: [
-        "NeetCode 150 — Trees, Recursion, ~8 problems (reduced volume, hedge-only now)",
-        "Georgia Tech CS7646 (free, YouTube + lucylabs.gatech.edu/ml4t) — market mechanics, reading financial data, technical-analysis intro",
-        "Stat 110 continues",
-        "Build a trivial 'Buy & Hold' QuantConnect algorithm end to end — this is mechanics warm-up, not a real strategy yet"
-      ], resources: ["neetcode", "gt-cs7646", "stat110", "quantconnect"],
+      { title: "Week 2 (8–14 Oct): Sit IELTS, submit DAAD, Gate 0", days: "8-14", tasks: [
+        "Sit IELTS Academic (target 7.0, no band below 6.5)",
+        "Take POWERPREP Test 1 cold as your GRE diagnostic — replace the provisional GRE skill levels",
+        "Submit the DAAD application by ~13 Oct (motivation letter, CV, LOR, transcripts, IELTS score)",
+        "GATE late-fee deadline 12 Oct — only matters if Day 1 slipped",
+        "Gate 0 review on Day 14"
+      ], resources: ["ielts-idp", "powerprep", "daad-scholarship"],
       dailyPlan: [
-        { d: 8, morning: "Vocab + mental math", daytime: "NeetCode Trees x3", deep1: "GT CS7646 — reading financial data", deep2: "Stat 110 — next lecture", deep3: "—", night: "Mental math" },
-        { d: 9, morning: "Vocab + mental math", daytime: "NeetCode Trees x3 (6 done)", deep1: "GT CS7646 — market mechanics", deep2: "Stat 110 — next lecture", deep3: "—", night: "Mental math" },
-        { d: 10, morning: "Vocab + mental math", daytime: "NeetCode Recursion x3", deep1: "GT CS7646 — technical analysis intro", deep2: "Scaffold 'Buy & Hold' QuantConnect algorithm — Initialize() only", deep3: "—", night: "Mental math" },
-        { d: 11, morning: "Vocab + mental math", daytime: "NeetCode Recursion x2 (done, ~8)", deep1: "Stat 110 continues", deep2: "Finish Buy & Hold algorithm — OnData(), run first backtest", deep3: "Read the output report — note every metric shown even if you don't understand it yet", night: "Mental math" },
-        { d: 12, morning: "Vocab + mental math", daytime: "NeetCode mixed review", deep1: "Review this week's GT CS7646 material out loud", deep2: "Re-run Buy & Hold on a different asset/date range, compare", deep3: "Write down what changed and why", night: "Mental math + Brainstellar" },
-        { d: 13, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 14, morning: "—", daytime: "REVIEW — cold-recall vocab, explain Buy & Hold results out loud", deep1: "Preview Week 3 (backtesting pitfalls)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 3: Backtesting pitfalls cold + Markov chain mini-project", days: "15-21", tasks: [
-        "SPACED-REPETITION CHECKPOINT: redo every Week 1-2 problem you got wrong or were slow on",
-        "NeetCode 150 — Heaps, Intervals, ~10 problems",
-        "QuantStart's FREE articles (not their paid ebooks) on lookahead bias, survivorship bias, overfitting — read each and write your own one-paragraph example. This is what operationalizes 'knows the pitfalls cold,' not passive reading.",
-        "MIT OCW Markov chains: transition matrices, stationary distributions — then code a 2-state Markov chain simulator on real historical price data"
-      ], resources: ["neetcode", "quantstart-articles", "mit-ocw-prob"],
-      dailyPlan: [
-        { d: 15, morning: "SPACED-REP: redo Week 1-2 wrong answers", daytime: "NeetCode Heaps x3", deep1: "QuantStart — lookahead bias article, write your own example", deep2: "MIT OCW — transition matrices", deep3: "—", night: "Mental math" },
-        { d: 16, morning: "Vocab + mental math", daytime: "NeetCode Heaps x3 (done)", deep1: "QuantStart — survivorship bias, write your own example", deep2: "MIT OCW — stationary distributions", deep3: "—", night: "Mental math" },
-        { d: 17, morning: "Vocab + mental math", daytime: "NeetCode Intervals x3", deep1: "QuantStart — overfitting, write your own example", deep2: "Start coding a 2-state Markov chain simulator (up/down days) in Python", deep3: "Pull real historical price data for the simulator (QuantConnect or a free source)", night: "Mental math + Brainstellar" },
-        { d: 18, morning: "Vocab + mental math", daytime: "NeetCode Intervals x3 (done, ~10)", deep1: "Estimate real transition probabilities from historical returns", deep2: "Finish the Markov simulator, validate it against real data", deep3: "Document what you found", night: "Mental math" },
-        { d: 19, morning: "Vocab + mental math", daytime: "NeetCode mixed review", deep1: "Review this week's 3 pitfall articles cold — explain each out loud, no notes", deep2: "Polish the Markov chain script and write-up", deep3: "—", night: "Mental math" },
-        { d: 20, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 21, morning: "—", daytime: "REVIEW — cold-explain lookahead/survivorship/overfitting to an imaginary interviewer", deep1: "Preview Week 4", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 4: Consolidation + Gate 1", days: "22-28", tasks: [
-        "NeetCode 150 — Greedy, ~6 problems",
-        "Full review pass across everything covered in Phase 1 — Stat 110, GT CS7646, the Markov project, the Buy & Hold algorithm",
-        "Day 28 Gate: cold-define lookahead bias/survivorship bias/overfitting, explain Sharpe ratio and max drawdown conceptually, fresh Bayes/EV problem solved unaided, QuantConnect account active with a template run end to end, NeetCode cumulative >= 25"
-      ], resources: ["neetcode"],
-      dailyPlan: [
-        { d: 22, morning: "Vocab + mental math", daytime: "NeetCode Greedy x3", deep1: "Review Stat 110 material covered so far", deep2: "Review GT CS7646 material covered so far", deep3: "—", night: "Mental math" },
-        { d: 23, morning: "Vocab + mental math", daytime: "NeetCode Greedy x3 (done)", deep1: "Re-explain the Markov chain project cold, no notes", deep2: "Re-explain the QuantConnect Buy & Hold algorithm cold", deep3: "—", night: "Mental math" },
-        { d: 24, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Full vocab cold-recall drill, all terms so far", deep2: "Fresh Bayes problem + fresh EV problem, solved cold", deep3: "—", night: "Mental math" },
-        { d: 25, morning: "Vocab + mental math", daytime: "Light review", deep1: "Define Sharpe ratio and max drawdown conceptually, unaided, no notes", deep2: "Review anything flagged as shaky this month", deep3: "—", night: "Mental math" },
-        { d: 26, morning: "—", daytime: "Light review only — no new material, no cramming", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 27, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest, sleep properly before the gate" },
-        { d: 28, morning: "—", daytime: "GATE 1 — full review against criteria above", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", deep3: "—", night: "—" }
+        { d: 8, morning: "Anki only", daytime: "IELTS light review — no new material", deep1: "DAAD: chase the LOR if not received", deep2: "IELTS: one Writing Task 2 timed, then stop", deep3: "—", night: "Sleep early before the IELTS" },
+        { d: 9, morning: "—", daytime: "IELTS EXAM (your booked date ~8–10 Oct)", deep1: "Rest — no study after the exam", deep2: "DAAD letter: integrate the reviewer's comments → v3", deep3: "—", night: "Rest" },
+        { d: 10, morning: "—", daytime: "POWERPREP Test 1 — cold, timed, full test (GRE diagnostic)", deep1: "Review every POWERPREP mistake; start an error log", deep2: "German long session: Nicos Weg ×3", deep3: "—", night: "Update GRE Quant + Verbal skill levels from the real score" },
+        { d: 11, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "DAAD: final read-through of every document", deep2: "Weekly review in Career OS", deep3: "—", night: "Rest" },
+        { d: 12, morning: "Anki", daytime: "GATE late-fee deadline TODAY (only if not registered); IELTS result → add to DAAD", deep1: "DAAD: upload all documents in the portal", deep2: "Goethe GDW4D26 — final decision (code expires 14 Oct)", deep3: "Anki", night: "Recap + log" },
+        { d: 13, morning: "Anki", daytime: "SUBMIT DAAD (2 days of slack before the 15 Oct working deadline)", deep1: "GRE: sign up for GregMat+, pick the study plan, set up the error log", deep2: "Nicos Weg ep 7–8", deep3: "Anki", night: "Recap + log" },
+        { d: 14, morning: "—", daytime: "GATE 0 — check every criterion in Milestones", deep1: "Go/No-Go review", deep2: "Plan Phase 1 week 1", deep3: "—", night: "—" }
       ]}
     ]},
-    { phase: "Days 29-56 — Core Quant Build: First Real Strategy", range: [29, 56], weeks: [
-      { title: "Week 5: Strategy 1 — SMA crossover, built and backtested", days: "29-35", tasks: [
-        "NeetCode 150 — Graphs BFS/DFS, ~8 problems",
-        "Build Strategy 1 (SMA crossover) on QuantConnect, run over 5+ years of real historical data",
-        "Read the output (Sharpe, max drawdown, CAGR) and write your own definition of each next to your own numbers",
-        "Audit your own code for at least one concrete lookahead-bias risk and fix it; add QuantConnect's transaction-cost model and compare before/after"
-      ], resources: ["neetcode", "quantconnect"],
+
+    { phase: "Phase 1 — Scores & audit (15 Oct – 1 Dec 2026)", range: [15, 62],
+      dayTemplate: weekTemplate(
+        { morning: "German: 1 Nicos Weg episode + Anki A1 (10 min)", daytime: "Work-window micro-slots (25-min Quick timer): Anki GRE vocab ×2 + 1 GRE Quant mini-set", deep1: "GRE Quant — this week's GregMat topic + error log", deep2: "GRE Verbal: Text Completion / Sentence Equivalence + 1 RC set", deep3: "Light: Anki (German + GRE) + plan tomorrow — first block to cut", night: "2-sentence recap + log hours" },
+        { morning: "—", daytime: "GRE: full timed section set or a mock (3h) + review", deep1: "NPTEL Theory of Computation — 1 week of lectures", deep2: "German long session: Nicos Weg ×3 + 1 Lingoni grammar video", deep3: "—", night: "Rest" },
+        BUFFER_SUNDAY,
+        { 2: { deep2: "AWA: 1 Issue essay (30 min) + self-score with the ETS rubric" },
+          4: { deep2: "Applications: credit-mapping table / APS dossier / Bennett document chase" } }
+      ),
+      weeks: [
+      { title: "Days 15–21 (15–21 Oct): GRE plan live + credit audit starts", days: "15-21", tasks: [
+        "GRE: GregMat plan running, error log in use every session",
+        "Start the credit-mapping table: required area → Bennett course → credits → syllabus page, for TUM, KIT, TU Darmstadt, RWTH, TU Berlin, Passau",
+        "Email APS India: which checklist applies to a final-year student without a provisional degree?",
+        "Chase Bennett documents on 21 Oct if nothing has arrived"
+      ], resources: ["gregmat", "aps-india", "nptel-toc"],
       dailyPlan: [
-        { d: 29, morning: "Vocab + mental math", daytime: "NeetCode Graphs BFS x3", deep1: "QuantConnect — scaffold Strategy 1 (SMA crossover), Initialize()", deep2: "Wire up OnData(), get it running on 1 year of data", deep3: "—", night: "Mental math" },
-        { d: 30, morning: "Vocab + mental math", daytime: "NeetCode Graphs DFS x3", deep1: "Extend Strategy 1 to 5+ years of data", deep2: "Run first full backtest", deep3: "—", night: "Mental math" },
-        { d: 31, morning: "Vocab + mental math", daytime: "NeetCode Graphs x2 (done, ~8)", deep1: "Read the backtest report line by line", deep2: "Write your own 1-line definition of Sharpe/drawdown/CAGR next to your actual numbers", deep3: "—", night: "Mental math + Brainstellar" },
-        { d: 32, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Audit your own Strategy 1 code for lookahead bias, line by line", deep2: "Fix anything found", deep3: "—", night: "Mental math" },
-        { d: 33, morning: "Vocab + mental math", daytime: "Light review", deep1: "Re-run the backtest after the fix — note how results changed", deep2: "Add QuantConnect's built-in transaction-cost/fee model", deep3: "—", night: "Mental math" },
-        { d: 34, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 35, morning: "—", daytime: "REVIEW — explain Strategy 1 end to end out loud, cold", deep1: "Preview Week 6", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
+        { d: 15, morning: "Nicos Weg + Anki", daytime: "Read the APS checklist; email APS about the final-year checklist", deep1: "GRE Quant: GregMat plan day 1 — arithmetic & number properties", deep2: "Credit audit: list the required areas for TUM (CS fundamentals, theory, FP & verification, maths)", deep3: "Anki", night: "Recap + log" },
+        { d: 16, morning: "Nicos Weg + Anki", daytime: "Micro-slots: GRE vocab + Quant mini-set", deep1: "GRE Quant: number properties practice + error log", deep2: "Credit audit: map Bennett courses to TUM's areas", deep3: "Anki", night: "Recap + log" },
+        { d: 17, morning: "—", daytime: "GRE: timed Quant section ×2 + review", deep1: "NPTEL Theory of Computation — week 1", deep2: "German long session", deep3: "—", night: "Rest" },
+        { d: 18, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Weekly review + skill re-rating", deep2: "Check d-mat.de for the Q1 2027 date", deep3: "—", night: "Rest" },
+        { d: 19, morning: "Nicos Weg + Anki", daytime: "Micro-slots: GRE vocab + Quant mini-set", deep1: "GRE Quant: algebra", deep2: "GRE Verbal: TC/SE + 1 RC set", deep3: "Anki", night: "Recap + log" },
+        { d: 20, morning: "Nicos Weg + Anki", daytime: "Micro-slots: GRE vocab + Quant mini-set", deep1: "GRE Quant: algebra practice", deep2: "AWA Issue essay #1 (30 min) + self-score", deep3: "Anki", night: "Recap + log" },
+        { d: 21, morning: "Nicos Weg + Anki", daytime: "Chase Bennett documents if not received", deep1: "GRE Quant: word problems", deep2: "APS dossier: start collecting attested copies", deep3: "Anki", night: "Recap + log" }
       ]},
-      { title: "Week 6: Strategy 1 hardening + GitHub repo starts", days: "36-42", tasks: [
-        "NeetCode 150 — 1-D Dynamic Programming, ~6 problems",
-        "Compare Strategy 1 with vs. without realistic transaction costs — document the gap honestly",
-        "Start the GitHub repo — methodology-first README, real commit history",
-        "Re-test Strategy 1 on a different asset and document how results differ"
-      ], resources: ["neetcode"],
-      dailyPlan: [
-        { d: 36, morning: "Vocab + mental math", daytime: "NeetCode 1-D DP x3", deep1: "Re-run Strategy 1 with the fee model, compare before/after honestly", deep2: "Document the gap in a findings note", deep3: "—", night: "Mental math" },
-        { d: 37, morning: "Vocab + mental math", daytime: "NeetCode 1-D DP x3 (done)", deep1: "Start GitHub repo — README skeleton", deep2: "Write the methodology section of the README", deep3: "—", night: "Mental math" },
-        { d: 38, morning: "Vocab + mental math", daytime: "Light review", deep1: "Re-test Strategy 1 on a different asset", deep2: "Document how results differ", deep3: "—", night: "Mental math + Brainstellar" },
-        { d: 39, morning: "Vocab + mental math", daytime: "Light review", deep1: "Clean up Strategy 1 code for readability", deep2: "Push to GitHub with real commit history", deep3: "—", night: "Mental math" },
-        { d: 40, morning: "Vocab + mental math", daytime: "Light review", deep1: "Full cold-explain of Strategy 1 to an imaginary interviewer", deep2: "Note weak points in your own explanation", deep3: "—", night: "Mental math" },
-        { d: 41, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 42, morning: "—", daytime: "REVIEW", deep1: "Preview Week 7 (walk-forward validation)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 7: Walk-forward validation + STAR stories begin", days: "43-49", tasks: [
-        "NeetCode 150 — 2-D Dynamic Programming, ~9 problems",
-        "Walk-forward split on Strategy 1: train on one window, test only on a held-out later window, report the test performance honestly even if it's worse",
-        "5-6 STAR behavioral stories written (unchanged from the original plan's approach)",
-        "Brainstellar moves to Medium tier"
-      ], resources: ["neetcode", "brainstellar"],
-      dailyPlan: [
-        { d: 43, morning: "Vocab + mental math", daytime: "NeetCode 2-D DP x3", deep1: "Set up a walk-forward split for Strategy 1 — train window only", deep2: "Write 2 STAR stories from past projects/internship", deep3: "—", night: "Mental math" },
-        { d: 44, morning: "Vocab + mental math", daytime: "NeetCode 2-D DP x3", deep1: "Run Strategy 1 on the held-out test window", deep2: "2 more STAR stories (4 done)", deep3: "—", night: "Mental math" },
-        { d: 45, morning: "Vocab + mental math", daytime: "NeetCode 2-D DP x3 (done, ~9)", deep1: "Report test-window performance honestly, even if worse than train", deep2: "2 more STAR stories (6 done)", deep3: "—", night: "Mental math + Brainstellar Medium" },
-        { d: 46, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Write up the walk-forward findings — what changed test vs. train, and why", deep2: "Brainstellar Medium x3", deep3: "—", night: "Mental math" },
-        { d: 47, morning: "Vocab + mental math", daytime: "Light review", deep1: "Cold-explain walk-forward validation and why it matters", deep2: "Brainstellar Medium x3", deep3: "—", night: "Mental math" },
-        { d: 48, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 49, morning: "—", daytime: "REVIEW", deep1: "Preview Week 8 (Strategy 2 + Gate 2)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 8: Strategy 2 + comparison + Gate 2", days: "50-56", tasks: [
-        "NeetCode 150 — 2-D DP finish + mixed review",
-        "Build Strategy 2 (RSI/mean-reversion, single asset — deliberately not pairs trading, which needs cointegration testing that's out of scope for this window)",
-        "Compute and compare Sharpe, Sortino, max drawdown, alpha, beta across both strategies",
-        "Day 56 Gate: at least one independently-built, walk-forward-validated strategy with documented lookahead-bias fix; NeetCode cumulative >= 50"
-      ], resources: ["neetcode"],
-      dailyPlan: [
-        { d: 50, morning: "Vocab + mental math", daytime: "NeetCode mixed review x4", deep1: "QuantConnect — scaffold Strategy 2 (RSI mean-reversion)", deep2: "Get Strategy 2 running on 1 year of data", deep3: "—", night: "Mental math" },
-        { d: 51, morning: "Vocab + mental math", daytime: "NeetCode mixed review x4", deep1: "Extend Strategy 2 to 5+ years, run full backtest", deep2: "Apply the walk-forward split to Strategy 2 too", deep3: "—", night: "Mental math" },
-        { d: 52, morning: "Vocab + mental math", daytime: "Light review", deep1: "Compute Sortino ratio and alpha/beta for both strategies", deep2: "Build a comparison table: Strategy 1 vs. Strategy 2, all metrics", deep3: "—", night: "Mental math + Brainstellar" },
-        { d: 53, morning: "Vocab + mental math", daytime: "Light review", deep1: "Audit Strategy 2 for lookahead/survivorship bias", deep2: "Fix anything found, re-run", deep3: "—", night: "Mental math" },
-        { d: 54, morning: "Vocab + mental math", daytime: "Light review", deep1: "Full cold-explain: which strategy is 'better' and why, using the actual numbers", deep2: "Update the GitHub repo with Strategy 2 + the comparison", deep3: "—", night: "Mental math" },
-        { d: 55, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest, sleep properly before the gate" },
-        { d: 56, morning: "—", daytime: "GATE 2 — full review against criteria above", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", deep3: "—", night: "—" }
-      ]}
+      { title: "Days 22–35 (22 Oct – 4 Nov): GRE Quant core + APS couriered", days: "22-35", tasks: [
+        "GRE Quant: algebra, geometry, data interpretation done in the GregMat plan",
+        "Register with APS India and courier the dossier by 31 Oct (₹18,000) — APS allows filing before the dMAT result",
+        "Contact g.a.s.t. about dMAT ADHD accommodations (needs ≥10 weeks before the test)",
+        "German: Nicos Weg A1 units 1–6"
+      ], resources: ["gregmat", "aps-india", "dmat-faq", "dw-nicos"] },
+      { title: "Days 36–49 (5–18 Nov): Verbal/AWA push + Erasmus shortlist", days: "36-49", tasks: [
+        "GRE Verbal + AWA: 2 essays/week, RC daily",
+        "Erasmus Mundus shortlist of at most 3 (AI/data only) with a requirements matrix — EMAI opens ~15 Nov",
+        "Credit-mapping table finished for all 6 programs; drop any program whose hard minimum you fail",
+        "German: Nicos Weg A1 units 7–12, Anki streak ≥80% of days"
+      ], resources: ["gregmat", "erasmus-catalogue", "dw-nicos"] },
+      { title: "Days 50–62 (19 Nov – 1 Dec): GRE mocks + Gate 1", days: "50-62", tasks: [
+        "POWERPREP Test 2 timed (save it for now) — target Q ≥163 + AWA around 4",
+        "2 more full mocks (POWERPREP PLUS or GregMat) with full review",
+        "Deloitte internship ends 1 Dec — the day block opens up from Day 63",
+        "Gate 1 review on Day 62"
+      ], resources: ["powerprep", "gregmat"] }
     ]},
-    { phase: "Days 57-77 — Strategy Iteration, Validation & Interview Readiness", range: [57, 77], weeks: [
-      { title: "Week 9: Parameter sensitivity + Pramp resumes + Alpaca deploy", days: "57-63", tasks: [
-        "NeetCode 150 — Advanced Graphs, Tries, ~6 problems",
-        "Parameter-sensitivity testing on both strategies — the classic 'only works for one magic number' overfitting tell",
-        "Pramp DSA + system-design mocks resume (unchanged rotation from the original plan)",
-        "Alpaca paper-trading account setup, deploy Strategy 1 to paper trading; Jane Street's monthly puzzle + Brainstellar Hard tier begin"
-      ], resources: ["neetcode", "pramp", "alpaca", "janestreet-puzzles", "brainstellar"],
-      dailyPlan: [
-        { d: 57, morning: "Vocab + mental math", daytime: "NeetCode Advanced Graphs x3", deep1: "Parameter-sensitivity test — vary Strategy 1's moving-average windows, does it still work", deep2: "Document what you find: fragile or robust?", deep3: "—", night: "Mental math" },
-        { d: 58, morning: "Vocab + mental math", daytime: "NeetCode Tries x3", deep1: "Same sensitivity test on Strategy 2's RSI thresholds", deep2: "Document findings", deep3: "—", night: "Mental math" },
-        { d: 59, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "PRAMP — DSA mock interview", deep2: "Debrief — what communication gaps showed up", deep3: "—", night: "Mental math + Brainstellar Hard" },
-        { d: 60, morning: "Vocab + mental math", daytime: "Light review", deep1: "PRAMP — system design mock", deep2: "Debrief", deep3: "Create Alpaca paper-trading account", night: "Mental math" },
-        { d: 61, morning: "Vocab + mental math", daytime: "Light review", deep1: "Deploy Strategy 1 to Alpaca paper trading", deep2: "Confirm it's actually placing simulated trades correctly", deep3: "Jane Street's current puzzle — attempt it", night: "Mental math" },
-        { d: 62, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 63, morning: "—", daytime: "REVIEW", deep1: "Preview Week 10", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 10: Cross-asset testing + first quant mock + behavioral mock", days: "64-70", tasks: [
-        "DSA shifts to maintenance-mode timed review",
-        "Re-run the best strategy across 2-3 different assets/periods — document where it breaks",
-        "First self-run timed quant mock: explain full methodology + all pitfalls out loud, recorded",
-        "Pramp behavioral mock"
-      ], resources: ["pramp"],
-      dailyPlan: [
-        { d: 64, morning: "Vocab + mental math", daytime: "Maintenance DSA review x3", deep1: "Re-run the best strategy on a second asset", deep2: "Document results", deep3: "—", night: "Mental math" },
-        { d: 65, morning: "Vocab + mental math", daytime: "Maintenance DSA review x3", deep1: "Re-run on a third asset/period", deep2: "Document where/why it breaks, if it does", deep3: "—", night: "Mental math" },
-        { d: 66, morning: "Vocab + mental math", daytime: "Maintenance review", deep1: "PRAMP — behavioral mock", deep2: "Debrief", deep3: "—", night: "Mental math + Brainstellar" },
-        { d: 67, morning: "Vocab + mental math", daytime: "Maintenance review", deep1: "Self-run timed quant mock — explain full methodology + all pitfalls out loud, 30min, recorded", deep2: "Review the recording honestly", deep3: "—", night: "Mental math" },
-        { d: 68, morning: "Vocab + mental math", daytime: "Light review", deep1: "Fix whatever the mock exposed as weak", deep2: "Update the GitHub repo with cross-asset findings", deep3: "—", night: "Mental math" },
-        { d: 69, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 70, morning: "—", daytime: "REVIEW", deep1: "Preview Week 11 (Gate 3)", deep2: "Weekly review in the dashboard", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 11: Portfolio combination + resume audit + Gate 3", days: "71-77", tasks: [
-        "Combine both strategies into a simple equal-weight portfolio view + a basic position-sizing/stop-loss concept",
-        "Finalize the GitHub repo README — methodology-first, honest about limitations",
-        "Full resume audit — every quant claim AND every hedge (DSA/Python) claim must hold under questioning",
-        "Day 77 Gate: 2 strategies compared on Sharpe/Sortino/drawdown/alpha/beta, defensible under adversarial questioning, deployed to Alpaca, real repo, applications active on both tracks"
-      ], resources: [],
-      dailyPlan: [
-        { d: 71, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Combine Strategy 1+2 into a simple equal-weight portfolio view", deep2: "Compute combined Sharpe/drawdown", deep3: "—", night: "Mental math" },
-        { d: 72, morning: "Vocab + mental math", daytime: "Light review", deep1: "Add a basic position-sizing/stop-loss concept to the portfolio", deep2: "Re-run the portfolio with the addition", deep3: "—", night: "Mental math" },
-        { d: 73, morning: "Vocab + mental math", daytime: "Light review", deep1: "Finalize the GitHub repo README — methodology-first, honest about limitations", deep2: "Resume audit part 1: every quant claim must hold under questioning", deep3: "—", night: "Mental math + Brainstellar" },
-        { d: 74, morning: "Vocab + mental math", daytime: "Light review", deep1: "Resume audit part 2: AI-Eng/SWE hedge claims (DSA, Python) — must also hold", deep2: "Update the dashboard's Resume/Portfolio tracker with real links", deep3: "—", night: "Mental math" },
-        { d: 75, morning: "Vocab + mental math", daytime: "Light review", deep1: "Full cold walk-through of the whole portfolio project, recorded", deep2: "Review the recording, fix weak spots", deep3: "—", night: "Mental math" },
-        { d: 76, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest, sleep properly before the gate" },
-        { d: 77, morning: "—", daytime: "GATE 3 — full review against criteria above", deep1: "Go/No-Go review", deep2: "Weekly + monthly review in the dashboard", deep3: "—", night: "—" }
-      ]}
+
+    { phase: "Phase 2 — Wave-1 applications & German A1 (2 Dec 2026 – 15 Jan 2027)", range: [63, 107],
+      dayTemplate: weekTemplate(
+        { morning: "German: Anki A1 + Nicos Weg", daytime: "Day block (no Deloitte): Erasmus Mundus documents (2h) + German A1 sprint (1.5h)", deep1: "GATE CS: Theory of Computation / DBMS / COA (NPTEL + previous-year papers)", deep2: "GRE retake prep if under target, otherwise applied-AI portfolio project", deep3: "Light: Anki + plan tomorrow", night: "Recap + log" },
+        { morning: "—", daytime: "Goethe A1 Modellsatz / Practice Set — timed, full", deep1: "italki speaking session (1h)", deep2: "GATE previous-year paper section (timed)", deep3: "—", night: "Rest" },
+        BUFFER_SUNDAY
+      ),
+      weeks: [
+      { title: "Days 63–72 (2–11 Dec): GRE test window + A1 sprint", days: "63-72", tasks: [
+        "Sit the GRE General (booked 1–10 Dec) — scores arrive in 8–10 days",
+        "Finish Nicos Weg A1 and take its free certificate test",
+        "Book the Goethe A1 exam (₹9,400) for late Jan/Feb and the Goethe New Delhi A2 course (starts 9 or 11 Jan, ₹28,500)",
+        "Register for the Q1 2027 dMAT the day g.a.s.t. opens it"
+      ], resources: ["dw-nicos", "goethe-a1-practice", "goethe-delhi-courses", "dmat-faq"] },
+      { title: "Days 73–92 (12–31 Dec): Erasmus Mundus submissions + GATE starts", days: "73-92", tasks: [
+        "EMAI scholarship round (last cycle closed ~20 Dec) — submit if shortlisted (1-min video, 600–800-word letter, 2 LORs)",
+        "GATE CS prep: Theory of Computation, DBMS, Computer Organization",
+        "GRE retake booked if the first score is below Q164 / AWA 4.0 (21-day gap)",
+        "German: 2 italki sessions/week, timed A1 practice sets"
+      ], resources: ["erasmus-catalogue", "gate2027", "nptel-toc", "italki"] },
+      { title: "Days 93–107 (1–15 Jan): CYBERSURE / CoDaS / EDISS + Gate 2", days: "93-107", tasks: [
+        "Erasmus submissions as shortlisted: CYBERSURE 4 Jan, CoDaS 5 Jan (docs by 12 Jan), EDISS 12 Jan, DEAI ~13 Jan",
+        "Download the GATE admit card (released ~4 Jan)",
+        "Start the Goethe A2 course (9 or 11 Jan)",
+        "Apply the GRE-vs-GATE decision rule on 15 Jan; Gate 2 review on Day 107"
+      ], resources: ["erasmus-catalogue", "gate2027", "goethe-delhi-courses"] }
     ]},
-    { phase: "Days 78-94 — Portfolio, Outreach & Final Gate", range: [78, 94], weeks: [
-      { title: "Week 12: Outreach + broad applications", days: "78-84", tasks: [
-        "Warm-intro outreach using the finished project as the hook — NOT the only bet, per the plan's own 'unconfirmed opportunity' framing",
-        "Broad applications to other small/boutique quant shops in parallel",
-        "Continued AI-Eng/SWE hedge applications",
-        "Second full Pramp mock cycle: DSA, system design, behavioral"
-      ], resources: ["pramp"],
-      dailyPlan: [
-        { d: 78, morning: "Vocab + mental math", daytime: "Light DSA review", deep1: "Draft the outreach message for the warm intro, the project as the hook", deep2: "Research 5 other small/boutique quant shop targets", deep3: "—", night: "Mental math" },
-        { d: 79, morning: "Vocab + mental math", daytime: "Light review", deep1: "Send the warm-intro outreach", deep2: "Apply to 2-3 other quant shop targets", deep3: "—", night: "Mental math" },
-        { d: 80, morning: "Vocab + mental math", daytime: "Light review", deep1: "PRAMP — DSA mock, cycle 2", deep2: "Debrief", deep3: "—", night: "Mental math + Brainstellar" },
-        { d: 81, morning: "Vocab + mental math", daytime: "Light review", deep1: "PRAMP — behavioral mock, cycle 2", deep2: "Continue AI-Eng/SWE hedge applications", deep3: "—", night: "Mental math" },
-        { d: 82, morning: "Vocab + mental math", daytime: "Light review", deep1: "Follow up on anything quiet 2+ weeks", deep2: "More quant-shop + AI-Eng/SWE applications", deep3: "—", night: "Mental math" },
-        { d: 83, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 84, morning: "—", daytime: "REVIEW — preview the full re-diagnostic week", deep1: "Weekly review in the dashboard", deep2: "—", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 13: Full cold re-diagnostic + targeted remediation", days: "85-91", tasks: [
-        "Complete cold re-run across all 10 original domains PLUS the 2 new quant skills, same rigor as the original diagnostic, no notes",
-        "Compare Day 1 (2026-08-15, original) vs. today's skill matrix honestly",
-        "Targeted remediation of whatever the re-diagnostic shows is weakest — not more of everything, specifically the weak points",
-        "Update every dashboard tracker with real final numbers"
-      ], resources: [],
-      dailyPlan: [
-        { d: 85, morning: "—", daytime: "Cold re-test: Python + DSA domains", deep1: "Cold re-test: Probability & Statistics", deep2: "Cold re-test: Linear Algebra & Calculus", deep3: "—", night: "No new material" },
-        { d: 86, morning: "—", daytime: "Cold re-test: Optimization & ML + Deep Learning/AI Engineering", deep1: "Cold re-test: SQL & Systems/Linux", deep2: "Cold re-test: Finance & Markets", deep3: "—", night: "No new material" },
-        { d: 87, morning: "—", daytime: "Cold re-test: Stochastic Processes + Mental Math", deep1: "Cold re-test: Algorithmic Trading/Backtesting — explain a strategy cold", deep2: "Cold re-test: Market Microstructure vocabulary — all terms, unprompted", deep3: "—", night: "No new material" },
-        { d: 88, morning: "—", daytime: "Compile the full skill matrix comparison, honestly", deep1: "Identify the single weakest area", deep2: "Targeted remediation session on that weakest area", deep3: "—", night: "No new material" },
-        { d: 89, morning: "—", daytime: "Second-weakest-area remediation", deep1: "Update every dashboard tracker with real final numbers", deep2: "Retrospective: is quant-primary still the right call, what's next regardless of outcome", deep3: "—", night: "No new material" },
-        { d: 90, morning: "—", daytime: "CATCH-UP & BUFFER", deep1: "Same", deep2: "Same", deep3: "—", night: "Rest" },
-        { d: 91, morning: "—", daytime: "REVIEW — final weekly + monthly review", deep1: "Preview the final days", deep2: "—", deep3: "—", night: "Plan tomorrow" }
-      ]},
-      { title: "Week 14: Final polish + Dec 1 gate", days: "92-94", tasks: [
-        "Final resume/portfolio audit — every claim on both tracks must hold under questioning",
-        "Final self-run mock: explain lookahead bias/survivorship bias/overfitting cold, walk through the portfolio project end to end, recorded",
-        "Day 94 / Dec 1 FINAL GATE — full honest review, not a pass/fail performance"
-      ], resources: [],
-      dailyPlan: [
-        { d: 92, morning: "—", daytime: "Final resume/portfolio audit — every claim holds under questioning", deep1: "Re-read your own strategy write-up cold, check every number", deep2: "Update the dashboard one last time", deep3: "—", night: "Rest" },
-        { d: 93, morning: "—", daytime: "Buffer", deep1: "Final self-run mock — explain lookahead/survivorship/overfitting cold + walk through the portfolio project end to end, recorded", deep2: "Review the recording", deep3: "—", night: "Rest, sleep properly before the gate" },
-        { d: 94, morning: "—", daytime: "FINAL GATE (DEC 1) — full review against criteria above", deep1: "Weekly + monthly + full-plan review in the dashboard", deep2: "Honest retrospective: what's actually, verifiably true now vs. Day 1", deep3: "—", night: "—" }
-      ]}
+
+    { phase: "Phase 3 — Gate tests & APS (16 Jan – 31 Mar 2027, final semester)", range: [108, 182],
+      dayTemplate: weekTemplate(
+        { morning: "German: Anki A2 + DW Deutschtrainer", daytime: "College + micro-slots: dMAT Core drill (Latin squares / figure sequences — 25-min timed, NO notes)", deep1: "GATE CS until the exam (Feb) → then TUM essay + statement drafting", deep2: "dMAT General Academic reading set (timed) / application documents", deep3: "Light: Anki + plan tomorrow — cut entirely in exam weeks", night: "Recap + log" },
+        { morning: "—", daytime: "Goethe A2 class (08:00–13:30, weekend batch) — or Nicos Weg A2 if on the weekday batch", deep1: "GATE / dMAT full timed mock", deep2: "Review the mock", deep3: "—", night: "Rest" },
+        { morning: "—", daytime: "Goethe A2 class (08:00–13:30) — then CATCH-UP & BUFFER", deep1: "Weekly review in Career OS", deep2: "Check d-mat.de / APS status / uni pages", deep3: "—", night: "Rest" }
+      ),
+      weeks: [
+      { title: "Days 108–143 (16 Jan – 20 Feb): GATE sprint & exam + A1 exam", days: "108-143", tasks: [
+        "Sit GATE CS (exam days 6–7, 13–14, 20–21 Feb — check your admit card)",
+        "Sit the Goethe A1 exam (late Jan/Feb)",
+        "dMAT drills from the official prep PDF — 3h/week, 6h/week in the final 3 weeks",
+        "Follow the A2 course without skipping — it's the ADHD scaffold through the crunch"
+      ], resources: ["gate2027", "dmat-prep", "goethe-delhi-courses"] },
+      { title: "Days 144–162 (21 Feb – 11 Mar): dMAT → APS + TUM essay topics", days: "144-162", tasks: [
+        "Sit the dMAT (New Delhi) — ideally by ~20 Feb; forward the certificate to APS the day it arrives",
+        "RWTH (1 Mar) — submit only if APS is already issued",
+        "TUM essay topics published by 1 Mar — pick one, outline it",
+        "Draft the TUM statement of reasons (≤2 pages) — your own writing, no AI"
+      ], resources: ["dmat-prep", "aps-india", "tum-style-guide"] },
+      { title: "Days 163–182 (12–31 Mar): APS certificate → TUM VPD + Gate 3", days: "163-182", tasks: [
+        "APS certificate issued (or written APS confirmation it will issue before ~5 Apr)",
+        "File the TUM VPD through uni-assist (€75 + €30 per extra program) — ≥8 weeks before 31 May",
+        "GATE result 19 Mar — record it; freeze the final list at 7–9 programs",
+        "TUM essay (~1,000 words) + statement finished and reviewed by two humans; Gate 3 review on Day 182"
+      ], resources: ["uni-assist-checklist", "tum-style-guide"] }
+    ]},
+
+    { phase: "Phase 4 — Wave-2 applications & German B1 (1 Apr – 15 Jul 2027)", range: [183, 288],
+      dayTemplate: weekTemplate(
+        { morning: "German: Anki B1 + DW slow news", daytime: "College (until May) → then portfolio project: deployed applied-AI/MLOps build", deep1: "Applications: one program per week end to end (documents, portal, uni-assist)", deep2: "German B1: course / Nicos Weg B1 + one written text for tutor correction", deep3: "Light: Anki + plan tomorrow", night: "Recap + log" },
+        { morning: "—", daytime: "Interview / test prep: CS theory mock + Java OOP drills (TUM test, KIT interview)", deep1: "German speaking practice (B1 speaking is in pairs)", deep2: "NeetCode 150 — 3 problems", deep3: "—", night: "Rest" },
+        BUFFER_SUNDAY
+      ),
+      weeks: [
+      { title: "Days 183–212 (1–30 Apr): Tübingen + TUM/FAU/Passau files", days: "183-212", tasks: [
+        "Tübingen ML deadline 30 Apr (only if converted grade ≤ 2.0)",
+        "Prepare the TUM, FAU and Passau applications in full (deadlines 31 May)",
+        "A2 course ends ~1 May — skip the A2 exam (no legal value)",
+        "2 recorded mock admission interviews (motivation + project deep-dive)"
+      ], resources: ["tum-style-guide", "uni-assist-checklist"] },
+      { title: "Days 213–243 (1–31 May): Saarland, TUM, FAU, Passau + graduation", days: "213-243", tasks: [
+        "Saarland deadline 15 May (2 LORs, GRE/GATE)",
+        "TUM, FAU, Passau deadlines 31 May",
+        "Graduate from Bennett (May) — request final transcripts + degree certificate immediately",
+        "Start B1 (Goethe Online Live 11-week course or Nicos Weg B1 + italki)"
+      ], resources: ["goethe-delhi-courses", "dw-nicos", "italki"] },
+      { title: "Days 244–273 (1–30 Jun): KIT + TU Berlin + portfolio project", days: "244-273", tasks: [
+        "KIT deadline 15 Jun — prepare for a possible KIT interview (June–July, scored 0–60, pass 30)",
+        "TU Berlin application (open-admission window ~1 Jun – 31 Aug)",
+        "Portfolio project: CI + tests + deployment (Made With ML)",
+        "Book Goethe B1 dates as soon as they're released (~2–2.5 months ahead)"
+      ], resources: ["made-with-ml", "neetcode", "goethe-b1-practice"] },
+      { title: "Days 274–288 (1–15 Jul): TU Darmstadt + blocked account + Gate 4", days: "274-288", tasks: [
+        "TU Darmstadt deadline 15 Jul — paper documents by post/courier (direct via TUCaN)",
+        "Blocked account money ready (€11,904 in 2026 — check the 2027 figure)",
+        "B1 course running; B1 exam dates booked",
+        "Gate 4 review on Day 288"
+      ], resources: ["goethe-b1-practice"] }
+    ]},
+
+    { phase: "Phase 5 — Departure (16 Jul – 20 Sep 2027)", range: [289, 355],
+      dayTemplate: weekTemplate(
+        { morning: "German: Anki B1 + DW news", daytime: "Logistics block — one task a day: visa / blocked account / insurance / housing / Anmeldung booking", deep1: "German B1 exam prep — timed module practice", deep2: "Werkstudent prep: NeetCode ×2 + CV + 5 LinkedIn connections", deep3: "Light: Anki + plan tomorrow", night: "Recap + log" },
+        { morning: "—", daytime: "TUM written-test prep if invited (logic, maths, theory, DB/architecture/Java)", deep1: "German speaking practice", deep2: "Portfolio project polish", deep3: "—", night: "Rest" },
+        BUFFER_SUNDAY
+      ),
+      weeks: [
+      { title: "Days 289–304 (16–31 Jul): Admit → visa appointment the same week", days: "289-304", tasks: [
+        "The week you get an admit: book the VFS visa appointment (appointments can't be moved earlier)",
+        "Open the blocked account and buy health insurance (visa start follows insurance start)",
+        "Apply to the Studierendenwerk dorm immediately (Munich waits 1–7 semesters); scam-check every WG-Gesucht offer",
+        "Sit B1 Reading + Listening modules"
+      ], resources: ["visa-faq", "daad-registering"] },
+      { title: "Days 305–335 (1–31 Aug): B1 + TUM test + Werkstudent CV + Gate 5", days: "305-335", tasks: [
+        "Sit B1 Writing + Speaking modules (₹4,700 each)",
+        "TUM written test (~mid/late Aug, on site) if invited",
+        "Werkstudent CV (1–2 pages, tabular, English) + saved searches on LinkedIn, StepStone, Arbeitnow, GermanTechJobs",
+        "Gate 5 review on Day 335"
+      ], resources: ["arbeitnow", "germantechjobs", "neetcode"] },
+      { title: "Days 336–355 (1–20 Sep): Fly, land, register", days: "336-355", tasks: [
+        "TU Darmstadt entrance exam (~1 Sep) if you didn't clear the GRE/GATE exemption",
+        "Retake any failed B1 module (or book it in Germany)",
+        "Fly; book the Anmeldung appointment for within 2 weeks of moving in",
+        "FINAL: on campus, enrolled, registered — Day 355"
+      ], resources: ["daad-registering"] }
     ]}
   ],
 
   /* -----------------------------------------------------------------
-     COURSES / RESOURCE LIBRARY — verified free as of Aug 2026
+     COURSES / RESOURCE LIBRARY — verified 1 Oct 2026 (free first)
      ----------------------------------------------------------------- */
   courses: [
-    { id: "python-tutor", name: "Python Tutor — Visualize Code Execution", url: "https://pythontutor.com/visualize.html", category: "Python", cost: "Free", status: "not-started", notes: "Mandatory tool: trace every problem here before trusting your code." },
-    { id: "neetcode", name: "NeetCode 150", url: "https://neetcode.io/practice", category: "DSA", cost: "Free", status: "not-started", notes: "Full 150-problem list + video explanations are free. Hedge-only now — target ~80-85 cumulative, not 110-120." },
-    { id: "stat110", name: "Harvard Stat 110 (Blitzstein)", url: "https://www.edx.org/learn/probability/harvard-university-introduction-to-probability", category: "Probability & Statistics", cost: "Free to audit", status: "not-started", notes: "Also free on YouTube; textbook free at probabilitybook.net. Now load-bearing for the primary track, not just the hedge." },
-    { id: "sqlzoo", name: "SQLZoo — JOIN tutorial", url: "https://sqlzoo.net/wiki/The_JOIN_operation", category: "SQL", cost: "Free", status: "not-started", notes: "" },
-    { id: "bandit", name: "OverTheWire: Bandit", url: "https://overthewire.org/wargames/bandit/", category: "Linux", cost: "Free", status: "not-started", notes: "Gamified, hands-on via SSH." },
-    { id: "tlcl", name: "The Linux Command Line (Shotts)", url: "https://linuxcommand.org/tlcl.php", category: "Linux", cost: "Free (CC-licensed)", status: "not-started", notes: "" },
-    { id: "mit-ocw-prob", name: "MIT OCW — Probability & Random Processes", url: "https://ocw.mit.edu/", category: "Quant", cost: "Free", status: "not-started", notes: "Markov chain basics only — not a full stochastic calculus treatment (deliberately out of scope, see the stochastic skill note)." },
-    { id: "brainstellar", name: "Brainstellar — Quant Interview Puzzles", url: "https://brainstellar.com/", category: "Quant", cost: "Free", status: "not-started", notes: "Organized Easy -> Deadly, by category." },
-    { id: "janestreet-puzzles", name: "Jane Street Puzzles", url: "https://www.janestreet.com/puzzles/", category: "Quant", cost: "Free", status: "not-started", notes: "Official, straight from a target firm. New puzzle roughly monthly." },
-    { id: "pramp", name: "Pramp (Exponent)", url: "https://www.pramp.com/", category: "Interview Prep", cost: "Free (5 credits/month)", status: "not-started", notes: "Peer mock interviews — DSA, system design, behavioral. ~1-in-5 sessions no-show; real limitation, not a reason to skip it." },
-    { id: "quantconnect", name: "QuantConnect (Algorithm Lab + free historical data)", url: "https://www.quantconnect.com/", category: "Quant / Algo Trading", cost: "Free, no card required", status: "not-started", notes: "Primary hands-on backtesting platform — Python/C#, 400TB+ historical data, unlimited free backtesting. Boot Camp tutorial first (Week 1), real strategy building from Week 5." },
-    { id: "zipline", name: "zipline-reloaded", url: "https://github.com/stefan-jansen/zipline-reloaded", category: "Quant / Algo Trading", cost: "Free / open-source", status: "not-started", notes: "Local/offline backtesting alternative — a backup if QuantConnect has an outage, not the primary platform." },
-    { id: "alpaca", name: "Alpaca (paper trading API)", url: "https://alpaca.markets/learn/start-paper-trading", category: "Quant / Algo Trading", cost: "Free paper trading account", status: "not-started", notes: "Deploy a validated strategy to live-simulated execution — used from Week 9, after a strategy is real, not before." },
-    { id: "gt-cs7646", name: "Georgia Tech CS7646 — Machine Learning for Trading", url: "https://lucylabs.gatech.edu/ml4t/", category: "Quant / Algo Trading", cost: "Free (full lecture set on YouTube + free materials)", status: "not-started", notes: "Core theory spine: market mechanics, CAPM/portfolio theory, technical indicators, backtesting." },
-    { id: "quantstart-articles", name: "QuantStart — free articles", url: "https://www.quantstart.com/articles/", category: "Quant / Algo Trading", cost: "Free (articles only)", status: "not-started", notes: "Best free explanation of lookahead bias/survivorship bias/overfitting. Do NOT buy their ebooks ($39-79) — everything required is in the free articles." }
+    { id: "powerprep", name: "ETS POWERPREP tests 1 & 2 (+ PLUS, $44.95 each)", url: "https://www.ets.org/gre/test-takers/general-test/prepare/powerprep.html", category: "Exams — GRE", cost: "Free (2 tests)", status: "not-started", notes: "Test 1 cold = diagnostic (Day 10). Save Test 2 for the final 3 weeks. Buy 1–2 PLUS tests." },
+    { id: "gregmat", name: "GregMat+", url: "https://www.gregmat.com/", category: "Exams — GRE", cost: "$11.99/month", status: "not-started", notes: "The most-recommended course on r/GRE (community consensus). Follow one study plan, don't hop." },
+    { id: "gate2027", name: "GATE 2027 official portal (IIT Madras)", url: "https://gate2027.iitm.ac.in/", category: "Exams — GATE", cost: "₹2,000 (₹2,500 late)", status: "not-started", notes: "Register by 5 Oct (late 12 Oct). Exam 6–7 / 13–14 / 20–21 Feb, result 19 Mar. Accepted by TUM, KIT, TU Darmstadt (≥750 exempts the entrance exam), Saarland, FAU." },
+    { id: "ielts-idp", name: "IELTS Academic — IDP India booking", url: "https://ieltsidpindia.com/information/ielts-test-fee", category: "Exams — English", cost: "₹19,000", status: "not-started", notes: "Computer-delivered: results in 1–2 days. Target 7.0, no band below 6.5." },
+    { id: "toefl-practice", name: "TOEFL iBT full-length practice test (2026 format)", url: "https://www.in.ets.org/content/dam/ets-india/pdfs/toefl/toefl-ibt-full-length-practice-test-1.pdf", category: "Exams — English", cost: "Free", status: "not-started", notes: "Only if you switch to TOEFL (₹15,729, scored 1–6 since Jan 2026)." },
+    { id: "dmat-faq", name: "dMAT India FAQ (check weekly for the Q1 2027 date)", url: "https://www.d-mat.de/en/faq-graduate-students-india/", category: "Exams — dMAT", cost: "€150 test", status: "not-started", notes: "Register via g.a.s.t. the day it opens. Accommodation requests ≥10 weeks before the test." },
+    { id: "dmat-prep", name: "dMAT official prep PDF (Core + General Academic)", url: "https://www.d-mat.de/wp-content/uploads/2026/09/260902_dMAT_General-Academic-Module_Preparatoy-Materials_EN.pdf", category: "Exams — dMAT", cost: "Free", status: "not-started", notes: "Plus 5 official tutorial videos and a portal demo on d-mat.de. Practise without notes — the real test allows none." },
+    { id: "aps-india", name: "APS India — registration & checklist", url: "https://aps-india.de/", category: "Applications", cost: "₹18,000", status: "not-started", notes: "Courier the dossier by 31 Oct. Certificate issues only after the dMAT certificate is checked." },
+    { id: "tum-sample-test", name: "TUM MSc Informatics sample written test", url: "https://www.cit.tum.de/fileadmin/w00byx/cit/Studium/Studiengaenge/Master_Informatik/sample-test_Master_application1.pdf", category: "Exams — University tests", cost: "Free", status: "not-started", notes: "2023 sample, 3 problems. Real test: 90 min, logic / maths / theory / DB-architecture-Java." },
+    { id: "tud-examples", name: "TU Darmstadt entrance-exam example questions", url: "https://www.informatik.tu-darmstadt.de/media/informatik/fb20_studium/studiengaenge/sonstige_pdfs/Examples.pdf", category: "Exams — University tests", cost: "Free", status: "not-started", notes: "Dijkstra, LL(1) parsing, neural-network forward pass. Exempt with GRE V155/Q165/AWA3.5 or GATE ≥750." },
+    { id: "nptel-toc", name: "NPTEL Theory of Computation (Prof. Tewari, IIT Kanpur)", url: "https://nptel.ac.in/courses/106104148", category: "CS Foundations", cost: "Free", status: "not-started", notes: "8 weeks, automata → decidability. Check = weekly assignments ≥70%." },
+    { id: "mit-6042", name: "MIT 6.042J Mathematics for Computer Science", url: "https://ocw.mit.edu/courses/6-042j-mathematics-for-computer-science-spring-2015/", category: "CS Foundations", cost: "Free", status: "not-started", notes: "Discrete maths + probability (TUM test area b, GATE)." },
+    { id: "mit-1806", name: "MIT 18.06 Linear Algebra (Strang)", url: "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/", category: "CS Foundations", cost: "Free", status: "not-started", notes: "Maintenance only — already 3.7/6." },
+    { id: "dw-nicos", name: "DW Nicos Weg (A1–B1, free certificate per level)", url: "https://learngerman.dw.com/en/nicos-weg/c-36519789", category: "German", cost: "Free", status: "not-started", notes: "The core spine. ~2-min episodes suit ADHD short sessions." },
+    { id: "dw-hub", name: "DW Learn German hub (Deutschtrainer, Artikeltrainer, Kurz und leicht)", url: "https://learngerman.dw.com/en/learn-german/s-9528", category: "German", cost: "Free", status: "not-started", notes: "" },
+    { id: "anki-a1", name: "Anki deck — Goethe A1 word list", url: "https://ankiweb.net/shared/info/293204297", category: "German", cost: "Free", status: "not-started", notes: "Use instead of generic frequency decks." },
+    { id: "anki-b1", name: "Anki deck — Goethe B1 Wortliste", url: "https://ankiweb.net/shared/info/1586166030", category: "German", cost: "Free", status: "not-started", notes: "From May 2027." },
+    { id: "goethe-a1-practice", name: "Goethe A1 model & practice exams", url: "https://www.goethe.de/en/spr/prf/ueb/pa1.html", category: "German", cost: "Free", status: "not-started", notes: "Timed practice from December." },
+    { id: "goethe-b1-practice", name: "Goethe B1 model & practice exams", url: "https://www.goethe.de/ins/mm/en/m/spr/prf/gzb1/ueb.html", category: "German", cost: "Free", status: "not-started", notes: "≥60% per module before booking." },
+    { id: "goethe-delhi-courses", name: "Goethe-Institut New Delhi — course dates (Intensive 160)", url: "https://www.goethe.de/ins/in/en/sta/del/kur/tup.cfm", category: "German", cost: "₹28,500 per level", status: "not-started", notes: "A2: weekend 9 Jan–1 May (Sat/Sun 08:00–13:30) or weekday 11 Jan–7 Apr (17:30). Fixed class times = the ADHD scaffold. Book only on goethe.de." },
+    { id: "easy-german", name: "Easy German / Super Easy German", url: "https://www.easygerman.org/", category: "German", cost: "Free", status: "not-started", notes: "Listening; good for the commute slot." },
+    { id: "schubert", name: "Schubert Verlag online grammar exercises", url: "https://www.schubert-verlag.de/aufgaben/uebungen_a1/a1_uebungen_index.htm", category: "German", cost: "Free", status: "not-started", notes: "" },
+    { id: "italki", name: "italki community tutors", url: "https://www.italki.com/", category: "German", cost: "~$5–15/hour", status: "not-started", notes: "Speaking + writing correction, 2×/week from December." },
+    { id: "tum-style-guide", name: "TUM application style guide", url: "https://www.tum.de/en/studies/application/application-info-portal/document-requirements/tum-style-guide", category: "Applications", cost: "Free", status: "not-started", notes: "Use as the universal template: PDF, A4, 12pt, 1.5 spacing. AI-written applications are excluded." },
+    { id: "daad-letter-guide", name: "DAAD letter-of-motivation guide", url: "https://www2.daad.de/medien/letter_of_motivation_nawam.pdf", category: "Applications", cost: "Free", status: "not-started", notes: "" },
+    { id: "daad-scholarship", name: "DAAD Study Scholarship — Master's, all disciplines", url: "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database/?detail=50026200", category: "Applications", cost: "Free (€992/month if awarded)", status: "not-started", notes: "Select India for the exact deadline. 1 LOR from a professor, CV ≤3 pages, letter 1–3 pages." },
+    { id: "uni-assist-checklist", name: "uni-assist checklist (VPD)", url: "https://www.uni-assist.de/fileadmin/Downloads/Tools/Checklisten/EN/UA-Checkliste-Standard-Verfahren-EN.pdf", category: "Applications", cost: "€75 + €30 per extra program", status: "not-started", notes: "6–7 weeks for Asia; file ≥8 weeks before the deadline." },
+    { id: "erasmus-catalogue", name: "Erasmus Mundus catalogue", url: "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en", category: "Applications", cost: "Free", status: "not-started", notes: "Max 2–3 AI/data programs. See scholarships.md for each program's link and deadline." },
+    { id: "neetcode", name: "NeetCode 150", url: "https://neetcode.io/practice", category: "Career", cost: "Free", status: "not-started", notes: "Werkstudent online-assessment baseline (LeetCode easy–medium). From Phase 4." },
+    { id: "made-with-ml", name: "Made With ML (MLOps)", url: "https://madewithml.com/courses/mlops/", category: "Career", cost: "Free", status: "not-started", notes: "Spine for the deployed portfolio project." },
+    { id: "hf-learn", name: "Hugging Face Learn", url: "https://huggingface.co/learn", category: "Career", cost: "Free", status: "not-started", notes: "Applied LLM / RAG depth." },
+    { id: "sdp", name: "System Design Primer", url: "https://github.com/donnemartin/system-design-primer", category: "Career", cost: "Free", status: "not-started", notes: "Zalando recommends Alex Xu's book for its system-design round." },
+    { id: "pramp", name: "Pramp (Exponent)", url: "https://www.pramp.com/", category: "Career", cost: "Free (5 credits/month)", status: "not-started", notes: "Mock interviews from Phase 4/5." },
+    { id: "arbeitnow", name: "Arbeitnow — English-speaking jobs in Germany", url: "https://www.arbeitnow.com/english-speaking-jobs", category: "Career", cost: "Free", status: "not-started", notes: "Saved searches from July 2027." },
+    { id: "germantechjobs", name: "GermanTechJobs", url: "https://germantechjobs.de", category: "Career", cost: "Free", status: "not-started", notes: "" },
+    { id: "visa-faq", name: "German Missions India — student visa FAQ", url: "https://india.diplo.de/in-en/service/2546328-2546328", category: "Logistics", cost: "Free", status: "not-started", notes: "Book VFS the week you're admitted." },
+    { id: "daad-registering", name: "DAAD — registering in Germany (Anmeldung)", url: "https://www.daad.de/en/studying-in-germany/living-in-germany/registering/", category: "Logistics", cost: "Free", status: "not-started", notes: "Anmeldung within 2 weeks of moving in." }
   ],
 
   /* -----------------------------------------------------------------
      PROJECTS
      ----------------------------------------------------------------- */
   projects: [
-    { id: "proj-quant", name: "Quant Trading Strategy Portfolio", status: "planned", progress: 0,
-      description: "The primary portfolio piece for the pivot: 2 independently-built, backtested trading strategies (SMA crossover, RSI mean-reversion) on QuantConnect, validated with walk-forward testing and honest lookahead/survivorship-bias auditing, compared on Sharpe/Sortino/drawdown/alpha/beta, at least one deployed to Alpaca paper trading, documented in a methodology-first GitHub repo. This is the actual evidence behind the 'credible working knowledge' claim — not a resume line, a real artifact.",
+    { id: "proj-dossier", name: "Germany application dossier (Winter 2027/28)", status: "in-progress", progress: 0,
+      description: "Everything the universities actually score: transcript credit mapping against each program's required areas, motivation letter, TUM statement + essay, tabular CV, LORs, APS certificate, uni-assist VPD. TUM's first stage is 50 of 57 points on curricular fit — this dossier, not the CGPA, is what decides admits.",
       milestones: [
-        { title: "QuantConnect account active, Boot Camp complete, first template backtest run", done: false, dueWeek: 1 },
-        { title: "Markov-chain mini-project done on real transition-probability data", done: false, dueWeek: 3 },
-        { title: "Strategy 1 (SMA crossover) built, backtested 5+ years, lookahead-bias audited and fixed", done: false, dueWeek: 5 },
-        { title: "Strategy 1 walk-forward validated, results reported honestly", done: false, dueWeek: 7 },
-        { title: "Strategy 2 (RSI mean-reversion) built and compared against Strategy 1 on Sharpe/Sortino/drawdown/alpha/beta", done: false, dueWeek: 8 },
-        { title: "Strategy deployed to Alpaca paper trading and confirmed working", done: false, dueWeek: 9 },
-        { title: "GitHub repo finalized — methodology-first README, honest about limitations", done: false, dueWeek: 11 }
+        { title: "Bennett documents received: module handbook, CGPA→% rule, minimum pass grade, rank letter", done: false, dueWeek: 3 },
+        { title: "DAAD submitted (letter, CV, LOR, transcripts, IELTS)", done: false, dueWeek: 2 },
+        { title: "APS dossier couriered", done: false, dueWeek: 5 },
+        { title: "Credit-mapping table done for TUM, KIT, TUD, RWTH, TU Berlin, Passau", done: false, dueWeek: 7 },
+        { title: "Master motivation letter reviewed by two humans", done: false, dueWeek: 9 },
+        { title: "TUM essay + statement of reasons final", done: false, dueWeek: 26 },
+        { title: "TUM VPD filed via uni-assist", done: false, dueWeek: 26 },
+        { title: "All 7–9 applications submitted", done: false, dueWeek: 41 }
       ],
       links: { repo: "", demo: "" } },
-    { id: "proj-rag", name: "RAG Q&A System (AI-Eng hedge stub)", status: "planned", progress: 0,
-      description: "Deliberately minimized after the quant pivot — a 3-4 day stub, not a multi-week build. Enough to defensibly discuss RAG basics (retrieval, chunking, embeddings) in an AI-Eng interview. No FastAPI backend, no agent tool-use, no deployment — those were cut entirely, not deferred.",
+    { id: "proj-mlops", name: "Werkstudent-ready applied-AI project (deployed)", status: "planned", progress: 0,
+      description: "One applied-AI system with CI, tests, deployment and monitoring that you can defend end to end in a German Werkstudent interview. Build on an existing strength (Nomly / the Dino request cascade) rather than starting cold. Real hours only from Phase 4.",
       milestones: [
-        { title: "Basic document ingestion + chunking + embeddings + retrieval working locally", done: false, dueWeek: 6 },
-        { title: "Can explain the architecture and trade-offs out loud, unaided", done: false, dueWeek: 6 }
+        { title: "Problem + scope chosen, repo with README skeleton", done: false, dueWeek: 27 },
+        { title: "Tests + CI pipeline green", done: false, dueWeek: 32 },
+        { title: "Deployed with basic monitoring", done: false, dueWeek: 37 },
+        { title: "Methodology-first README + 2-minute walkthrough you can give cold", done: false, dueWeek: 45 }
       ],
       links: { repo: "", demo: "" } }
   ],
 
   /* -----------------------------------------------------------------
-     APPLICATIONS / INTERVIEWS / COMPETITIONS — start empty, real trackers
+     APPLICATIONS — pre-seeded with the target list (status "planned").
+     Deadlines are last cycle's pattern unless confirmed — re-check each
+     program page in November.
      ----------------------------------------------------------------- */
-  applications: [],
+  applications: [
+    { id: "app-daad", company: "DAAD", role: "Study Scholarship — Master's (all disciplines)", dateApplied: "", deadline: "2026-10-15", status: "planned", link: "https://www2.daad.de/deutschland/stipendium/datenbank/en/21148-scholarship-database/?detail=50026200", notes: "Working deadline 15 Oct — confirm in the portal (select India)." },
+    { id: "app-rwth", company: "RWTH Aachen", role: "MSc Software Systems Eng. / Data Science", dateApplied: "", deadline: "2027-03-01", status: "planned", link: "https://sc.informatik.rwth-aachen.de/en/studium/master/sse/application-for-admission/", notes: "Only if APS is issued by 1 Mar. GRE Q >75th pct, V >15th, AWA ≥3.5. No GATE." },
+    { id: "app-tue", company: "Uni Tübingen", role: "MSc Machine Learning", dateApplied: "", deadline: "2027-04-30", status: "planned", link: "https://uni-tuebingen.de/en/study/finding-a-course/degree-programs-available/detail/course/machine-learning-master/", notes: "Only if converted grade ≤2.0. 27 ECTS maths, 18 ECTS CS, IELTS 7.0. €1,500/sem." },
+    { id: "app-saar", company: "Saarland University", role: "MSc Computer Science / DSAI", dateApplied: "", deadline: "2027-05-15", status: "planned", link: "https://saarland-informatics-campus.de/en/studium-studies/master-english/application-guide/", notes: "CGPA ≥75% AND top-10% rank; GRE or GATE (no minimum); 2 LORs; C1 English." },
+    { id: "app-tum", company: "TUM", role: "MSc Informatics", dateApplied: "", deadline: "2027-05-31", status: "planned", link: "https://www.cit.tum.de/en/cit/studies/degree-programs/master-informatics/", notes: "APS via uni-assist VPD first (file by ~5 Apr). GRE Q164/AWA4 or GATE CS. €6,000/sem. Written test ~Aug if in the 70–84 band." },
+    { id: "app-fau", company: "FAU Erlangen", role: "MSc Artificial Intelligence", dateApplied: "", deadline: "2027-05-31", status: "planned", link: "https://www.ai.study.fau.eu/prospective-students/master-ai/application-master/", notes: "GATE CS/DA route (or GRE General + Math Subject). €4,000/sem from SS 2027." },
+    { id: "app-passau", company: "Uni Passau", role: "MSc AI Engineering", dateApplied: "", deadline: "2027-05-31", status: "planned", link: "https://www.uni-passau.de/en/msc-ai-eng", notes: "No GRE. APS by the deadline. A1 German by end of year 1. No tuition." },
+    { id: "app-kit", company: "KIT", role: "MSc Computer Science (INT)", dateApplied: "", deadline: "2027-06-15", status: "planned", link: "https://www.informatik.kit.edu/english/14346.php", notes: "GRE V151/Q164/AWA4 or GATE. Possible interview Jun–Jul (0–60, pass 30). €1,500/sem." },
+    { id: "app-tud", company: "TU Darmstadt", role: "MSc Computer Science", dateApplied: "", deadline: "2027-07-15", status: "planned", link: "https://www.informatik.tu-darmstadt.de/studium_fb20/vor_dem_studium/bewerbung_1/bewerbung_2.en.jsp", notes: "Direct via TUCaN, paper documents by post. 60 ECTS matching core; exam ~1 Sep unless GRE V155/Q165/AWA3.5 or GATE ≥750." },
+    { id: "app-tub", company: "TU Berlin", role: "MSc Computer Science", dateApplied: "", deadline: "2027-08-31", status: "planned", link: "https://www.tu.berlin/en/eecs/academics-teaching/study-offer/masters-programs/msc-computer-science-informatik/msc-cs-in-application-admission", notes: "Safe-ish (open admission). No GRE. Credit minimums: 12 CP theory, 12 CP comp. eng., 18 CP maths." }
+  ],
   interviews: [],
   competitions: [
-    { id: "comp-kaggle-1", name: "First Kaggle competition (beginner-friendly, well-documented)", platform: "Kaggle", status: "not-started", url: "https://www.kaggle.com/competitions", notes: "Lower priority after the pivot — only pursue if time genuinely allows after the quant portfolio work. Goal if pursued: finish and document end-to-end, not win." }
+    { id: "comp-kaggle-1", name: "First Kaggle competition (beginner-friendly, well-documented)", platform: "Kaggle", status: "not-started", url: "https://www.kaggle.com/competitions", notes: "Optional — only after every application is in (Phase 5). Goal if pursued: finish and document end to end, not win." }
   ],
 
   /* -----------------------------------------------------------------
@@ -366,26 +411,22 @@ const DEFAULT_STATE = {
   dailyPlanDone: {},
 
   /* -----------------------------------------------------------------
-     TIMETABLE — revised for a 5-hour sleep floor (talked down from an
-     initial 4-hour proposal). Gym/breakfast stay non-negotiable; the
-     Deloitte work window is unchanged (internship-imposed, not a choice).
-     The actual trade is bedtime moving 1 hour later, not the evening
-     getting compressed.
+     TIMETABLE — same real schedule; the content of each block changed.
      ----------------------------------------------------------------- */
   timetable: [
     { time: "05:30–07:30", block: "Gym", type: "fixed", note: "Non-negotiable, set by you — not up for redesign." },
-    { time: "07:30–08:30", block: "Breakfast & bath", type: "fixed", note: "Non-negotiable." },
-    { time: "08:30–09:30", block: "Buffer / commute — light warm-up", type: "light", note: "Quant-vocabulary flashcards + quick mental math. Nothing new or hard here, it's transition time." },
-    { time: "09:30–18:00", block: "WORK WINDOW — flexible study between pings", type: "flexible", note: "Deloitte internship — you're logged in this whole span but only doing ~2 real work hours, scattered unpredictably. Do NOT plan deep, hard-to-resume work here. Use the floating focus timer in short 25-min sessions for resumable tasks: DSA problems, GT CS7646/QuantStart reading, applications." },
+    { time: "07:30–08:30", block: "Breakfast & bath", type: "fixed", note: "Non-negotiable. German audio (Coffee Break German, Easy German) fits here." },
+    { time: "08:30–09:30", block: "Buffer / commute — light warm-up", type: "light", note: "German: 1 Nicos Weg episode + 10 min Anki. Nothing new or hard here, it's transition time." },
+    { time: "09:30–18:00", block: "WORK WINDOW → DAY BLOCK", type: "flexible", note: "Until 1 Dec: Deloitte — interruptible, ~2 real work hours scattered. Use 25-min Quick sessions for resumable tasks only: Anki (German + GRE vocab), GRE Quant mini-sets, application admin. From 2 Dec: free day block (Erasmus documents, German A1 sprint). From January: Bennett's final semester + dMAT Core micro-drills." },
     { time: "18:00–18:45", block: "Decompress / dinner prep", type: "light" },
     { time: "18:45–19:30", block: "Dinner", type: "fixed" },
-    { time: "19:30–21:30", block: "DEEP WORK 1 — hardest task of the day", type: "deep", note: "Uninterrupted, your best focus window. Quant theory (probability, stochastic processes, backtesting concepts) most days; DSA only ~2x/week." },
+    { time: "19:30–21:30", block: "DEEP WORK 1 — hardest task of the day", type: "deep", note: "Your best focus window. GRE Quant (Oct–Nov) → GATE CS (Dec–Feb) → TUM essay/statement (Mar) → one application per week (Apr–Jul) → German B1 exam prep (Jul–Aug)." },
     { time: "21:30–21:45", block: "Break", type: "light" },
-    { time: "21:45–23:15", block: "DEEP WORK 2 — applied coding", type: "deep", note: "The quant strategy project (was the RAG project pre-pivot)." },
+    { time: "21:45–23:15", block: "DEEP WORK 2 — second-hardest", type: "deep", note: "GRE Verbal/AWA + application documents (Oct–Nov) → Erasmus Mundus + GRE retake (Dec–Jan) → dMAT reading sets (Jan–Mar) → German B1 (Apr–Jul) → Werkstudent prep (Jul–Sep)." },
     { time: "23:15–23:30", block: "Break", type: "light" },
-    { time: "23:30–00:15", block: "DEEP WORK 3 — Quant Lab", type: "deep", note: "New block, 45min, ring-fenced specifically for QuantConnect/backtesting hands-on execution so it never gets silently displaced by DSA or hedge content. Deliberately lower-cognitive-load than Deep Work 1 — iteration, not new theory, since it's 11:30pm." },
-    { time: "00:15–00:30", block: "Quick review + mental math + plan tomorrow", type: "light" },
-    { time: "00:30", block: "Sleep (~5h to 05:30 wake)", type: "fixed", note: "Hard floor, zero slack. Talked down from an initial 4-hour proposal — chronic slippage past 00:30 should trigger a schedule renegotiation at the next gate, not a silent further cut." }
+    { time: "23:30–00:15", block: "LIGHT BLOCK — Anki / flashcards / plan tomorrow", type: "light", note: "Was 'Quant Lab'. Low-load only, never new theory. This is the FIRST block to cut: dropping it moves sleep to 23:30 (6h). At minimum, cut it in the 7 days before IELTS, GRE, GATE, dMAT and B1." },
+    { time: "00:15–00:30", block: "Quick review + plan tomorrow", type: "light" },
+    { time: "00:30", block: "Sleep (~5h to 05:30 wake)", type: "fixed", note: "Your call — kept as you set it. Research says ≤6h is inadequate for adults (AASM/Sleep Research Society) and sleep is when new vocabulary consolidates — which is exactly what German + GRE Verbal depend on. Chronic slippage past 00:30 should trigger a renegotiation at the next gate, not a silent further cut." }
   ],
 
   /* -----------------------------------------------------------------
@@ -394,18 +435,24 @@ const DEFAULT_STATE = {
   reviews: { weekly: [], monthly: [] },
 
   /* -----------------------------------------------------------------
-     MILESTONES — the real gates, quant-primary, "credible working
-     knowledge" bar throughout, not mastery
+     MILESTONES — Go/No-Go gates. Each criterion is a yes/no check;
+     the fail action is what you do instead of renegotiating the plan.
      ----------------------------------------------------------------- */
   milestones: [
-    { id: "gate1", title: "Day 28 Gate — Phase 1 Complete", dueDay: 28, status: "pending",
-      criteria: "Cold-define lookahead bias, survivorship bias, and overfitting correctly and unprompted. Explain what a Sharpe ratio and max drawdown measure, conceptually, without notes. Fresh Bayes/EV problem solved unaided. QuantConnect account active, at least one template algorithm run end to end. NeetCode cumulative >= 25 problems." },
-    { id: "gate2", title: "Day 56 Gate — Phase 2 Complete", dueDay: 56, status: "pending",
-      criteria: "At least one genuinely independently-built backtested strategy on QuantConnect with real multi-year results (Sharpe, drawdown, CAGR documented). Can point to a specific lookahead-bias fix made in your own code and explain why it mattered. Walk-forward validation applied at least once, with honest reporting even where test performance dropped. Markov-chain transition-probability mini-project done on real data. NeetCode cumulative >= 50." },
-    { id: "gate3", title: "Day 77 Gate — Phase 3 Complete", dueDay: 77, status: "pending",
-      criteria: "2 distinct backtested strategies built and compared on Sharpe/Sortino/max drawdown/alpha/beta. Can defend either strategy under adversarial questioning — what would break it, why isn't this overfit. Strategy deployed to Alpaca paper trading at least once. Real GitHub repo with an honest, methodology-first README. Applications active for both quant-shop targets generally (not just the warm intro) and AI-Eng/SWE hedge targets. NeetCode cumulative >= 70-75." },
-    { id: "gate4", title: "Day 94 / Dec 1 — FINAL GATE", dueDay: 94, status: "pending",
-      criteria: "Full cold re-diagnostic complete across all 10 original domains plus the 2 new quant skills, compared honestly against the original Day 1 baseline. Can explain, cold and unprompted, all core vocabulary/pitfalls (lookahead bias, survivorship bias, overfitting, walk-forward validation, Sharpe ratio, max drawdown, alpha, beta, mean reversion, random walk, Markov property) to a nontechnical-ish interviewer. At least one backtested strategy is genuinely finished, validated, and resume-ready — not a toy, not claimed-but-fragile. NeetCode cumulative >= 80-85 (hedge intact, not abandoned). This is a 'credible, trainable junior' bar, not mastery — the gate is honesty about what's actually true, not a pass/fail performance." }
+    { id: "g0", title: "G0 — Lock-in (14 Oct 2026)", dueDay: 14, status: "pending",
+      criteria: "GATE CS registered (PDF + receipt). IELTS sat or booked on a date DAAD accepts. DAAD submitted — or consciously skipped (no partial submission). GRE booked for 1–10 Dec. Goethe GDW4D26 decision made. Bennett documents + 2 LORs requested, APS email sent, g.a.s.t. accommodation enquiry sent. FAIL ACTION: chase everything on 21 Oct; if GATE missed, GRE-only route." },
+    { id: "g1", title: "G1 — Scores & audit (1 Dec 2026)", dueDay: 62, status: "pending",
+      criteria: "IELTS ≥7.0 overall (≥6.5 floor). POWERPREP Test 2 timed: Q ≥163, AWA practice ~4. Credit-mapping table done for TUM, KIT, TUD, RWTH, TU Berlin, Passau. APS dossier couriered (tracking number). German: Nicos Weg A1 units 1–12, Anki on ≥80% of days. Erasmus shortlist ≤3. FAIL ACTION: IELTS retake in Dec; move GRE to early Jan (₹5,650); drop any program whose credit minimum you fail." },
+    { id: "g2", title: "G2 — Wave 1 (15 Jan 2027)", dueDay: 107, status: "pending",
+      criteria: "Official GRE ≥ Q164 / AWA 4.0 (stretch Q165 / V155). Erasmus submissions done as shortlisted. dMAT registered (New Delhi). Goethe A1 exam booked, A2 course started 9 or 11 Jan. GATE admit card downloaded. FAIL ACTION: apply the GRE-vs-GATE rule — below Q164 after two attempts, GATE CS becomes the TUM/KIT route and RWTH drops; if no dMAT date by 15 Jan, re-plan around KIT, TUD, TU Berlin." },
+    { id: "g3", title: "G3 — Gate tests & APS (31 Mar 2027)", dueDay: 182, status: "pending",
+      criteria: "dMAT sat, certificate forwarded to APS. APS certificate issued (or written confirmation it issues before ~5 Apr). TUM VPD filed through uni-assist. TUM essay (~1,000 words) + statement drafted by YOU and reviewed by two humans. GATE result recorded; final list frozen at 7–9 programs. FAIL ACTION: no APS by ~5 Apr → TUM, FAU, Passau come off the 'safe to submit' list; KIT, TUD, TU Berlin anchor the cycle." },
+    { id: "g4", title: "G4 — Wave 2 (15 Jul 2027)", dueDay: 288, status: "pending",
+      criteria: "All planned applications submitted, including at least one safe-ish (TU Berlin or Passau). At least 1 admit, OR ≥4 decisions still pending. Blocked-account money available (€11,904 in 2026 — check the 2027 figure). B1 course running, B1 dates booked. FAIL ACTION: add TU Berlin immediately (window to ~31 Aug); prepare the Summer 2028 contingency; JN Tata / K.C. Mahindra if funds fall short." },
+    { id: "g5", title: "G5 — Departure-ready (31 Aug 2027)", dueDay: 335, status: "pending",
+      criteria: "Visa granted. Housing: Studierendenwerk application filed or a scam-checked temporary contract. Anmeldung appointment booked for within 2 weeks of arrival. B1 modules sat (or retake booked). TUM written test / TUD exam attended or exempt. Werkstudent CV + saved searches live. FAIL ACTION: ask the university about deferring the start — don't fly on hope; book a 4-week short-stay room." },
+    { id: "g6", title: "FINAL — On campus (20 Sep 2027)", dueDay: 355, status: "pending",
+      criteria: "Landed, enrolled, Anmeldung done, bank account + health insurance active, B1 certificate (or retake date). Honest retrospective: what's verifiably true now vs. 1 Oct 2026. Then: Deutschlandstipendium in semester 1 and the first Werkstudent applications." }
   ],
 
   /* -----------------------------------------------------------------
@@ -417,16 +464,16 @@ const DEFAULT_STATE = {
     claims: [
       { skill: "Python", claimedLevel: "Strong understanding", verifiedLevel: 1, defensible: false, note: "Do not claim above level 3 until re-tested and holding up." },
       { skill: "SQL", claimedLevel: "Comfortable", verifiedLevel: 1.6, defensible: false, note: "JOINs are a real gap — fix before claiming this." },
-      { skill: "NumPy/Pandas", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic — verify before relying on the claim. Now genuinely load-bearing for the quant track." },
+      { skill: "NumPy/Pandas", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic — verify before relying on the claim." },
       { skill: "Git/GitHub", claimedLevel: "Comfortable", verifiedLevel: null, defensible: null, note: "Untested by the diagnostic." },
-      { skill: "Algorithmic Trading", claimedLevel: "N/A yet", verifiedLevel: 0, defensible: false, note: "Do not claim ANY quant-trading skill on a resume until the Strategy 1/2 portfolio is real and verifiable — this is the whole point of the pivot's evidence-based framing." }
+      { skill: "German", claimedLevel: "Elementary (A1 in progress)", verifiedLevel: 0, defensible: true, note: "Claim only the level you've actually certified (Goethe A1 → B1). 'In progress' is honest and helps on LinkedIn." }
     ],
     portfolioLinks: []
   },
 
   achievements: [
     { id: "a1", date: "2026-08-15", title: "Diagnostic complete", description: "Finished the full 10-domain skill diagnostic — the real baseline this whole plan is built on." },
-    { id: "a2", date: PLAN_START_DATE, title: "Quant pivot — evidence-based, not impulsive", description: "Researched the real timeline/hiring-bar evidence before committing, got talked down from a 4-hour-sleep plan to a sustainable 5-hour floor, and set 'credible working knowledge' instead of 'mastery' as the actual target. That's the harder, more useful decision than just saying yes to the deadline." }
+    { id: "a3", date: PLAN_START_DATE, title: "One lane: Germany MS", description: "Chose a single primary lane after researching ~60 programs in 15 countries, scholarships, tests and the German job market — and parked the quant plan explicitly instead of running five plans at once." }
   ],
 
   settings: { theme: "light" }

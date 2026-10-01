@@ -1,11 +1,14 @@
 # Career OS — Personal Dashboard
 
 A single-page career-tracking dashboard, pre-populated with the real output of a
-full career-strategy engagement: a 10-domain evidence-based skill diagnostic and
-a 94-day plan (Day 1 = restart date, Day 94 = Dec 1, 2026) built around a
-quant/algorithmic-trading-primary strategy, with AI Engineer/SWE kept as a real
-hedge. (Pivoted 2026-08-30 from an earlier AI-Engineer-primary version of this
-same plan — see `CONTENT_VERSION` in `js/app.js` for how that transition works.)
+full career-strategy engagement: a 355-day, calendar-anchored plan (Day 1 =
+2026-10-01, Day 355 = 2027-09-20 arrival) for a CS/AI master's in Germany,
+Winter 2027/28 — six phases with Go/No-Go gates, an exam + German (A1 -> B1)
+skill matrix, a verified resource library, and the target universities
+pre-seeded in Applications. (Earlier versions: AI-Engineer-primary, then a
+quant-trading pivot on 2026-08-30; the v4 migration archives the quant plan
+into `STATE.archive.quant` rather than deleting it — see `CONTENT_VERSION` in
+`js/app.js`.)
 
 No backend, no build step, no signup. Everything lives in your browser's
 `localStorage`. Two CDN scripts (Chart.js, Font Awesome) are the only external
@@ -62,8 +65,9 @@ No environment variables are needed anywhere — there's no backend.
 ## How your data works
 
 - On first load, the app seeds `localStorage` from `js/data.js` (`DEFAULT_STATE`) —
-  your real diagnostic scores, the 94-day roadmap, verified resources, and the
-  Day 28/56/77/94 milestone gates.
+  the skill matrix, the 355-day roadmap (explicit day-by-day plans for Days
+  1–21, then each phase's weekly `dayTemplate` fills Today's Plan for every
+  other day), verified resources, target applications and the G0–G5 gates.
 - Every edit (skill update, application logged, note saved, etc.) is written
   straight back to `localStorage` under the key `careerOS_state_v1`.
 - Unlike a purely static seed, **content updates do propagate to an existing

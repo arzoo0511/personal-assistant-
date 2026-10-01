@@ -91,8 +91,8 @@ function renderHoursByCategoryChart() {
   const ctx = document.getElementById("hoursChart");
   if (!ctx) return;
   const cats = [
-    ["math", "Math", "--series-1"], ["dsa", "DSA", "--series-2"], ["quant", "Quant", "--series-3"],
-    ["ai", "AI / Projects", "--series-4"], ["projects", "Other projects", "--series-5"], ["interviewPrep", "Interview prep", "--series-7"]
+    ["exams", "Exams", "--series-1"], ["german", "German", "--series-2"], ["cs", "CS foundations", "--series-3"],
+    ["apps", "Applications", "--series-4"], ["dsa", "DSA", "--series-5"], ["ai", "AI / Projects", "--series-6"], ["interviewPrep", "Interview prep", "--series-7"]
   ];
   const totals = cats.map(([id]) => STATE.studyLog.reduce((a, l) => a + (l.hours[id] || 0), 0));
   chartInstances.hoursChart = new Chart(ctx, {

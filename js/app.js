@@ -22,8 +22,15 @@ let STATE = null;
 // substantively different, not just updated), gated so it only fires once
 // per save via the `savedVersion < 3` check below. Do not repeat this
 // startDate-reset pattern for ordinary future content bumps.
-const CONTENT_VERSION = 3;
-const TOTAL_PLAN_DAYS = 94; // Day 94 = Dec 1, 2026 from the v3 restart date
+//
+// v4 (2026-10-01): Quant-primary -> Germany MS (CS/AI, Winter 2027/28).
+// A full lane change, so it archives the quant skills/courses/projects/
+// milestones and the quant-plan progress into STATE.archive.quant (nothing
+// is deleted), replaces them with the Germany plan, and pins startDate to
+// PLAN_START_DATE — this plan is calendar-anchored (deadlines are fixed
+// dates), so Day N must always mean the same date regardless of load day.
+const CONTENT_VERSION = 4;
+const TOTAL_PLAN_DAYS = 355; // Day 1 = 2026-10-01, Day 355 = 2027-09-20 (arrival)
 
 function loadState() {
   try {
@@ -31,7 +38,7 @@ function loadState() {
     if (raw) return migrateContent(JSON.parse(raw));
   } catch (e) { console.warn("Failed to parse saved state, resetting.", e); }
   const fresh = getFreshDefaultState();
-  fresh.meta.startDate = todayISO(); // dynamic — a true first-ever load always starts on the day it actually happens, not the static seed date
+  fresh.meta.startDate = PLAN_START_DATE; // calendar-anchored plan (v4+): Day 1 is always 2026-10-01
   fresh.meta.contentVersion = CONTENT_VERSION;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
   return fresh;
@@ -81,11 +88,64 @@ function migrateContent(saved) {
     saved.meta.startDate = todayISO();
   }
 
+  // v4-only, one-time: the Germany-MS lane change. Archive (never delete)
+  // everything quant-specific, then swap in the Germany plan.
+  if (savedVersion < 4) migrateToGermanyPlan(saved, fresh);
+
   saved.meta = saved.meta || {};
   saved.meta.contentVersion = CONTENT_VERSION;
   saved.meta.lastUpdated = todayISO();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
   return saved;
+}
+
+const V4_ARCHIVED_COURSE_IDS = ["python-tutor", "stat110", "sqlzoo", "bandit", "tlcl", "mit-ocw-prob", "brainstellar",
+  "janestreet-puzzles", "quantconnect", "zipline", "alpaca", "gt-cs7646", "quantstart-articles"];
+function migrateToGermanyPlan(saved, fresh) {
+  saved.archive = saved.archive || {};
+  const freshSkillIds = fresh.skills.map(s => s.id);
+  saved.archive.quant = {
+    archivedOn: todayISO(),
+    startDate: saved.meta ? saved.meta.startDate : null,
+    skills: (saved.skills || []).filter(s => !freshSkillIds.includes(s.id)),
+    courses: (saved.courses || []).filter(c => V4_ARCHIVED_COURSE_IDS.includes(c.id)),
+    projects: (saved.projects || []).filter(p => p.id === "proj-quant" || p.id === "proj-rag"),
+    roadmapDone: saved.roadmapDone || {},
+    dailyPlanDone: saved.dailyPlanDone || {}
+  };
+
+  // Skills: the Germany skill set, but any skill whose id survives
+  // (dsa, linalg, probstat, dlai) keeps the user's own level + history.
+  saved.skills = fresh.skills.map(fs => {
+    const existing = (saved.skills || []).find(s => s.id === fs.id);
+    return existing ? { ...fs, level: existing.level, history: existing.history || fs.history } : fs;
+  });
+
+  // Courses: drop the archived quant resources, keep anything the user
+  // added themselves, then add the Germany library (additive).
+  saved.courses = (saved.courses || []).filter(c => !V4_ARCHIVED_COURSE_IDS.includes(c.id));
+  fresh.courses.forEach(fc => { if (!saved.courses.find(c => c.id === fc.id)) saved.courses.push(fc); });
+
+  saved.projects = (saved.projects || []).filter(p => p.id !== "proj-quant" && p.id !== "proj-rag");
+  fresh.projects.forEach(fp => { if (!saved.projects.find(p => p.id === fp.id)) saved.projects.push(fp); });
+
+  saved.applications = saved.applications || [];
+  fresh.applications.forEach(fa => { if (!saved.applications.find(a => a.id === fa.id)) saved.applications.push(fa); });
+
+  saved.resume = saved.resume || fresh.resume;
+  saved.resume.claims = (saved.resume.claims || []).filter(c => c.skill !== "Algorithmic Trading");
+  if (!saved.resume.claims.find(c => c.skill === "German")) saved.resume.claims.push(fresh.resume.claims.find(c => c.skill === "German"));
+
+  saved.achievements = saved.achievements || [];
+  const pivot = fresh.achievements.find(a => a.id === "a3");
+  if (pivot && !saved.achievements.find(a => a.id === "a3")) saved.achievements.unshift(pivot);
+
+  // Progress keys are day/phase-indexed, so quant-plan ticks would land on
+  // the wrong Germany tasks — start clean (the old ticks are archived above).
+  saved.roadmapDone = {};
+  saved.dailyPlanDone = {};
+  saved.meta = saved.meta || {};
+  saved.meta.startDate = PLAN_START_DATE;
 }
 
 function saveState() {
@@ -115,6 +175,16 @@ function daysBetween(a, b) {
   const A = new Date(a + "T00:00:00");
   const B = new Date(b + "T00:00:00");
   return Math.round((B - A) / 86400000);
+}
+
+// Calendar date for a plan day (Day 1 = startDate).
+function planDayDate(dayNum) {
+  const d = new Date(STATE.meta.startDate + "T00:00:00");
+  d.setDate(d.getDate() + dayNum - 1);
+  return d;
+}
+function fmtPlanDay(dayNum) {
+  return planDayDate(dayNum).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
 function currentPlanDay() {
@@ -195,17 +265,17 @@ function escapeHtml(str) {
 const VIEW_TITLES = {
   dashboard: ["Dashboard", "Your career operating system, at a glance"],
   mastersheet: ["Master Sheet", "Everything on one page — weeks, milestones, and the skill matrix"],
-  roadmap: ["Roadmap", "4 phases to Dec 1 — week by week"],
+  roadmap: ["Roadmap", "6 phases to arrival (Sept 2027) — gate by gate"],
   timetable: ["Timetable & Calendar", "The daily template + a study-day log"],
-  skills: ["Skill Trackers", "AI · Quant · Math · DSA · Finance — evidence-based, 0-6 scale"],
-  progress: ["Progress & Charts", "Skill growth, backtested strategies, study hours, pace to Dec 1"],
+  skills: ["Skill Trackers", "Exams · German · CS foundations · Career — evidence-based, 0-6 scale"],
+  progress: ["Progress & Charts", "Skill growth, study hours, pace to arrival"],
   projects: ["Projects", "Portfolio pieces in progress"],
   courses: ["Courses & Resources", "The verified free-resource library"],
-  applications: ["Applications", "Internship / job pipeline"],
+  applications: ["Applications", "Universities, scholarships & Werkstudent pipeline"],
   interviews: ["Interviews", "Rounds, prep notes, outcomes"],
   competitions: ["Competitions", "Kaggle, hackathons, and the rest"],
   studylog: ["Study & Exercise Log", "Daily hours by category + streaks"],
-  milestones: ["Milestones", "Day 28 / 56 / 77 / 94 gates and weekly checkpoints"],
+  milestones: ["Milestones", "Go/No-Go gates G0–G5 + arrival"],
   reviews: ["Weekly / Monthly Review", "What got done, what didn't, why"],
   notes: ["Notes", "Freeform, tagged"],
   resume: ["Resume & Portfolio", "Only claim what you can demonstrate at 3+"],
@@ -331,7 +401,7 @@ function renderStakesBanner() {
   el.innerHTML = `
     <i class="fa-solid ${onTrack ? "fa-fire" : "fa-triangle-exclamation"} sb-icon"></i>
     <div>
-      <b>TARGET: ${escapeHtml(primaryHeadline)}</b> — before 2027 graduation.
+      <b>TARGET: ${escapeHtml(primaryHeadline)}</b> — on campus by Oct 2027.
       <span class="sb-sub">&nbsp;Day ${day}/${TOTAL_PLAN_DAYS} ${daysToGate != null ? `· ${daysToGate <= 0 ? "GATE DUE NOW" : daysToGate + " days to " + nextGate.title} ` : ""}· weakest right now: ${escapeHtml(weakest.name)} (${weakest.level}/6, needs ${weakest.target}/6)${onTrack ? " · this week's tasks: done" : ""}</span>
     </div>
   `;
@@ -523,7 +593,8 @@ function resetTimer(e) {
    DASHBOARD
    ============================================================ */
 function weakSkills() {
-  return STATE.skills.filter(s => s.level < 2.5 && s.category !== "Quant" || (s.category === "Quant" && s.id !== "mentalmath" && s.level < 2));
+  // Gap-based (v4): a skill is weak when it's 2+ points short of its own target.
+  return STATE.skills.filter(s => s.target - s.level >= 2);
 }
 
 function findCurrentWeek() {
@@ -543,6 +614,19 @@ function findDayPlan(dayNum) {
       if (!w.dailyPlan) continue;
       const found = w.dailyPlan.find(d => d.d === dayNum);
       if (found) return { week: w, plan: found };
+    }
+  }
+  // No explicit day-by-day entry: fall back to the phase's weekly template
+  // (indexed by weekday), so every day of the plan has a Today's Plan.
+  const phase = STATE.roadmap.find(p => p.range && dayNum >= p.range[0] && dayNum <= p.range[1]);
+  if (phase && phase.dayTemplate) {
+    const t = phase.dayTemplate[planDayDate(dayNum).getDay()];
+    if (t) {
+      const week = phase.weeks.find(w => {
+        const [s, e] = w.days.split("-").map(n => parseInt(n, 10));
+        return dayNum >= s && dayNum <= e;
+      }) || phase.weeks[0];
+      return { week, plan: { d: dayNum, ...t } };
     }
   }
   return null;
@@ -573,10 +657,10 @@ function studyStreak() {
 
 const PLAN_SLOTS = [
   { key: "morning", label: "Morning (8:30-9:30)", icon: "fa-feather", color: "var(--series-4)" },
-  { key: "daytime", label: "Work window (9:30-18:00)", icon: "fa-shuffle", color: "var(--series-2)" },
+  { key: "daytime", label: "Day block (9:30-18:00)", icon: "fa-shuffle", color: "var(--series-2)" },
   { key: "deep1", label: "Deep work 1 (19:30-21:30)", icon: "fa-bolt", color: "var(--series-1)" },
   { key: "deep2", label: "Deep work 2 (21:45-23:15)", icon: "fa-bolt", color: "var(--series-1)" },
-  { key: "deep3", label: "Quant Lab (23:30-00:15)", icon: "fa-flask", color: "var(--series-1)" },
+  { key: "deep3", label: "Light block (23:30-00:15)", icon: "fa-layer-group", color: "var(--series-4)" },
   { key: "night", label: "Night (00:15-00:30)", icon: "fa-moon", color: "var(--series-7)" }
 ];
 function renderTodayPlanCard(day, plan) {
@@ -587,7 +671,7 @@ function renderTodayPlanCard(day, plan) {
   return `
     <div class="card mb-16" style="border-color:var(--series-1);">
       <div class="card-title-row">
-        <h3><i class="fa-solid fa-calendar-day"></i>&nbsp; Today's plan — Day ${day}${isBufferDay ? " (buffer day)" : ""}</h3>
+        <h3><i class="fa-solid fa-calendar-day"></i>&nbsp; Today's plan — Day ${day} · ${fmtPlanDay(day)}${isBufferDay ? " (buffer day)" : ""}</h3>
         <span class="muted">${doneCount}/${activeSlots.length} done</span>
       </div>
       ${activeSlots.map(s => {
@@ -621,7 +705,7 @@ function renderDayChecklist(dp, currentDay, firstRenderThisSession) {
     <div class="week-block" style="margin-bottom:6px; ${isToday ? "border-color:var(--series-1);" : ""}">
       <div class="week-header" onclick="toggleWeekOpen('${bodyId}')" style="padding:9px 12px;">
         <div class="flex gap-8">
-          <span class="wtitle" style="font-size:12.5px;">Day ${dp.d}${isBuffer ? " · buffer" : ""}</span>
+          <span class="wtitle" style="font-size:12.5px;">Day ${dp.d} · ${fmtPlanDay(dp.d)}${isBuffer ? " · buffer" : ""}</span>
           ${isToday ? '<span class="badge badge-good">today</span>' : ""}
         </div>
         <div class="flex gap-10">
@@ -647,7 +731,7 @@ function renderDashboard() {
   const pct = Math.min(100, Math.round((day / TOTAL_PLAN_DAYS) * 100));
   const cw = findCurrentWeek();
   const avgSkill = (STATE.skills.reduce((a, s) => a + s.level, 0) / STATE.skills.length).toFixed(1);
-  const dsaHours = STATE.studyLog.reduce((a, l) => a + (l.hours.dsa || 0), 0);
+  const examHours = STATE.studyLog.reduce((a, l) => a + (l.hours.exams || 0), 0);
   const weak = weakSkills().sort((a, b) => a.level - b.level).slice(0, 3);
   const streak = studyStreak();
   const upcomingMilestone = STATE.milestones.find(m => m.status !== "passed" && m.status !== "failed" && m.dueDay >= day) || STATE.milestones[STATE.milestones.length - 1];
@@ -697,9 +781,9 @@ function renderDashboard() {
         <div class="delta ${streak > 0 ? "good" : "flat"}"><i class="fa-solid fa-fire"></i> ${streak > 0 ? "keep it going" : "log today to start one"}</div>
       </div>
       <div class="card stat-tile">
-        <div class="value">${dsaHours}h</div>
-        <div class="label">DSA hours logged</div>
-        <div class="delta flat"><i class="fa-solid fa-code"></i> total since start</div>
+        <div class="value">${Math.round(examHours * 10) / 10}h</div>
+        <div class="label">Exam-prep hours logged</div>
+        <div class="delta flat"><i class="fa-solid fa-pen-to-square"></i> GRE · IELTS · GATE · dMAT</div>
       </div>
     </div>
 
@@ -775,7 +859,7 @@ function renderMasterSheet() {
         <tr>
           <td class="muted">${phase.phase.split("—")[0].trim()}</td>
           <td><b>${escapeHtml(w.title)}</b></td>
-          <td>${w.days}</td>
+          <td>${w.days} <span class="muted">(${fmtPlanDay(start)}–${fmtPlanDay(end)})</span></td>
           <td>${done}/${total}</td>
           <td>${badge}</td>
         </tr>`;
@@ -819,7 +903,7 @@ function renderMasterSheet() {
     </div>
 
     <div class="card mb-16">
-      <div class="card-title-row"><h3><i class="fa-solid fa-route"></i>&nbsp; All 12 weeks</h3></div>
+      <div class="card-title-row"><h3><i class="fa-solid fa-route"></i>&nbsp; All plan blocks</h3></div>
       <div class="table-wrap"><table>
         <thead><tr><th>Phase</th><th>Week</th><th>Days</th><th>Tasks</th><th>Status</th></tr></thead>
         <tbody>${weekRows}</tbody>
@@ -876,6 +960,23 @@ function renderRoadmap() {
   let html = "";
   STATE.roadmap.forEach((phase, pIdx) => {
     html += `<div class="section-title">${escapeHtml(phase.phase)}</div>`;
+    if (phase.dayTemplate) {
+      const tplId = `tpl-${pIdx}`;
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      html += `
+        <div class="week-block" style="margin-bottom:8px;">
+          <div class="week-header" onclick="toggleWeekOpen('${tplId}')" style="padding:9px 12px;">
+            <span class="wtitle" style="font-size:12.5px;"><i class="fa-solid fa-repeat"></i>&nbsp; Typical week in this phase — feeds Today's Plan on days without a day-by-day entry</span>
+            <i class="fa-solid fa-chevron-down" style="font-size:11px;"></i>
+          </div>
+          <div class="week-body ${roadmapOpenIds.has(tplId) ? "open" : ""}" id="${tplId}" style="padding:4px 12px 10px;">
+            ${[1, 2, 3, 4, 5, 6, 0].map(i => {
+              const t = phase.dayTemplate[i];
+              return `<div style="font-size:12.5px; padding:6px 0; border-bottom:1px solid var(--gridline);"><b>${dayNames[i]}:</b> ${PLAN_SLOTS.filter(s => t[s.key] && t[s.key] !== "—").map(s => `<span style="color:${s.color};">${s.label.split(" (")[0]}</span> — ${escapeHtml(t[s.key])}`).join(" · ")}</div>`;
+            }).join("")}
+          </div>
+        </div>`;
+    }
     phase.weeks.forEach((w, wIdx) => {
       const [start, end] = w.days.split("-").map(n => parseInt(n, 10));
       const isCurrent = day >= start && day <= end;
@@ -891,7 +992,7 @@ function renderRoadmap() {
               ${isCurrent ? '<span class="badge badge-good" style="margin-left:8px;">current</span>' : ""}
             </div>
             <div class="flex gap-10">
-              <span class="wdays">Days ${w.days} · ${done}/${total}</span>
+              <span class="wdays">Days ${w.days} · ${fmtPlanDay(start)}–${fmtPlanDay(end)} · ${done}/${total}</span>
               <i class="fa-solid fa-chevron-down"></i>
             </div>
           </div>
@@ -1174,9 +1275,9 @@ function importData(evt) {
   evt.target.value = "";
 }
 function resetAll() {
-  if (!confirm(`This wipes all local data and reloads the ${TOTAL_PLAN_DAYS}-day quant-primary plan from scratch (Day 1 resets to today). Export a backup first if you want to keep anything. Continue?`)) return;
+  if (!confirm(`This wipes all local data and reloads the ${TOTAL_PLAN_DAYS}-day Germany MS plan from scratch (Day 1 stays 1 Oct 2026 — the plan is calendar-anchored). Export a backup first if you want to keep anything. Continue?`)) return;
   STATE = getFreshDefaultState();
-  STATE.meta.startDate = todayISO(); // dynamic, not the static seed constant — Day 1 is genuinely today, whenever "today" is
+  STATE.meta.startDate = PLAN_START_DATE; // calendar-anchored: deadlines are fixed dates, so Day 1 never moves
   STATE.meta.contentVersion = CONTENT_VERSION;
   saveState();
   toast("Reset to default plan");
@@ -1211,7 +1312,7 @@ function renderSettings() {
       <div class="card" style="grid-column: span 2;">
         <div class="card-title-row"><h3><i class="fa-solid fa-circle-info"></i>&nbsp; About this plan</h3></div>
         <p style="font-size:13px;">Plan start date: <b>${fmtDate(STATE.meta.startDate)}</b> · Last updated: <b>${fmtDate(STATE.meta.lastUpdated)}</b></p>
-        <p style="font-size:12.5px;">Built from a full Phase 1-5 career strategy engagement: 2026 market research, a 10-domain forced-problem-solving diagnostic (not self-report), evidence-based path selection, a skill-gap analysis, and this ${TOTAL_PLAN_DAYS}-day plan (restructured 2026-08-30 for a quant-primary pivot with a hard Dec 1 deadline). Edit skill levels honestly as you re-test — the whole point of this tool is that it reflects demonstrated ability, not how you feel about your progress.</p>
+        <p style="font-size:12.5px;">Built from a full Phase 1-5 career strategy engagement: 2026 market research, a 10-domain forced-problem-solving diagnostic (not self-report), evidence-based path selection, a skill-gap analysis, and this ${TOTAL_PLAN_DAYS}-day plan (rebuilt 2026-10-01 around a single lane — a CS/AI master's in Germany for Winter 2027/28 — after a full research cycle on universities, scholarships, tests and the German job market; the earlier quant plan is archived in your backup data, not deleted). Edit skill levels honestly as you re-test — the whole point of this tool is that it reflects demonstrated ability, not how you feel about your progress.</p>
       </div>
     </div>
   `;
@@ -1241,7 +1342,9 @@ document.addEventListener("DOMContentLoaded", () => {
   STATE.dailyPlanDone = STATE.dailyPlanDone || {};
   applyTheme(STATE.settings.theme || "light");
   initNav();
-  if (STATE.settings.lastTimerCategory) document.getElementById("ftCategory").value = STATE.settings.lastTimerCategory;
+  const ftCat = document.getElementById("ftCategory");
+  // Guard: a category saved under an older plan (e.g. "quant") may no longer be an option.
+  if (STATE.settings.lastTimerCategory && [...ftCat.options].some(o => o.value === STATE.settings.lastTimerCategory)) ftCat.value = STATE.settings.lastTimerCategory;
   setTimerDuration(suggestTimerDefault());
   goToView("dashboard");
 });

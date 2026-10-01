@@ -249,15 +249,15 @@ function openApplicationModal(id) {
   openModal(`
     <div class="modal-header"><h3>${a ? "Edit" : "New"} application</h3><button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button></div>
     <div class="form-row">
-      <div class="field"><label>Company</label><input type="text" id="f-company" value="${escapeHtml(a ? a.company : "")}" /></div>
-      <div class="field"><label>Role</label><input type="text" id="f-role" value="${escapeHtml(a ? a.role : "")}" /></div>
+      <div class="field"><label>University / company</label><input type="text" id="f-company" value="${escapeHtml(a ? a.company : "")}" /></div>
+      <div class="field"><label>Program / role</label><input type="text" id="f-role" value="${escapeHtml(a ? a.role : "")}" /></div>
     </div>
     <div class="form-row">
-      <div class="field"><label>Date applied</label><input type="date" id="f-date" value="${a ? a.dateApplied : todayISO()}" /></div>
+      <div class="field"><label>Date applied</label><input type="date" id="f-date" value="${a ? a.dateApplied : ""}" /></div>
       <div class="field"><label>Deadline (if known)</label><input type="date" id="f-deadline" value="${a && a.deadline ? a.deadline : ""}" /></div>
     </div>
     <div class="field"><label>Status</label>
-      <select id="f-status">${["applied","interview","offer","rejected","ghosted"].map(v => `<option value="${v}" ${a && a.status === v ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <select id="f-status">${["planned","applied","interview","offer","rejected","ghosted"].map(v => `<option value="${v}" ${a && a.status === v ? "selected" : ""}>${v}</option>`).join("")}</select>
     </div>
     <div class="field"><label>Link</label><input type="text" id="f-link" value="${escapeHtml(a ? a.link : "")}" /></div>
     <div class="field"><label>Notes</label><textarea id="f-notes" rows="2">${escapeHtml(a ? a.notes : "")}</textarea></div>
@@ -293,16 +293,16 @@ function renderApplications() {
   STATE.applications.forEach(a => counts[a.status] = (counts[a.status] || 0) + 1);
   el.innerHTML = `
     <div class="grid grid-4 mb-16">
-      ${["applied","interview","offer","rejected"].map(s => `<div class="card stat-tile"><div class="value">${counts[s] || 0}</div><div class="label">${s}</div></div>`).join("")}
+      ${["planned","applied","offer","rejected"].map(s => `<div class="card stat-tile"><div class="value">${counts[s] || 0}</div><div class="label">${s}</div></div>`).join("")}
     </div>
     <div class="flex-between mb-16"><div></div><button class="btn btn-primary" onclick="openApplicationModal()"><i class="fa-solid fa-plus"></i> Log application</button></div>
     <div class="card">
       <div class="table-wrap"><table>
-        <thead><tr><th>Company</th><th>Role</th><th>Applied</th><th>Deadline</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th>University / company</th><th>Program / role</th><th>Applied</th><th>Deadline</th><th>Status</th><th></th></tr></thead>
         <tbody>
-          ${STATE.applications.length ? STATE.applications.map(a => `
+          ${STATE.applications.length ? [...STATE.applications].sort((x, y) => (x.deadline || "9999").localeCompare(y.deadline || "9999")).map(a => `
             <tr>
-              <td><b>${escapeHtml(a.company)}</b></td>
+              <td><b>${a.link ? `<a href="${escapeHtml(a.link)}" target="_blank" rel="noopener">${escapeHtml(a.company)}</a>` : escapeHtml(a.company)}</b></td>
               <td>${escapeHtml(a.role)}</td>
               <td>${fmtDate(a.dateApplied)}</td>
               <td>${a.deadline ? fmtDate(a.deadline) : "–"}</td>
@@ -330,7 +330,7 @@ function openInterviewModal(id) {
     <div class="form-row">
       <div class="field"><label>Date</label><input type="date" id="f-date" value="${iv ? iv.date : todayISO()}" /></div>
       <div class="field"><label>Type</label>
-        <select id="f-type">${["DSA","System Design","Behavioral","Quant/Probability","Take-home","Other"].map(v => `<option ${iv && iv.type === v ? "selected" : ""}>${v}</option>`).join("")}</select>
+        <select id="f-type">${["Admission interview","Werkstudent — technical","DSA","System Design","Behavioral","Take-home","Other"].map(v => `<option ${iv && iv.type === v ? "selected" : ""}>${v}</option>`).join("")}</select>
       </div>
     </div>
     <div class="field"><label>Outcome</label>
@@ -449,9 +449,12 @@ function renderCompetitions() {
 /* ============================================================
    STUDY & EXERCISE LOG
    ============================================================ */
+// v4 (Germany plan). Old keys (math, quant, projects) stay in past log
+// entries and still count toward each day's total; they're just no longer
+// offered as new categories.
 const STUDY_CATS = [
-  ["math", "Mathematics"], ["dsa", "DSA"], ["quant", "Quant"],
-  ["ai", "AI / Projects work"], ["projects", "Other project time"], ["interviewPrep", "Interview prep"]
+  ["exams", "Exams (GRE/IELTS/GATE/dMAT)"], ["german", "German"], ["cs", "CS foundations"],
+  ["apps", "Applications"], ["dsa", "DSA"], ["ai", "AI / Projects work"], ["interviewPrep", "Interview prep"]
 ];
 // Primary path — ALWAYS today, no date field to fat-finger. Manual numbers here
 // are an adjustment on top of whatever the focus timer already auto-logged,
@@ -551,17 +554,16 @@ function renderStudyLog() {
     <div class="card">
       <div class="card-title-row"><h3><i class="fa-solid fa-clock-rotate-left"></i>&nbsp; History</h3><button class="btn btn-sm" onclick="openBackfillModal()"><i class="fa-solid fa-clock-rotate-left"></i> Backfill a previous day</button></div>
       <div class="table-wrap"><table>
-        <thead><tr><th>Date</th><th>Math</th><th>DSA</th><th>Quant</th><th>AI</th><th>Projects</th><th>Interview</th><th>Total</th><th></th></tr></thead>
+        <thead><tr><th>Date</th>${STUDY_CATS.map(([, label]) => `<th>${label.split(" (")[0]}</th>`).join("")}<th>Total</th><th></th></tr></thead>
         <tbody>
           ${STATE.studyLog.length ? STATE.studyLog.slice(0, 30).map(l => `
             <tr>
               <td>${fmtDate(l.date)}</td>
-              <td>${l.hours.math || 0}</td><td>${l.hours.dsa || 0}</td><td>${l.hours.quant || 0}</td>
-              <td>${l.hours.ai || 0}</td><td>${l.hours.projects || 0}</td><td>${l.hours.interviewPrep || 0}</td>
+              ${STUDY_CATS.map(([id]) => `<td>${l.hours[id] || 0}</td>`).join("")}
               <td><b>${l.total}h</b></td>
               <td><button class="icon-btn" onclick="deleteLogEntry('${l.date}')"><i class="fa-solid fa-trash"></i></button></td>
             </tr>
-          `).join("") : `<tr><td colspan="8"><div class="empty-state"><i class="fa-solid fa-stopwatch"></i>Nothing logged yet — start today.</div></td></tr>`}
+          `).join("") : `<tr><td colspan="${STUDY_CATS.length + 3}"><div class="empty-state"><i class="fa-solid fa-stopwatch"></i>Nothing logged yet — start today.</div></td></tr>`}
         </tbody>
       </table></div>
     </div>
