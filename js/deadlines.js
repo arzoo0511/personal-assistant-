@@ -10,9 +10,10 @@
      2. DL_ITEMS below — tests, documents and logistics on the critical path.
      3. STATE.deadlines.custom — anything you add yourself.
 
-   Provenance: TUM, FAU and GATE facts were checked against the official
-   pages on 2026-10-06. Everything else is the 1 Oct research or last
-   cycle's pattern and is flagged "re-check" until verified.
+   Provenance: requirements for TU Berlin, TU Darmstadt, TU Dortmund, FU Berlin,
+   Passau, Göttingen, TUHH and APS India were read on their official pages on
+   2026-10-06. WS 2027/28 deadlines are not published yet — dates are last
+   cycle's pattern and stay flagged "re-check" until the November pass.
    ========================================================================= */
 
 const DL_LEVEL = {
@@ -25,91 +26,88 @@ const DL_LEVEL = {
 /* ---- non-application items. level: hard = external fixed date · chain = prerequisite on the
         dMAT → APS → VPD → submit path · target = self-set date · check = re-verify a source ---- */
 const DL_ITEMS = [
-  { id: "ielts", date: "2026-10-09", when: "8–10 Oct", approx: true, cat: "Test", level: "chain",
-    title: "Sit IELTS Academic (computer-delivered)",
-    miss: "The result is needed for DAAD (15 Oct working deadline) and as English proof everywhere. Computer results take 1–2 days, so 10 Oct is the last comfortable day.",
-    note: "Target 7.0 overall, no band below 6.5 (Tübingen, Saarland, TU Darmstadt ask 7.0). The plan assumed it was booked on Day 1 — confirm the booking exists.",
-    link: "https://ieltsidpindia.com/information/ielts-test-fee" },
-  { id: "lor-daad", date: "2026-10-12", cat: "Documents", level: "chain",
-    title: "DAAD letter of recommendation in hand (1 professor)",
-    miss: "DAAD can't be submitted without it, and professors need about two weeks' notice. Saarland later needs 2 LORs.",
-    note: "Chase on 8 and 12 Oct if nothing has arrived." },
-  { id: "gre-book", date: "2026-10-15", cat: "Test", level: "target",
-    title: "Book the GRE General seat for 1–10 Dec",
-    miss: "A later sitting squeezes the retake: a retake needs a 21-day gap and scores take ~8–10 days to arrive.",
-    note: "Suggested date — there is no external deadline, but popular dates fill up. Take POWERPREP Test 1 cold first as your diagnostic.",
-    link: "https://www.ets.org/gre/test-takers/general-test/prepare/powerprep.html" },
+  { id: "aps-ask", date: "2026-10-12", cat: "Documents", level: "chain",
+    title: "Ask APS India the final-year question (quiz + email to info@aps-india.de)",
+    miss: "Everything downstream depends on the answer: can a student with 7 of 8 semesters done sit the dMAT and file APS before graduating? If not, the May deadlines fail and the plan moves to the July–August deadlines or Summer 2028.",
+    note: "g.a.s.t. replied on 6 Oct that eligibility is APS India's call. APS lists no email on its contact page (a web form); info@aps-india.de appears on its dMAT page.",
+    link: "https://aps-india.de/dmat/" },
+  { id: "passau-check", date: "2026-10-12", cat: "Applications", level: "target",
+    title: "Email Passau: do stats / discrete maths / ML / algorithms count as mathematics?",
+    miss: "Passau needs ≥35 ECTS of maths and you have ~24 (~30 with Statistical ML). Applying without asking wastes a uni-assist fee and a letter.",
+    note: "Send your course list; skip Passau if the answer is no." },
+  { id: "lor", date: "2026-10-15", cat: "Documents", level: "target", optional: true,
+    title: "Ask two professors for recommendation letters",
+    miss: "Only DAAD and possibly HPI ask for them — none of the core five do. Cheap to do once, but not on the critical path.",
+    note: "Short email + your CV + the program list." },
   { id: "bennett-docs", date: "2026-10-21", cat: "Documents", level: "chain",
-    title: "Bennett documents: module handbook, CGPA→% rule, minimum pass grade, class-rank letter",
-    miss: "Without the CGPA→% rule and pass grade you can't compute your converted German grade (Tübingen needs ≤2.0; Saarland wants ≥75% and top-10% rank) or finish the credit-mapping table that decides TUM's first-stage score.",
-    note: "Plan target: documents requested Day 1, chase on 21 Oct." },
-  { id: "aps-courier", date: "2026-10-31", cat: "Documents", level: "chain",
-    title: "Register with APS India and courier the dossier (₹18,000)",
-    miss: "The APS certificate is mandatory for every program on your list and can't be added after you apply. It only issues after the dMAT is checked, so the dossier should already be waiting.",
-    note: "APS accepts the dossier before the dMAT result.",
-    link: "https://aps-india.de/" },
-  { id: "dmat-access", date: "2026-11-04", cat: "Test", level: "target",
-    title: "Ask g.a.s.t. about dMAT ADHD accommodations",
-    miss: "Requests must be in at least 10 weeks before your test date. For a 20 Feb sitting that is ~12 Dec at the latest.",
-    note: "Plan target 4 Nov; the real limit moves with your dMAT date.",
-    link: "https://www.d-mat.de/en/faq-graduate-students-india/" },
+    title: "Bennett documents: syllabi with contact hours, 168 = 240 ECTS letter, grading scale + pass mark, CGPA→%, medium-of-instruction letter, transcript",
+    miss: "Universities decide credits from syllabus content and workload. Without these you can't finish the credit audit that decides TU Berlin, FU Berlin, Dortmund and Darmstadt (maths is your thinnest area).",
+    note: "Plan target: requested on Day 1, chase on 21 Oct. Details: reports/bennett-credit-audit-2026-10-06.md." },
+  { id: "aps-docs", date: "2026-10-31", cat: "Documents", level: "chain",
+    title: "Assemble the APS paperwork (Class X/XII marksheets, passport, Aadhaar with linked mobile, semester 1–7 marksheets)",
+    miss: "APS needs the complete checklist in one submission — nothing can be added later for the same procedure. Having it ready means you can file the day APS confirms you can.",
+    note: "Don't courier anything until APS answers the final-year question.",
+    link: "https://aps-india.de/wp-content/uploads/2026/06/Leaflet_BA_Graduates_English_dMAT_June2026.pdf" },
+  { id: "audit", date: "2026-11-04", cat: "Applications", level: "chain",
+    title: "Credit-audit table done for the core programs (syllabi attached)",
+    miss: "Maths is your thinnest area (~24 ECTS-equivalent). A program with a high maths bar (Passau ≥35) can sink an application after you've paid for it.",
+    note: "Start from reports/bennett-credit-audit-2026-10-06.md." },
+  { id: "internship", date: "2026-11-15", cat: "Career", level: "target",
+    title: "Apply for the next internship before Deloitte ends on 1 Dec (SAP Labs India or another German-linked firm)",
+    miss: "A gap after 1 Dec removes a Germany-linked line from your CV just as applications open. Check each page's real eligibility — the criteria I found (≥60%, no active backlogs, 3–6 months) come from third-party sites.",
+    link: "https://www.foundit.in/career-advice/sap-labs-internship-apply/" },
   { id: "reverify", date: "2026-11-15", cat: "Applications", level: "check",
     title: "Re-verify every program's 2027/28 deadline and requirements on its official page",
-    miss: "Most dates here are last cycle's pattern. A moved deadline or a new requirement is the quiet way to lose an application.",
-    note: "Already verified 6 Oct: TUM (GRE/GATE minimums, 1 Feb–31 May window) and FAU (GRE General accepted; 2027/28 dates not yet published). Edit any date in the Applications tracker and it updates here." },
-  { id: "gre-test", date: "2026-12-10", when: "1–10 Dec", cat: "Test", level: "chain",
-    title: "Sit the GRE General (first attempt)",
-    miss: "TUM needs Quant ≥164 and Writing ≥4.0 and KIT asks the same; both are hard minimums and there is no GATE fallback. December leaves room for a retake before spring.",
-    note: "Verbal is ignored by TUM; TU Darmstadt's exam exemption needs V155 / Q165 / AWA 3.5. TUM's ETS code is 7806, department 5199." },
-  { id: "emai", date: "2026-12-20", approx: true, cat: "Scholarship", level: "hard", optional: true,
-    title: "EMAI Erasmus Mundus scholarship round closes (last cycle's date)",
-    miss: "Only matters if you were shortlisted — the round opens ~15 Nov. Funding layer, not a second lane.",
-    note: "Max 2–3 AI/data programs; accept only if fully funded.",
-    link: "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en" },
-  { id: "erasmus-jan", date: "2027-01-04", when: "4–13 Jan", approx: true, cat: "Scholarship", level: "hard", optional: true,
-    title: "Erasmus Mundus: CYBERSURE 4 Jan · CoDaS 5 Jan · EDISS 12 Jan · DEAI ~13 Jan",
-    miss: "Only if shortlisted; last cycle's dates, so re-check the catalogue.",
-    link: "https://www.eacea.ec.europa.eu/scholarships/erasmus-mundus-catalogue_en" },
+    miss: "Most dates here are last cycle's pattern (WS 2027/28 dates aren't published yet). A moved deadline or a new requirement is the quiet way to lose an application.",
+    note: "Requirements were read on the official pages on 6 Oct (TU Berlin, TU Darmstadt, Dortmund, FU Berlin, Passau, Göttingen, TUHH, APS India). Edit any date in the Applications tracker and it updates here." },
+  { id: "ielts-sit", date: "2026-11-30", when: "by 30 Nov", cat: "Test", level: "chain",
+    title: "Sit IELTS Academic (target 7.0 overall, no band under 6.5)",
+    miss: "APS and the student visa need an approved language certificate — medium-of-instruction letters are not accepted there. TU Darmstadt wants 7.0, TU Berlin and Göttingen 6.5. A first-half-November sitting leaves room for a January retake.",
+    note: "Book the date in October (computer-delivered, results in 1–2 days).",
+    link: "https://ieltsidpindia.com/information/ielts-test-fee" },
+  { id: "a1-done", date: "2026-12-15", cat: "German", level: "target",
+    title: "German A1 finished (Nicos Weg + the free certificate test)",
+    miss: "The A2 course in January builds on it; Passau wants A1 by the end of year 1.",
+    link: "https://learngerman.dw.com/en/nicos-weg/c-36519789" },
+  { id: "a2-start", date: "2027-01-09", cat: "German", level: "target",
+    title: "Start the A2 course (Goethe New Delhi weekend batch)",
+    miss: "The fixed class time is your scaffold through the final semester; B1 by Jul–Aug depends on starting here.",
+    link: "https://www.goethe.de/ins/in/en/sta/del/kur/tup.cfm" },
+  { id: "sem7-marks", date: "2027-01-15", when: "Dec–Jan", cat: "Documents", level: "chain",
+    title: "Semester 7 results → marksheets 1–7 added to the APS file",
+    miss: "APS's dMAT exemption is measured in completed semesters (7 of 8); you want the marksheet in hand the moment a dMAT date opens." },
+  { id: "gre-decision", date: "2027-01-15", cat: "Test", level: "target",
+    title: "GRE decision (default: no)",
+    miss: "Only KIT, Mannheim, RWTH and FAU AI need it, and their deadlines still leave room for a February–March sitting. TUM, Saarland, Stuttgart and Tübingen are off the list for other reasons.",
+    note: "Say yes only if you consciously want one of those programs." },
   { id: "dmat-sit", date: "2027-02-20", approx: true, cat: "Test", level: "chain",
     title: "Sit the dMAT — latest comfortable date (date TBC on d-mat.de)",
-    miss: "Later than ~20 Feb pushes the APS certificate past ~5 Apr and the uni-assist VPD inside 8 weeks of 31 May — TUM, FAU and Passau fall out, and KIT (15 Jun), TU Darmstadt (15 Jul) and TU Berlin carry the cycle.",
-    note: "Register the day g.a.s.t. opens it. Forward the certificate to APS the day it arrives.",
+    miss: "Later than ~20 Feb pushes the APS certificate past ~5 Apr and the uni-assist VPDs inside 8 weeks of 31 May — Passau and FU Berlin fall out, and the cycle rests on TU Darmstadt (15 Jul) and TU Berlin (31 Aug).",
+    note: "Register the day g.a.s.t. opens it; forward the certificate to APS the day it arrives. Eligibility to sit before graduating isn't confirmed — see the APS item above.",
     link: "https://www.d-mat.de/en/faq-graduate-students-india/" },
-  { id: "tum-topics", date: "2027-03-01", cat: "Documents", level: "check",
-    title: "TUM essay topics published — pick one and outline it",
-    miss: "The ~1,000-word essay and ≤2-page statement are scored, and TUM excludes AI-written applications — so these need drafting time, in your own words.",
-    link: "https://www.tum.de/en/studies/application/application-info-portal/document-requirements/tum-style-guide" },
-  { id: "gre-final", date: "2027-03-31", cat: "Test", level: "target",
-    title: "GRE final score in hand (any retake included) and program list frozen at 7–9",
-    miss: "Scores take ~8–10 days to reach universities. A retake after mid-April risks missing 31 May.",
-    note: "Plan's Gate 3 date." },
   { id: "aps-cert", date: "2027-03-31", cat: "Documents", level: "chain",
-    title: "APS certificate issued (or written APS confirmation it issues by ~5 Apr)",
-    miss: "uni-assist can't process the TUM VPD without it, and every program on your list requires it." },
-  { id: "tum-vpd", date: "2027-04-05", cat: "Documents", level: "chain",
-    title: "File the TUM VPD through uni-assist (€75 + €30 per extra program)",
-    miss: "uni-assist takes 6–7 weeks for Asia; filing after ~5 Apr can't clear before TUM's 31 May deadline.",
+    title: "APS certificate issued (or APS's written status)",
+    miss: "APS is mandatory for every Indian degree on your list, and it only issues after the dMAT is checked." },
+  { id: "vpd", date: "2027-04-05", cat: "Documents", level: "chain",
+    title: "File the uni-assist VPDs (Passau, FU Berlin, TU Berlin as applicable)",
+    miss: "uni-assist takes 6–7 weeks for Asia; file at least 8 weeks before the deadline (31 May → by ~5 Apr). TU Darmstadt applies directly, not through uni-assist.",
     link: "https://www.uni-assist.de/fileadmin/Downloads/Tools/Checklisten/EN/UA-Checkliste-Standard-Verfahren-EN.pdf" },
   { id: "grad-docs", date: "2027-05-31", when: "May 2027", approx: true, cat: "Documents", level: "target",
     title: "Request final transcripts and degree certificate as soon as you graduate",
     miss: "Admission offers and the visa both end up needing the degree certificate; every week of delay holds up enrolment." },
-  { id: "b1-book", date: "2027-06-30", cat: "German", level: "target",
-    title: "Book Goethe B1 module dates (released ~2–2.5 months ahead)",
-    miss: "B1 by Sept 2027 is your German target; late booking means retaking modules in Germany.",
+  { id: "b1-book", date: "2027-05-15", cat: "German", level: "target",
+    title: "Book the Goethe B1 modules (dates open ~2–2.5 months ahead)",
+    miss: "B1 by Aug–Sep 2027 shortens the settlement clock from 27 to 21 months; late booking means retaking modules in Germany.",
     link: "https://www.goethe.de/ins/mm/en/m/spr/prf/gzb1/ueb.html" },
   { id: "blocked", date: "2027-07-15", cat: "Visa & logistics", level: "chain",
     title: "Blocked account money ready (€11,904 in 2026 — check the 2027 figure)",
     miss: "The visa application needs proof of funds, and the visa appointment can't be moved earlier once booked." },
-  { id: "tum-test", date: "2027-08-20", when: "~mid/late Aug", approx: true, cat: "Test", level: "hard", optional: true,
-    title: "TUM written test (on site, 90 min) — only if invited",
-    miss: "Invited applicants in the middle score band sit it; missing it ends the application. Prep from the sample test.",
-    link: "https://www.cit.tum.de/fileadmin/w00byx/cit/Studium/Studiengaenge/Master_Informatik/sample-test_Master_application1.pdf" },
   { id: "b1-done", date: "2027-08-31", cat: "German", level: "target",
     title: "Goethe B1 — all four modules passed",
-    miss: "Shortens Blue Card settlement from 27 to 21 months and fixes the top hiring complaint from German IT employers." },
-  { id: "tud-exam", date: "2027-09-01", approx: true, cat: "Test", level: "hard", optional: true,
-    title: "TU Darmstadt entrance exam (~1 Sep) — unless you clear the GRE exemption",
-    miss: "Exempt with GRE V155 / Q165 / AWA 3.5 or GATE ≥750; otherwise you must sit it." },
+    miss: "84% of tech Werkstudent posts ask for German; B1 also shortens settlement from 27 to 21 months." },
+  { id: "tud-exam", date: "2027-09-01", when: "first week of Sep", approx: true, cat: "Test", level: "hard", optional: true,
+    title: "TU Darmstadt entrance exam (on campus) — unless you are exempt",
+    miss: "A 90-minute written exam if your documents can't prove the required content; it is on campus, so plan the trip and visa timing. GRE V155/Q165/AWA 3.5 would exempt you." },
   { id: "arrival", date: "2027-09-20", cat: "Visa & logistics", level: "target",
     title: "On campus, enrolled; Anmeldung booked within 2 weeks of moving in",
     miss: "Day 355 of the plan.",
@@ -119,8 +117,8 @@ const DL_ITEMS = [
 /* ---- date still unknown: check on a schedule instead of waiting ---- */
 const DL_FLOATING = [
   { id: "fl-dmat", cat: "Test", level: "chain", title: "dMAT Q1 2027 date and registration opening",
-    miss: "Everything downstream (APS, VPD, TUM/FAU/Passau) is timed from this sitting; seats are limited.",
-    note: "Register through g.a.s.t. the day it opens. Accommodation requests need ≥10 weeks' notice.",
+    miss: "Everything downstream (APS, VPDs, the May deadlines) is timed from this sitting; seats are limited.",
+    note: "Register through g.a.s.t. the day it opens. Accommodation requests need ≥10 weeks' notice. Whether you can sit it before graduating is awaiting APS's answer.",
     link: "https://www.d-mat.de/en/faq-graduate-students-india/" },
   { id: "fl-vfs", cat: "Visa & logistics", level: "chain", title: "VFS visa appointment — the week you get an admit",
     miss: "Appointments can't be moved earlier, so booking on the day you're admitted decides your arrival date.",
@@ -129,31 +127,33 @@ const DL_FLOATING = [
 
 /* ---- per-application consequence + conditions (keyed by STATE.applications ids) ---- */
 const DL_APP_NOTES = {
-  "app-daad": { level: "hard",
-    miss: "Scholarship round lost — the next one is a year away. Aim to submit by 13 Oct for two days of slack.",
-    check: "15 Oct is the plan's working deadline, not confirmed: select India in the DAAD portal and email DAAD New Delhi today." },
-  "app-rwth": { level: "hard", optional: true,
-    miss: "RWTH is out for this intake. Only apply if the APS certificate is already issued by 1 Mar — otherwise skip it deliberately.",
-    check: "Plan note: GRE accepted, no GATE route." },
-  "app-tue": { level: "hard", optional: true,
-    miss: "Tübingen is out. Only apply if your converted grade is ≤2.0 — that needs Bennett's CGPA→% rule first." },
-  "app-saar": { level: "hard",
-    miss: "Out for this intake. Check eligibility first: plan notes say CGPA ≥75% AND top-10% rank, plus 2 LORs and GRE/GATE (no minimum score).",
-    check: "Your CGPA→% conversion decides whether you qualify at all — get Bennett's rule and rank letter." },
-  "app-tum": { level: "hard", verified: "2026-10-06",
-    miss: "Out of TUM. Needs GRE Q≥164 + AWA≥4.0 (or GATE), APS certificate, uni-assist VPD filed by ~5 Apr, statement + essay — all your own writing." },
-  "app-fau": { level: "hard", verified: "2026-10-06",
-    miss: "Out of FAU. GRE General is accepted (Math Subject Test optional, score should be above the 60th percentile).",
-    check: "2027/28 dates aren't published yet — last cycle ran 15 Apr to 31 May." },
-  "app-passau": { level: "hard",
-    miss: "Out of Passau. No GRE needed, but the APS certificate has to be there by the deadline." },
-  "app-kit": { level: "hard",
-    miss: "Out of KIT. GRE V151 / Q164 / AWA 4 (or GATE); a possible interview in Jun–Jul is scored 0–60, pass 30." },
-  "app-tud": { level: "hard",
-    miss: "Out of TU Darmstadt. Paper documents go by post/courier — allow transit time.",
-    check: "Exam ~1 Sep unless GRE V155 / Q165 / AWA 3.5." },
-  "app-tub": { level: "hard",
-    miss: "TU Berlin's open-admission window closes — your safe-ish fallback. Credit minimums: 12 CP theory, 12 CP computer engineering, 18 CP maths." }
+  "app-daad": { level: "hard", optional: true,
+    miss: "Scholarship round lost — the next one is a year away. Skipping is the default; decide by 10 Oct.",
+    check: "15 Oct is the plan's working date, not confirmed: select India in the DAAD portal." },
+  "app-tub": { level: "hard", verified: "2026-10-06",
+    miss: "TU Berlin's open-admission window closes (~31 Aug) — your late-deadline anchor. Credit match: 12 CP theory, 12 CP computer engineering, 12 CP methodological, 18 CP maths.",
+    check: "Theory credit hangs on Algorithms (DAA) counting as theory." },
+  "app-tud": { level: "hard", verified: "2026-10-06",
+    miss: "Out of TU Darmstadt. Paper documents go by post/courier and must ARRIVE by 15 Jul.",
+    check: "IELTS 7.0 / C1; entrance exam in the first week of September unless GRE-exempt." },
+  "app-dortmund": { level: "hard", verified: "2026-10-06",
+    miss: "Out of Dortmund — your safest program (not admission-restricted).",
+    check: "The pages disagree on the deadline (15 May / 15 Jun / 15 Jul): verify." },
+  "app-fub": { level: "hard", verified: "2026-10-06",
+    miss: "Out of FU Berlin — free, English-taught Data Science that fits your credits.",
+    check: "2027/28 dates aren't published; last cycle ran to 31 May." },
+  "app-passau": { level: "hard", verified: "2026-10-06",
+    miss: "Out of Passau — but check the maths bar first (≥35 ECTS vs your ~24–30).",
+    check: "uni-assist window 1 Apr–31 May." },
+  "app-goe": { level: "hard", optional: true, verified: "2026-10-06",
+    miss: "Out of Göttingen — a backup, not a target.",
+    check: "Includes a ~60-minute aptitude test." },
+  "app-hpi": { level: "hard", optional: true,
+    miss: "Out of HPI — a stretch (admission-restricted).",
+    check: "Third-party info only; email studinfo@hpi.de first." },
+  "app-tuhh": { level: "hard", optional: true, verified: "2026-10-06",
+    miss: "Out of TUHH — a stretch whose 1 Mar deadline likely precedes your APS certificate.",
+    check: "Ask your senior whether TUHH accepts proof that the APS application was submitted." }
 };
 
 /* ---- state + helpers ---- */
@@ -266,6 +266,15 @@ function dlDashboardCard() {
   </div>`;
 }
 
+/* ---- decisions already made (shown on the page so they are not reopened by drift) ---- */
+const DL_DECISIONS = [
+  { when: "6 Oct 2026", title: "No GATE", body: "GATE 2027's late registration closes 12 Oct and its results (19 Mar) would come too late to help most deadlines; skipped." },
+  { when: "6 Oct 2026", title: "GRE is parked until 15 Jan (default: no)", body: "It only matters for KIT, Mannheim, RWTH and FAU AI. TUM (Q≥164, €4–6k/semester), Saarland (CGPA ≥75% and top 10%), Stuttgart (15 Jan deadline) and Tübingen (grade ≤2.0) are off the list for their own reasons." },
+  { when: "6 Oct 2026", title: "A lean list: 4–6 applications in tuition-free states", body: "Core: TU Berlin, TU Darmstadt, TU Dortmund Data Science, FU Berlin Data Science. Check first: Passau (maths bar). Stretch/backup: HPI, TUHH, Göttingen. Baden-Württemberg (€1,500/semester) and Bavaria's TUM/FAU (€4–6k) are out." },
+  { when: "6 Oct 2026", title: "IELTS is needed regardless of waivers", body: "APS and the visa accept only IELTS/TOEFL/Goethe — not medium-of-instruction letters. Sit it once by 30 Nov (target 7.0, no band under 6.5)." },
+  { when: "6 Oct 2026", title: "German: A1 now, A2 course from January, B1 exam Jul–Aug", body: "June is a stretch, not a plan; B1 is not needed for admission to the English-taught programs on your list." }
+];
+
 /* ---- render ---- */
 function renderDeadlines() {
   const el = document.getElementById("view-deadlines");
@@ -332,10 +341,10 @@ function renderDeadlines() {
 
   /* the dMAT → APS → VPD → submit chain */
   const chain = [
+    { date: "2026-10-20", label: "APS answers the final-year question", sub: "quiz run + email sent" },
     { date: "2027-02-20", label: "dMAT sat", sub: "date TBC on d-mat.de" },
     { date: "2027-03-31", label: "APS certificate issued", sub: "can't issue before the dMAT is checked" },
-    { date: "2027-04-05", label: "TUM VPD filed (uni-assist)", sub: "8 weeks before 31 May" },
-    { date: "2027-05-31", label: "TUM · FAU · Passau submit", sub: "KIT 15 Jun · TUD 15 Jul if you slip" }
+    { date: "2027-05-31", label: "Passau · FU Berlin submit", sub: "Dortmund ~15 May · TU Darmstadt 15 Jul · TU Berlin 31 Aug if you slip" }
   ];
   const chainCard = `<div class="card mb-16">
     <div class="card-title-row"><h3><i class="fa-solid fa-link"></i>&nbsp; The critical path — this, not your CGPA, is what can sink the cycle</h3></div>
@@ -348,7 +357,7 @@ function renderDeadlines() {
           <div style="margin-top:6px;"><span class="badge ${dlDays(c.date) <= 45 ? "badge-serious" : "badge-neutral"}">${dlDays(c.date)} days left</span></div>
         </div>`).join("")}
     </div>
-    <p class="muted" style="margin-top:10px;">Every step waits on the one before it. If the dMAT lands after ~20 Feb, TUM, FAU and Passau are at risk and the cycle rests on KIT (15 Jun), TU Darmstadt (15 Jul) and TU Berlin. APS also has to be filed before you apply — it can't be added later. Source: the 1 Oct plan.</p>
+    <p class="muted" style="margin-top:10px;">Every step waits on the one before it. APS decides first whether a student with 7 of 8 semesters done can sit the dMAT and file before graduating. If not — or if the dMAT lands after ~20 Feb — the May deadlines fail and the cycle rests on TU Darmstadt (15 Jul) and TU Berlin (31 Aug), or you move to the Summer 2028 intake (Passau opens 1 Nov–15 Dec 2027; the dMAT result stays valid).</p>
   </div>`;
 
   /* timeline, grouped by month */
@@ -375,7 +384,7 @@ function renderDeadlines() {
         <option value="hard" ${view === "hard" ? "selected" : ""}>Hard cutoffs + critical path only</option>
         <option value="all" ${view === "all" ? "selected" : ""}>Everything incl. done</option>
       </select></div>
-    <p class="muted" style="margin-bottom:10px;">Verified against official pages on 6 Oct 2026: TUM, FAU and GATE. All other dates come from the 1 Oct research or last cycle's pattern — treat them as <b>re-check</b> until the November pass. University deadlines come from the Applications tracker, so edit them there.</p>
+    <p class="muted" style="margin-bottom:10px;">Requirements were read on official pages on 6 Oct 2026 (TU Berlin, TU Darmstadt, Dortmund, FU Berlin, Passau, Göttingen, TUHH, APS India). WS 2027/28 deadlines are not published yet, so dates are last cycle's pattern — treat them as <b>re-check</b> until the November pass. University deadlines come from the Applications tracker, so edit them there.</p>
     ${shown.length ? `<div class="table-wrap"><table>
       <thead><tr><th></th><th>When</th><th>What</th><th>Type</th><th>If you miss it</th></tr></thead><tbody>${body}</tbody></table></div>`
       : `<div class="empty-state"><i class="fa-solid fa-circle-check"></i>Nothing to show in this view.</div>`}
@@ -407,7 +416,7 @@ function renderDeadlines() {
   /* locked decisions */
   const decisions = `<div class="card mb-16">
     <div class="card-title-row"><h3><i class="fa-solid fa-lock"></i>&nbsp; Decisions already made — don't reopen by drift</h3></div>
-    <div style="font-size:13px;"><b>6 Oct 2026 — GRE only, no GATE.</b> GATE 2027's late registration window closes 12 Oct, so this is reversible only until then; the exam is 6–21 Feb and results are out 19 Mar. TUM and KIT therefore depend on GRE Quant ≥164 / AWA ≥4.0, which makes the December attempt and the retake window your only buffer. Reopen only if your cold POWERPREP Test 1 comes back far below 164 — and only before 12 Oct.</div>
+    ${DL_DECISIONS.map(d => `<div style="font-size:13px; padding:7px 0; border-bottom:1px solid var(--gridline);"><b>${escapeHtml(d.when)} — ${escapeHtml(d.title)}.</b> ${escapeHtml(d.body)}</div>`).join("")}
   </div>`;
 
   /* add your own */

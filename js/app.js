@@ -29,7 +29,22 @@ let STATE = null;
 // is deleted), replaces them with the Germany plan, and pins startDate to
 // PLAN_START_DATE — this plan is calendar-anchored (deadlines are fixed
 // dates), so Day N must always mean the same date regardless of load day.
-const CONTENT_VERSION = 4;
+//
+// v5 (2026-10-06): GATE dropped — GRE General is the only admission test.
+// The roadmap's task/slot counts are unchanged on purpose (roadmapDone and
+// dailyPlanDone are keyed by position), so existing ticks stay on the same
+// rows. Reference content is replaced as in v4; user-editable text (skill
+// notes, course notes, application notes) is only patched where it still
+// holds the exact seeded wording.
+//
+// v6 (2026-10-06, evening): the lean re-plan after the deep dive and the
+// Bennett credit audit. Roadmap, timetable, strategy and milestone text are
+// replaced (reference content); the shortlist changes (TUM/KIT/RWTH/Saarland/
+// FAU/Tübingen leave the tracker, TU Berlin/Darmstadt/Dortmund/FU Berlin/
+// Passau/Göttingen/HPI/TUHH come in) and the GRE skills are archived. Because
+// the roadmap's tasks changed, only Week 1 ticks and day-1-to-6 slot ticks
+// are kept; everything else is archived in STATE.archive.preV6, not deleted.
+const CONTENT_VERSION = 6;
 const TOTAL_PLAN_DAYS = 355; // Day 1 = 2026-10-01, Day 355 = 2027-09-20 (arrival)
 
 function loadState() {
@@ -92,6 +107,12 @@ function migrateContent(saved) {
   // everything quant-specific, then swap in the Germany plan.
   if (savedVersion < 4) migrateToGermanyPlan(saved, fresh);
 
+  // v5-only, one-time: GATE removed from the plan.
+  if (savedVersion < 5) migrateToGreOnly(saved);
+
+  // v6-only, one-time: the lean re-plan.
+  if (savedVersion < 6) migrateToLeanPlan(saved, fresh);
+
   saved.meta = saved.meta || {};
   saved.meta.contentVersion = CONTENT_VERSION;
   saved.meta.lastUpdated = todayISO();
@@ -146,6 +167,124 @@ function migrateToGermanyPlan(saved, fresh) {
   saved.dailyPlanDone = {};
   saved.meta = saved.meta || {};
   saved.meta.startDate = PLAN_START_DATE;
+}
+
+// Strip GATE from user-editable text without clobbering anything the user
+// rewrote: each pair only fires if the seeded phrase is still there verbatim.
+const V5_TEXT_PATCHES = {
+  skills: {
+    toc: [["GATE CS and TU Darmstadt's exam.", "the KIT interview and TU Darmstadt's exam."]],
+    probstat: [["TUM test area (b) + GATE.", "TUM test area (b) + the TU Darmstadt exam."]],
+    linalg: [["maintain via GATE practice, no dedicated block.", "maintain via GRE Quant and dMAT practice, no dedicated block."]],
+    db_arch: [["TUM test area (d) + GATE DBMS/COA sections.", "TUM test area (d) + the TU Darmstadt exam (DBMS / computer architecture)."]]
+  },
+  courses: {
+    "tud-examples": [[" or GATE ≥750.", "."]],
+    "mit-6042": [["(TUM test area b, GATE)", "(TUM test area b)"]]
+  },
+  applications: {
+    "app-saar": [["GRE or GATE (no minimum)", "GRE (no minimum score)"]],
+    "app-tum": [["GRE Q164/AWA4 or GATE CS.", "GRE Q164/AWA4 (hard minimums; no GATE route used)."]],
+    "app-fau": [["GATE CS/DA route (or GRE General + Math Subject).", "GRE General accepted (Math Subject Test optional; aim above the 60th percentile) — checked 6 Oct 2026."]],
+    "app-kit": [["GRE V151/Q164/AWA4 or GATE.", "GRE V151/Q164/AWA4."]],
+    "app-tud": [[" or GATE ≥750.", "."]]
+  }
+};
+function applyTextPatches(saved, patches) {
+  const field = { skills: "note", courses: "notes", applications: "notes" };
+  Object.keys(patches).forEach(list => {
+    (saved[list] || []).forEach(item => {
+      (patches[list][item.id] || []).forEach(([from, to]) => {
+        const f = field[list];
+        if (typeof item[f] === "string") item[f] = item[f].split(from).join(to);
+      });
+    });
+  });
+}
+function migrateToGreOnly(saved) {
+  // The GATE portal is no longer part of the plan.
+  saved.courses = (saved.courses || []).filter(c => c.id !== "gate2027");
+  applyTextPatches(saved, V5_TEXT_PATCHES);
+}
+
+// v6 text patches — same rule: only fires where the seeded phrase is still there verbatim.
+const V6_TEXT_PATCHES = {
+  skills: {
+    toc: [["Feeds the TUM written test (area c), the KIT interview and TU Darmstadt's exam.", "Feeds the TU Darmstadt entrance exam, Göttingen's aptitude test and admission interviews."]],
+    probstat: [["TUM test area (b) + the TU Darmstadt exam.", "Your thinnest credit area (~24 ECTS-equivalent) + the TU Darmstadt exam."]],
+    linalg: [["maintain via GRE Quant and dMAT practice, no dedicated block.", "maintain via dMAT practice, no dedicated block."]],
+    db_arch: [["TUM test area (d) + the TU Darmstadt exam (DBMS / computer architecture).", "TU Darmstadt exam (DBMS / computer architecture) + the TU Dresden/Berlin credit tables."]],
+    english_test: [["(Tübingen, Saarland, TU Darmstadt ask for 7.0)", "(TU Darmstadt asks 7.0, TU Berlin and Göttingen 6.5; APS and the visa need an approved certificate — medium-of-instruction letters are not accepted there)"]],
+    dmat: [["consider requesting ADHD accommodations (≥10 weeks before the test).", "consider requesting ADHD accommodations (≥10 weeks before the test). Eligibility: APS exempts bachelor students who have not completed 7 semesters of a 4-year program — you complete semester 7 in Dec 2026; confirm with APS."]],
+    app_docs: [["5/6 = motivation letter + TUM statement/essay + tabular CV reviewed by two humans (not AI) and mapped to each program's modules. TUM excludes AI-written applications.", "5/6 = motivation letters + credit-mapping tables + tabular CV reviewed by two humans (not AI) and mapped to each program's modules. Write every letter yourself, no AI."]],
+    interview: [["4/6 = would score ≥30/60 on KIT's interview (motivation + technical depth on your own projects). Two recorded mock orals before June.", "4/6 = can explain your own projects and your motivation for 10 minutes without notes (admission interviews, aptitude tests). Two recorded mock orals before June."]]
+  },
+  courses: {
+    powerprep: [["Test 1 cold = diagnostic (Day 10).", "OPTIONAL: GRE is parked until the 15 Jan decision. If you add it, Test 1 cold = diagnostic."]],
+    gregmat: [["The most-recommended course on r/GRE (community consensus).", "OPTIONAL (GRE parked until 15 Jan). The most-recommended course on r/GRE (community consensus)."]]
+  }
+};
+// Applications that stay in the tracker: refresh the note from the new seed only if it still
+// holds the previous seeded text. The six dropped programs leave only if untouched.
+const V6_APP_OLD_NOTES = {
+  "app-daad": "Working deadline 15 Oct — confirm in the portal (select India).",
+  "app-tub": "Safe-ish (open admission). No GRE. Credit minimums: 12 CP theory, 12 CP comp. eng., 18 CP maths.",
+  "app-tud": "Direct via TUCaN, paper documents by post. 60 ECTS matching core; exam ~1 Sep unless GRE V155/Q165/AWA3.5.",
+  "app-passau": "No GRE. APS by the deadline. A1 German by end of year 1. No tuition."
+};
+const V6_DROPPED_APPS = ["app-rwth", "app-tue", "app-saar", "app-tum", "app-fau", "app-kit"];
+const V6_DOSSIER_OLD = {
+  description: "Everything the universities actually score: transcript credit mapping against each program's required areas, motivation letter, TUM statement + essay, tabular CV, LORs, APS certificate, uni-assist VPD. TUM's first stage is 50 of 57 points on curricular fit — this dossier, not the CGPA, is what decides admits.",
+  milestones: [
+    "Bennett documents received: module handbook, CGPA→% rule, minimum pass grade, rank letter",
+    "DAAD submitted (letter, CV, LOR, transcripts, IELTS)",
+    "APS dossier couriered",
+    "Credit-mapping table done for TUM, KIT, TUD, RWTH, TU Berlin, Passau",
+    "Master motivation letter reviewed by two humans",
+    "TUM essay + statement of reasons final",
+    "TUM VPD filed via uni-assist",
+    "All 7–9 applications submitted"
+  ]
+};
+function migrateToLeanPlan(saved, fresh) {
+  saved.archive = saved.archive || {};
+  const prev = saved.archive.preV6 = saved.archive.preV6 || {};
+  prev.archivedOn = todayISO();
+
+  // Progress: the roadmap tasks changed, so keep only Week 1 ticks (positions 0-0-*)
+  // and the slot ticks of days 1-6; the rest is archived.
+  prev.roadmapDone = saved.roadmapDone || {};
+  prev.dailyPlanDone = saved.dailyPlanDone || {};
+  saved.roadmapDone = Object.fromEntries(Object.entries(prev.roadmapDone).filter(([k]) => k.startsWith("0-0-")));
+  saved.dailyPlanDone = Object.fromEntries(Object.entries(prev.dailyPlanDone).filter(([k]) => parseInt(k, 10) <= 6));
+
+  // GRE skills leave the active list (they would otherwise read as the "weakest" skill).
+  const GRE_SKILLS = ["gre_quant", "gre_verbal"];
+  prev.skills = (saved.skills || []).filter(s => GRE_SKILLS.includes(s.id));
+  saved.skills = (saved.skills || []).filter(s => !GRE_SKILLS.includes(s.id));
+
+  applyTextPatches(saved, V6_TEXT_PATCHES);
+
+  // Applications.
+  saved.applications = saved.applications || [];
+  const untouched = a => a.status === "planned" && !a.dateApplied;
+  prev.droppedApplications = saved.applications.filter(a => V6_DROPPED_APPS.includes(a.id) && untouched(a));
+  saved.applications = saved.applications.filter(a => !(V6_DROPPED_APPS.includes(a.id) && untouched(a)));
+  saved.applications.forEach(a => {
+    const old = V6_APP_OLD_NOTES[a.id], fa = fresh.applications.find(x => x.id === a.id);
+    if (old && fa && a.notes === old) a.notes = fa.notes;
+  });
+  fresh.applications.forEach(fa => { if (!saved.applications.find(a => a.id === fa.id)) saved.applications.push(fa); });
+
+  // Dossier project: refresh wording that still equals the previous seed.
+  const dossier = (saved.projects || []).find(p => p.id === "proj-dossier");
+  const freshDossier = fresh.projects.find(p => p.id === "proj-dossier");
+  if (dossier && freshDossier) {
+    if (dossier.description === V6_DOSSIER_OLD.description) dossier.description = freshDossier.description;
+    (dossier.milestones || []).forEach((m, i) => {
+      if (m.title === V6_DOSSIER_OLD.milestones[i] && freshDossier.milestones[i]) m.title = freshDossier.milestones[i].title;
+    });
+  }
 }
 
 function saveState() {
@@ -788,7 +927,7 @@ function renderDashboard() {
       <div class="card stat-tile">
         <div class="value">${Math.round(examHours * 10) / 10}h</div>
         <div class="label">Exam-prep hours logged</div>
-        <div class="delta flat"><i class="fa-solid fa-pen-to-square"></i> GRE · IELTS · GATE · dMAT</div>
+        <div class="delta flat"><i class="fa-solid fa-pen-to-square"></i> GRE · IELTS · dMAT</div>
       </div>
     </div>
 

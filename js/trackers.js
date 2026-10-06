@@ -453,7 +453,7 @@ function renderCompetitions() {
 // entries and still count toward each day's total; they're just no longer
 // offered as new categories.
 const STUDY_CATS = [
-  ["exams", "Exams (GRE/IELTS/GATE/dMAT)"], ["german", "German"], ["cs", "CS foundations"],
+  ["exams", "Exams (GRE/IELTS/dMAT)"], ["german", "German"], ["cs", "CS foundations"],
   ["apps", "Applications"], ["dsa", "DSA"], ["ai", "AI / Projects work"], ["interviewPrep", "Interview prep"]
 ];
 // Primary path — ALWAYS today, no date field to fat-finger. Manual numbers here
