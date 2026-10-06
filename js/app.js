@@ -264,6 +264,7 @@ function escapeHtml(str) {
    ============================================================ */
 const VIEW_TITLES = {
   dashboard: ["Dashboard", "Your career operating system, at a glance"],
+  deadlines: ["Deadlines", "Every date that can cost you an admission — hard cutoffs, critical path, re-checks"],
   mastersheet: ["Master Sheet", "Everything on one page — weeks, milestones, and the skill matrix"],
   roadmap: ["Roadmap", "6 phases to arrival (Sept 2027) — gate by gate"],
   timetable: ["Timetable & Calendar", "The daily template + a study-day log"],
@@ -303,6 +304,7 @@ function goToView(name) {
 
 const RENDERERS = {
   dashboard: renderDashboard,
+  deadlines: renderDeadlines,    // deadlines.js
   mastersheet: renderMasterSheet,
   roadmap: renderRoadmap,
   timetable: renderTimetable,
@@ -402,7 +404,7 @@ function renderStakesBanner() {
     <i class="fa-solid ${onTrack ? "fa-fire" : "fa-triangle-exclamation"} sb-icon"></i>
     <div>
       <b>TARGET: ${escapeHtml(primaryHeadline)}</b> — on campus by Oct 2027.
-      <span class="sb-sub">&nbsp;Day ${day}/${TOTAL_PLAN_DAYS} ${daysToGate != null ? `· ${daysToGate <= 0 ? "GATE DUE NOW" : daysToGate + " days to " + nextGate.title} ` : ""}· weakest right now: ${escapeHtml(weakest.name)} (${weakest.level}/6, needs ${weakest.target}/6)${onTrack ? " · this week's tasks: done" : ""}</span>
+      <span class="sb-sub">&nbsp;Day ${day}/${TOTAL_PLAN_DAYS} ${daysToGate != null ? `· ${daysToGate <= 0 ? "GATE DUE NOW" : daysToGate + " days to " + nextGate.title} ` : ""}${dlBannerText() ? `· <b>${dlBannerText()}</b> ` : ""}· weakest right now: ${escapeHtml(weakest.name)} (${weakest.level}/6, needs ${weakest.target}/6)${onTrack ? " · this week's tasks: done" : ""}</span>
     </div>
   `;
 }
@@ -743,6 +745,7 @@ function renderDashboard() {
   const el = document.getElementById("view-dashboard");
   el.innerHTML = `
     ${todayPlan ? renderTodayPlanCard(day, todayPlan.plan) : ""}
+    ${dlDashboardCard()}
     ${!loggedToday ? `
     <div class="card nudge-card mb-16">
       <div class="flex-between">
