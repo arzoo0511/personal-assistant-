@@ -23,15 +23,29 @@ const NPTEL_COURSES = {
   }
 };
 
-// Only weeks 6-8 of the Innovation course were verified (from the NPTEL page
-// snippet); every other title is a blank for the user to fill from the real
-// syllabus — nothing here is invented.
-const NPTEL_VERIFIED_TOPICS = {
-  innov: {
-    6: "Sustainability innovation & entrepreneurship; innovation context & pattern; SMEs in sustainable development",
-    7: "Management of innovation; creation of IPR; types of IPR; patents & copyrights; patents in India",
-    8: "Business models & value proposition; business model failure; incubators; managing investors; future markets & innovation needs for India"
-  }
+// Week titles copied from the official NPTEL course pages (nptel.ac.in/courses/
+// 110107094 and 106108703, read 7 Oct 2026). Never overwrites a title the user typed.
+const NPTEL_WEEK_TOPICS = {
+  innov: [
+    "Analyzing the current business scenario; innovation & creativity; innovation in current environment; types of innovation; schools of innovation",
+    "Challenges of innovation; steps of innovation management; idea management system; divergent vs convergent thinking; design thinking & entrepreneurship",
+    "Experimentation in innovation management; idea championship; participation for innovation; co-creation; prototyping to incubation",
+    "What is a business model?; who is an entrepreneur?; social entrepreneurship; Blue Ocean Strategy I & II",
+    "Marketing of innovation; technology innovation process; technological innovation management planning & strategies; technology forecasting",
+    "Sustainability innovation & entrepreneurship; innovation sustainable conditions; innovation context & patterns; SMEs in sustainable development; insight & entrepreneurship",
+    "Management of innovation, creation of IPR I & II; types of IPR; patents & copyrights; patents in India",
+    "Business models & value proposition; business model failure (reasons & remedies); incubators: business vs technology; managing investors; future markets & innovation needs for India"
+  ],
+  genai: [
+    "Introduction: what programmers do, algorithms, how effective GenAI is at coding; Python basics (REPL, arithmetic, float limits, bits, strings)",
+    "Variables & assignment (misconceptions, swapping); functions & built-ins; input(); debugging buggy code with ChatGPT / GitHub Copilot",
+    "User-defined functions & good design; simple/complex conditionals; Refute problems; boolean operators & short-circuiting",
+    "Helper functions; recursion; \"Ask the Client\" problems; strings & immutability",
+    "Lists, tuples, exceptions; iteration Pattern 1 (search) & Pattern 2 (accumulate); list comprehension",
+    "Iteration & testing: while→for, binary search, num_unique, Pattern 3 (all pairs), dictionaries, test-driven development, doctests",
+    "Learning a new language (C): clarifying tasks, Python vs C, translating, integer division semantics",
+    "Strings & functions in C (char[] vs char*, const, malloc); algorithm- vs data-centric; simplified Python lists implemented in C"
+  ]
 };
 
 function nptelState() {
@@ -39,14 +53,17 @@ function nptelState() {
     STATE.nptel = { done: {}, courses: {}, session: {} };
     Object.keys(NPTEL_COURSES).forEach(k => {
       STATE.nptel.courses[k] = {
-        weeks: Array.from({ length: 8 }, (_, i) => ({
-          topic: (NPTEL_VERIFIED_TOPICS[k] || {})[i + 1] || "",
-          lectures: false, assignment: false, revised: false
-        })),
+        weeks: Array.from({ length: 8 }, () => ({ topic: "", lectures: false, assignment: false, revised: false })),
         mocks: [], weak: []
       };
     });
   }
+  // Fill any still-blank week title from the official list (also repairs saves from the first release).
+  Object.keys(NPTEL_COURSES).forEach(k => {
+    const cs = STATE.nptel.courses[k];
+    if (!cs) return;
+    cs.weeks.forEach((w, i) => { if (!w.topic) w.topic = (NPTEL_WEEK_TOPICS[k] || [])[i] || ""; });
+  });
   return STATE.nptel;
 }
 
@@ -178,7 +195,8 @@ function renderNptel() {
     return `<div class="card mb-16">
       <div class="card-title-row"><h3><i class="fa-solid fa-graduation-cap"></i>&nbsp; ${escapeHtml(c.name)}</h3>
         <a class="btn btn-sm" href="${c.url}" target="_blank" rel="noopener">NPTEL page</a></div>
-      <p class="muted">${escapeHtml(c.who)} · Exam ${fmtDate(c.exam)} · Readiness shown only from your last 2 mocks${rd == null ? " (none yet)" : ": <b>" + rd + "%</b>"}</p>
+      <p class="muted">${escapeHtml(c.who)} · Exam ${fmtDate(c.exam)} (date confirmed on the official NPTEL course page) · Readiness shown only from your last 2 mocks${rd == null ? " (none yet)" : ": <b>" + rd + "%</b>"}</p>
+      <p class="muted">Week titles are the official lecture groupings. Official assignments: NPTEL course page → <b>Downloads</b>${k === "genai" ? " (Weeks 1–8 posted)" : " (none posted for this course — practise from lectures)"}.</p>
       <div class="field"><label>Exam session / centre (from your hall ticket)</label>
         <input type="text" value="${escapeHtml(s.session[k] || "")}" placeholder="e.g. forenoon, centre name" onchange="nptelSetSession('${k}', this.value)" /></div>
 
