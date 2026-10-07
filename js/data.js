@@ -59,7 +59,7 @@ const DEFAULT_STATE = {
     aggressiveParallel: "None. German A1 → B1 runs inside this plan (it is part of the Germany lane). The next internship (SAP Labs India or another German-linked firm, 2027 batch) is an application task, not a second lane; Werkstudent readiness (portfolio project, DSA, LinkedIn) gets real hours only after the applications are in.",
     option: "Quant / algo-trading plan — PARKED on 2026-10-01 (archived in Settings data, nothing deleted). Reopen only by an explicit decision, never by drift. Contingency if APS cannot be issued before the spring deadlines (it may need the completed degree): use the July–August deadlines (TU Darmstadt 15 Jul, TU Berlin 31 Aug) or move to the Summer 2028 intake (Passau opens 1 Nov–15 Dec 2027); the dMAT result stays valid and an IELTS is usually accepted for 2 years.",
     deprioritized: "GATE CS (skipped 6 Oct 2026). GRE General is parked — decide on 15 Jan, default no; it only matters for KIT, Mannheim, RWTH and FAU AI. Off the list: TUM (GRE Q≥164, €4–6k/semester), Saarland (CGPA ≥75% and top-10% rank), Stuttgart (15 Jan deadline), Tübingen (grade ≤2.0), RWTH (1 Mar + GRE), FAU (€4,000/semester). Also: Erasmus Mundus rounds, US programs, telc German certificates (not on the visa list — use Goethe or ÖSD), the Goethe A2 exam (no legal value).",
-    notes: "Re-planned 2026-10-06 after the deep dive (reports/germany-ms-deep-dive-2026-10-06.md) and the Bennett credit audit (reports/bennett-credit-audit-2026-10-06.md). Day 1 = 1 Oct 2026, Day 355 = 20 Sept 2027. What decides this cycle: (1) CREDITS — maths is your thinnest area (~24 ECTS-equivalent), so Dortmund, FU Berlin, TU Berlin and Darmstadt fit while Passau (≥35) probably does not; (2) APS — the certificate needs the dMAT, and it is unconfirmed whether a student with 7 of 8 semesters done can get it before graduating (APS reply pending): if not, the May deadlines fail and you rely on July–August deadlines or Summer 2028; (3) MONEY — tuition-free states only (Berlin, Hesse, NRW today); Baden-Württemberg is €1,500/semester and TUM/FAU €4–6k; budget 5 semesters; (4) GERMAN — 84% of tech Werkstudent posts need it, so aim for B1 by Aug–Sep 2027 (A2 course Jan–May, B1 exam Jul–Aug; June is a stretch). CGPA is 7.80 (recomputed from the transcript); semester 7 has only 12 credits, so it can lift it to 7.97 at most — do not trade German or the dMAT for marks. IELTS is needed regardless of any university waiver: APS and the visa accept only IELTS/TOEFL/Goethe, not medium-of-instruction letters. Sleep: the 5h floor stays your call, but the research (AASM: ≤6h is inadequate; sleep consolidates new vocabulary) says drop the 23:30 light block, at minimum in the 7 days before each exam."
+    notes: "Re-planned 2026-10-06 after the deep dive (reports/germany-ms-deep-dive-2026-10-06.md) and the Bennett credit audit (reports/bennett-credit-audit-2026-10-06.md). Day 1 = 1 Oct 2026, Day 355 = 20 Sept 2027. What decides this cycle: (1) CREDITS — maths is your thinnest area (~24 ECTS-equivalent), so Dortmund, FU Berlin, TU Berlin and Darmstadt fit while Passau (≥35) probably does not; (2) APS — the certificate needs the dMAT, and it is unconfirmed whether a student with 7 of 8 semesters done can get it before graduating (APS reply pending): if not, the May deadlines fail and you rely on July–August deadlines or Summer 2028; (3) MONEY — tuition-free states only (Berlin, Hesse, NRW today); Baden-Württemberg is €1,500/semester and TUM/FAU €4–6k; budget 5 semesters; (4) GERMAN — 84% of tech Werkstudent posts need it, so aim for B1 by Aug–Sep 2027 (A2 course Jan–May, B1 exam Jul–Aug; June is a stretch). CGPA is 7.80 (recomputed from the transcript); semester 7 has only 12 credits, so it can lift it to 7.97 at most — do not trade German or the dMAT for marks. IELTS is needed regardless of any university waiver (APS and the visa do not accept medium-of-instruction letters) — but not soon: prepare from 31 Oct, after the NPTEL exams, sit in mid-December, retake in late January if needed. Sleep: the 5h floor stays your call, but the research (AASM: ≤6h is inadequate; sleep consolidates new vocabulary) says drop the 23:30 light block, at minimum in the 7 days before each exam."
   },
 
   /* -----------------------------------------------------------------
@@ -75,7 +75,7 @@ const DEFAULT_STATE = {
       note: "4/6 = Goethe B1 passed, all 4 modules (Modellsatz ≥60% per module before booking). True zero baseline on 1 Oct 2026. ~350–450 hours to B1 → 8–10 h/week average.",
       history: [{ date: PLAN_START_DATE, level: 0, note: "Starting from zero" }] },
     { id: "english_test", name: "IELTS Academic", category: "Exams", level: 3.5, target: 5,
-      note: "5/6 = 7.0 overall, no band below 6.5 (TU Darmstadt asks 7.0, TU Berlin and Göttingen 6.5; APS and the visa need an approved certificate — medium-of-instruction letters are not accepted there). PROVISIONAL until the Day 2 full mock.",
+      note: "5/6 = 7.0 overall, no band below 6.5 (TU Darmstadt asks 7.0, TU Berlin and Göttingen 6.5; APS and the visa need an approved certificate — medium-of-instruction letters are not accepted there). PROVISIONAL until your first full mock (31 Oct).",
       history: [{ date: PLAN_START_DATE, level: 3.5, note: "Provisional estimate" }] },
     { id: "dmat", name: "dMAT Core speed", category: "Exams", level: 2.5, target: 4,
       note: "Core Module = figure sequences, mathematical equations, Latin squares — 20 items / 25 min each, NO note-taking. That's a working-memory load: practise exactly that format, and consider requesting ADHD accommodations (≥10 weeks before the test). Eligibility: APS exempts bachelor students who have not completed 7 semesters of a 4-year program — you complete semester 7 in Dec 2026; confirm with APS.",
@@ -116,30 +116,30 @@ const DEFAULT_STATE = {
       { title: "Week 1 (1–7 Oct): Lock the exam plan, ask APS, request Bennett documents", days: "1-7", tasks: [
         "Open the DAAD portal, select India and read the exact deadline — apply only if it still fits (decide by 10 Oct; skipping is the default)",
         "Lock the exam plan: dMAT + IELTS only — no GATE, GRE parked until the 15 Jan decision",
-        "Choose the IELTS sitting (first half of November is ideal) and check Goethe A1 evening/weekend batches (code GDW4D26 valid to 14 Oct)",
+        "IELTS is NOT this month: prepare from 31 Oct (after the NPTEL exams), sit in mid-December, retake in late January if needed. This week only check Goethe A1 evening/weekend batches (code GDW4D26 valid to 14 Oct)",
         "Email Bennett: syllabi with contact hours, a '168 credits = 240 ECTS' letter, grading scale + pass mark, CGPA→%, medium-of-instruction letter, official transcript — and ask 2 professors for recommendation letters (only DAAD/HPI need them; cheap to do once)",
         "Send the dMAT question to g.a.s.t. (done 6 Oct — they replied that eligibility is APS India's call) and run the APS requirements quiz"
       ], resources: ["daad-scholarship", "dmat-faq", "ielts-idp", "aps-dmat"],
       dailyPlan: [
-        { d: 1, morning: "Open DAAD portal → select India → note the exact deadline; email DAAD New Delhi", daytime: "Emails: 2 professors (LORs) + Bennett registrar (syllabi, CGPA→% rule, grading scale + pass mark, 168 = 240 ECTS letter, medium-of-instruction letter)", deep1: "Lock the exam plan: dMAT + IELTS only (GATE skipped, GRE parked until 15 Jan)", deep2: "Choose the IELTS sitting (Nov–Dec) and check Goethe A1 batches", deep3: "Install Anki, add the Goethe A1 deck", night: "Recap today in 2 sentences + log hours" },
-        { d: 2, morning: "DW Nicos Weg A1 — episode 1", daytime: "Outline your general motivation letter in bullets (read the DAAD letter guide only if you will apply — the same story serves every program)", deep1: "IELTS full practice test, timed — this is your diagnostic", deep2: "Motivation letter draft v1 (your own words — no AI); it feeds DAAD and every program", deep3: "Anki 10 min", night: "Score the IELTS mock → update the IELTS skill level" },
-        { d: 3, morning: "—", daytime: "IELTS Writing Task 1 + Task 2 practice, then Speaking (record yourself, 3 parts)", deep1: "Tabular CV — ≤3 pages, month/year dates (used by DAAD and several programs)", deep2: "German: Nicos Weg episodes 2–3", deep3: "—", night: "Rest" },
-        { d: 4, morning: "—", daytime: "CATCH-UP & BUFFER — finish anything from Days 1–3", deep1: "Write down your IELTS date choice and the Goethe A1 batch decision", deep2: "Weekly review: self-rate every skill 0–6 in Skill Trackers", deep3: "—", night: "Rest" },
-        { d: 5, morning: "Nicos Weg ep 4 + Anki", daytime: "IELTS Reading set (timed) in 25-min chunks", deep1: "IELTS Listening + weakest-band drill", deep2: "Motivation letter v2", deep3: "Anki", night: "Recap + log" },
-        { d: 6, morning: "Nicos Weg ep 5 + Anki", daytime: "Collect APS documents: Class X/XII marksheets, passport, Aadhaar (linked mobile), semester 1–7 marksheets", deep1: "IELTS full mock #2, timed", deep2: "Review mock #2 mistakes; Writing Task 2 rewrite", deep3: "Anki", night: "Recap + log" },
+        { d: 1, morning: "Open DAAD portal → select India → note the exact deadline; email DAAD New Delhi", daytime: "Emails: 2 professors (LORs) + Bennett registrar (syllabi, CGPA→% rule, grading scale + pass mark, 168 = 240 ECTS letter, medium-of-instruction letter)", deep1: "Lock the exam plan: dMAT + IELTS only (GATE skipped, GRE parked until 15 Jan)", deep2: "Note the IELTS plan (prep from 31 Oct, sit mid-December) and check Goethe A1 batches", deep3: "Install Anki, add the Goethe A1 deck", night: "Recap today in 2 sentences + log hours" },
+        { d: 2, morning: "DW Nicos Weg A1 — episode 1", daytime: "Outline your general motivation letter in bullets (read the DAAD letter guide only if you will apply — the same story serves every program)", deep1: "German: Nicos Weg ep 2–3 + Anki (no IELTS yet)", deep2: "Motivation letter draft v1 (your own words — no AI); it feeds DAAD and every program", deep3: "Anki 10 min", night: "Recap + log" },
+        { d: 3, morning: "—", daytime: "Anki + one Nicos Weg episode; Bennett document chase", deep1: "Tabular CV — ≤3 pages, month/year dates (used by DAAD and several programs)", deep2: "German: Nicos Weg episodes 2–3", deep3: "—", night: "Rest" },
+        { d: 4, morning: "—", daytime: "CATCH-UP & BUFFER — finish anything from Days 1–3", deep1: "Write down the IELTS plan (prep from 31 Oct, sit mid-December) and the Goethe A1 batch decision", deep2: "Weekly review: self-rate every skill 0–6 in Skill Trackers", deep3: "—", night: "Rest" },
+        { d: 5, morning: "Nicos Weg ep 4 + Anki", daytime: "Motivation letter bullets (your own words)", deep1: "German: Nicos Weg ep 4–5", deep2: "Motivation letter v2", deep3: "Anki", night: "Recap + log" },
+        { d: 6, morning: "Nicos Weg ep 5 + Anki", daytime: "Collect APS documents: Class X/XII marksheets, passport, Aadhaar (linked mobile), semester 1–7 marksheets", deep1: "Tabular CV polish", deep2: "Motivation letter v2", deep3: "Anki", night: "Recap + log" },
         { d: 7, morning: "Nicos Weg ep 6 + Anki", daytime: "Email APS India (info@aps-india.de): can a 7-of-8-semester student sit the dMAT and file APS before graduating? Then run the APS requirements quiz", deep1: "NPTEL GenAI — Wk 1–2 + assignment review (NPTEL tracker plan)", deep2: "Email Passau the maths pre-check question (stats/ML/algorithms as 'mathematics'?)", deep3: "30-min Career OS block: start the credit-audit table", night: "Recap + log" }
       ]},
       { title: "Week 2 (8–14 Oct): APS answer, Passau pre-check, NPTEL first, Gate 0", days: "8-14", tasks: [
         "Email APS India the final-year question (info@aps-india.de, or the contact form on aps-india.de/contact-us/) — and write down what the quiz said",
         "Email Passau: do Probability & Statistics, Discrete Mathematical Structures, Statistical ML and Algorithms count as mathematics modules? (they need ≥35 ECTS; you have ~24–30)",
         "Collect the APS paperwork: Class X/XII marksheets, passport, Aadhaar with linked mobile, semester 1–7 marksheets",
-        "Decide DAAD (skip by default) and book the IELTS date; the NPTEL GenAI exam on 16 Oct is this week's priority",
+        "Decide DAAD (skip by default); the NPTEL GenAI exam on 16 Oct is this week's priority — nothing IELTS until 31 Oct",
         "Gate 0 review on Day 14"
       ], resources: ["aps-dmat", "aps-leaflet", "ielts-idp"],
       dailyPlan: [
         { d: 8, morning: "Anki only", daytime: "LOR requests to 2 professors (short email + CV + program list) — if not sent yet", deep1: "NPTEL GenAI Wk 3–4 (NPTEL tracker)", deep2: "NPTEL GenAI: 20 MCQs + recall", deep3: "30-min Career OS block: credit audit — map each Bennett course to an area", night: "Recap + log" },
         { d: 9, morning: "Nicos Weg + Anki", daytime: "DAAD decision: if the real India deadline fits and you want it, start; otherwise note 'skipped' in Applications", deep1: "NPTEL GenAI Wk 5–6", deep2: "NPTEL GenAI quiz", deep3: "30-min Career OS block: list the APS documents you still lack", night: "Recap + log" },
-        { d: 10, morning: "Nicos Weg + Anki", daytime: "Book the IELTS Academic date (computer-delivered, first half of November)", deep1: "NPTEL GenAI Wk 7–8", deep2: "NPTEL GenAI mixed quiz (timed)", deep3: "Anki", night: "Recap + log" },
+        { d: 10, morning: "Nicos Weg + Anki", daytime: "Nothing IELTS this week — it starts on 31 Oct. Use the slot for Bennett/APS follow-ups", deep1: "NPTEL GenAI Wk 7–8", deep2: "NPTEL GenAI mixed quiz (timed)", deep3: "Anki", night: "Recap + log" },
         { d: 11, morning: "—", daytime: "CATCH-UP & BUFFER — finish what slipped", deep1: "Weekly review in Career OS — re-rate skills honestly", deep2: "Plan next week + check d-mat.de (Q1 2027 date) and the APS news page", deep3: "—", night: "Rest" },
         { d: 12, morning: "Anki only", daytime: "Check for the APS and Passau replies; chase Bennett if nothing arrived", deep1: "NPTEL GenAI mock 1 (timed)", deep2: "NPTEL error analysis", deep3: "30-min Career OS block: update the credit-audit table with any syllabi received", night: "Recap + log" },
         { d: 13, morning: "Anki only", daytime: "If the APS reply arrived: write the checklist in Notes and update the dMAT/APS timeline here", deep1: "NPTEL GenAI repair", deep2: "NPTEL code-tracing drills", deep3: "—", night: "Recap + log" },
@@ -160,38 +160,43 @@ const DEFAULT_STATE = {
         "NPTEL GenAI exam on 16 Oct, then Innovation prep for 25 Oct — Career OS gets 30 minutes a day until the 25th",
         "Chase Bennett documents on 21 Oct if nothing has arrived; write down what you received",
         "Credit-audit table (course → area → credits → syllabus) for TU Berlin, FU Berlin, Dortmund and Darmstadt, from your Bennett transcript",
-        "Act on the APS reply (or follow up) and fix the dMAT and IELTS dates in your calendar"
+        "Act on the APS reply (or follow up) and put the dMAT window and the mid-December IELTS plan in your calendar"
       ], resources: ["aps-dmat", "ielts-idp", "dw-nicos"],
       dailyPlan: [
         { d: 15, morning: "Nicos Weg + Anki", daytime: "Check APS and Passau replies (10 min)", deep1: "NPTEL GenAI final 24h: light sheet review only", deep2: "—", deep3: "—", night: "Sleep early" },
         { d: 16, morning: "—", daytime: "NPTEL GenAI EXAM DAY", deep1: "Rest — no study after the exam", deep2: "—", deep3: "—", night: "Rest" },
         { d: 17, morning: "—", daytime: "NPTEL Innovation: diagnostic + weak map", deep1: "NPTEL Innovation Wk 1–2", deep2: "—", deep3: "30-min Career OS block: credit audit — area totals", night: "Rest" },
         { d: 18, morning: "—", daytime: "CATCH-UP & BUFFER — Innovation Wk 1–3 if nothing slipped", deep1: "NPTEL Innovation Wk 3", deep2: "Weekly review in Career OS", deep3: "—", night: "Rest" },
-        { d: 19, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki + IELTS vocabulary", deep1: "NPTEL Innovation Wk 4–6", deep2: "NPTEL recall + MCQs", deep3: "30-min Career OS block: Bennett documents status", night: "Recap + log" },
-        { d: 20, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki + IELTS reading passage", deep1: "NPTEL Innovation Wk 7–8", deep2: "NPTEL mixed quiz (timed)", deep3: "30-min Career OS block: IELTS 20-min listening", night: "Recap + log" },
+        { d: 19, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki (German)", deep1: "NPTEL Innovation Wk 4–6", deep2: "NPTEL recall + MCQs", deep3: "30-min Career OS block: Bennett documents status", night: "Recap + log" },
+        { d: 20, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki (German)", deep1: "NPTEL Innovation Wk 7–8", deep2: "NPTEL mixed quiz (timed)", deep3: "30-min Career OS block: motivation letter bullets", night: "Recap + log" },
         { d: 21, morning: "Nicos Weg + Anki", daytime: "Chase Bennett documents if not received", deep1: "NPTEL Innovation mock 1", deep2: "NPTEL error analysis", deep3: "—", night: "Recap + log" }
       ]},
       { title: "Days 22–35 (22 Oct – 4 Nov): NPTEL done, credit audit finished", days: "22-35", tasks: [
         "NPTEL Innovation exam on 25 Oct — then rest on the 26th",
         "Credit-audit table finished for the five programs with syllabus PDFs attached (use reports/bennett-credit-audit-2026-10-06.md)",
-        "IELTS: full mock + weak-band plan; book the sitting if you have not",
+        "From 31 Oct: IELTS prep starts — one timed diagnostic mock first, then about 1 hour on weekdays and one timed section at weekends",
         "German: Nicos Weg A1 units 1–6; decide on a Goethe A1 batch"
       ], resources: ["ielts-idp", "dw-nicos", "goethe-delhi-courses"],
       dailyPlan: [
-        { d: 22, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki + IELTS vocabulary", deep1: "NPTEL Innovation repair", deep2: "NPTEL easily-confused-terms drill", deep3: "—", night: "Recap + log" },
+        { d: 22, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki (German)", deep1: "NPTEL Innovation repair", deep2: "NPTEL easily-confused-terms drill", deep3: "—", night: "Recap + log" },
         { d: 23, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki", deep1: "NPTEL Innovation mock 2", deep2: "NPTEL error analysis + do-not-forget sheet", deep3: "—", night: "Recap + log" },
         { d: 24, morning: "—", daytime: "NPTEL Innovation final 24h: light sheet review only", deep1: "Prep ID + route to the exam centre", deep2: "—", deep3: "—", night: "Sleep early" },
         { d: 25, morning: "—", daytime: "NPTEL INNOVATION EXAM DAY", deep1: "Rest", deep2: "—", deep3: "—", night: "Rest" },
-        { d: 26, morning: "—", daytime: "Rest — nothing new", deep1: "Anki only (German)", deep2: "—", deep3: "—", night: "Rest" }
+        { d: 26, morning: "—", daytime: "Rest — nothing new", deep1: "Anki only (German)", deep2: "—", deep3: "—", night: "Rest" },
+        { d: 27, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki (German)", deep1: "Credit audit: finish the five-program table", deep2: "German: Nicos Weg ×2", deep3: "Anki", night: "Recap + log" },
+        { d: 28, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki (German)", deep1: "Motivation letter v3 (own words)", deep2: "German: Nicos Weg + one grammar video", deep3: "Anki", night: "Recap + log" },
+        { d: 29, morning: "Nicos Weg + Anki", daytime: "Chase Bennett documents; check the APS and Passau replies", deep1: "Tabular CV final", deep2: "German: Nicos Weg", deep3: "Anki", night: "Recap + log" },
+        { d: 30, morning: "Nicos Weg + Anki", daytime: "Micro-slots: Anki (German)", deep1: "APS documents: scan and name every file in checklist order", deep2: "German: Nicos Weg", deep3: "Anki", night: "Recap + log" },
+        { d: 31, morning: "—", daytime: "IELTS DIAGNOSTIC: one full timed mock (about 3h) — just to see where you are; no pressure", deep1: "Review the mock; write down your two weakest areas", deep2: "German long session: Nicos Weg ×3", deep3: "—", night: "Rest" }
       ]},
-      { title: "Days 36–49 (5–18 Nov): IELTS, letters, re-verification", days: "36-49", tasks: [
-        "Sit IELTS in the first half of November if booked; otherwise 3 full mocks + writing feedback",
+      { title: "Days 36–49 (5–18 Nov): IELTS prep, letters, re-verification", days: "36-49", tasks: [
+        "IELTS prep: weekly timed sections, one full mock around 15 Nov, writing feedback twice (no exam yet)",
         "Draft motivation letter v1 (own words) and a tabular CV",
         "Re-verify each program's WS 2027/28 deadline and requirements page (15 Nov) — edit the dates in the Applications tracker",
         "Apply for the next internship before Deloitte ends on 1 Dec: SAP Labs India or another German-linked firm (check the real eligibility)"
       ], resources: ["ielts-idp", "dw-nicos", "arbeitnow"] },
-      { title: "Days 50–62 (19 Nov – 1 Dec): IELTS result, A1 done, Gate 1", days: "50-62", tasks: [
-        "IELTS result in hand (target 7.0, no band under 6.5) — or the retake booked for January",
+      { title: "Days 50–62 (19 Nov – 1 Dec): IELTS booked, A1 done, Gate 1", days: "50-62", tasks: [
+        "IELTS: second full mock around 28 Nov, then book the mid-December computer-delivered sitting (target 7.0, no band under 6.5)",
         "German: Nicos Weg A1 finished and the free certificate test taken",
         "Gate 1: credit audit, APS paperwork and letter drafts done; you know the APS rule for a 7-of-8-semester student",
         "Deloitte internship ends 1 Dec — the day block opens from Day 63"
@@ -200,7 +205,7 @@ const DEFAULT_STATE = {
 
     { phase: "Phase 2 — Documents, A1 → A2 & dMAT readiness (2 Dec 2026 – 15 Jan 2027)", range: [63, 107],
       dayTemplate: weekTemplate(
-        { morning: "German: Anki A1 + Nicos Weg", daytime: "Day block (no Deloitte): German A1 sprint (1.5h) + application documents (2h)", deep1: "Application documents: letters / credit audit / APS file", deep2: "IELTS retake prep if needed, otherwise dMAT Core drills", deep3: "Light: Anki + plan tomorrow", night: "Recap + log" },
+        { morning: "German: Anki A1 + Nicos Weg", daytime: "Day block (no Deloitte): German A1 sprint (1.5h) + application documents (2h)", deep1: "Application documents: letters / credit audit / APS file", deep2: "IELTS prep until the mid-December sitting (retake prep if needed), then dMAT Core drills", deep3: "Light: Anki + plan tomorrow", night: "Recap + log" },
         { morning: "—", daytime: "Goethe A1 Modellsatz / Practice Set — timed, full", deep1: "italki speaking session (1h)", deep2: "dMAT drill set (timed, NO notes)", deep3: "—", night: "Rest" },
         BUFFER_SUNDAY
       ),
@@ -215,7 +220,8 @@ const DEFAULT_STATE = {
         "Add the semester 7 marksheets to the APS file and follow the checklist APS gave you",
         "Book the Goethe exams you actually want (A1 paper only if Passau stays on the list; skip the A2 exam)",
         "Letters v3 per program (FU Berlin, Dortmund, Darmstadt, TU Berlin)",
-        "German: timed A1 practice sets; start A2 vocabulary"
+        "German: timed A1 practice sets; start A2 vocabulary",
+        "Sit IELTS Academic in mid-December (target 7.0 overall, no band under 6.5; results in 1–2 days) — retake in late January if needed"
       ], resources: ["aps-leaflet", "goethe-a1-practice", "italki"] },
       { title: "Days 93–107 (1–15 Jan): A2 course, GRE decision, Gate 2", days: "93-107", tasks: [
         "Start the A2 course (Goethe New Delhi weekend batch, 9 Jan)",
@@ -320,7 +326,6 @@ const DEFAULT_STATE = {
     { id: "powerprep", name: "ETS POWERPREP tests 1 & 2 (+ PLUS, $44.95 each)", url: "https://www.ets.org/gre/test-takers/general-test/prepare/powerprep.html", category: "Exams — GRE", cost: "Free (2 tests)", status: "not-started", notes: "OPTIONAL: GRE is parked until the 15 Jan decision. If you add it, Test 1 cold = diagnostic. Save Test 2 for the final 3 weeks. Buy 1–2 PLUS tests." },
     { id: "gregmat", name: "GregMat+", url: "https://www.gregmat.com/", category: "Exams — GRE", cost: "$11.99/month", status: "not-started", notes: "OPTIONAL (GRE parked until 15 Jan). The most-recommended course on r/GRE (community consensus). Follow one study plan, don't hop." },
     { id: "ielts-idp", name: "IELTS Academic — IDP India booking", url: "https://ieltsidpindia.com/information/ielts-test-fee", category: "Exams — English", cost: "₹19,000", status: "not-started", notes: "Computer-delivered: results in 1–2 days. Target 7.0, no band below 6.5." },
-    { id: "toefl-practice", name: "TOEFL iBT full-length practice test (2026 format)", url: "https://www.in.ets.org/content/dam/ets-india/pdfs/toefl/toefl-ibt-full-length-practice-test-1.pdf", category: "Exams — English", cost: "Free", status: "not-started", notes: "Only if you switch to TOEFL (₹15,729, scored 1–6 since Jan 2026)." },
     { id: "dmat-faq", name: "dMAT India FAQ (check weekly for the Q1 2027 date)", url: "https://www.d-mat.de/en/faq-graduate-students-india/", category: "Exams — dMAT", cost: "€150 test", status: "not-started", notes: "Register via g.a.s.t. the day it opens. Accommodation requests ≥10 weeks before the test." },
     { id: "dmat-prep", name: "dMAT official prep PDF (Core + General Academic)", url: "https://www.d-mat.de/wp-content/uploads/2026/09/260902_dMAT_General-Academic-Module_Preparatoy-Materials_EN.pdf", category: "Exams — dMAT", cost: "Free", status: "not-started", notes: "Plus 5 official tutorial videos and a portal demo on d-mat.de. Practise without notes — the real test allows none." },
     { id: "aps-india", name: "APS India — registration & checklist", url: "https://aps-india.de/", category: "Applications", cost: "₹18,000", status: "not-started", notes: "Courier the dossier by 31 Oct. Certificate issues only after the dMAT certificate is checked." },
@@ -354,7 +359,7 @@ const DEFAULT_STATE = {
     { id: "visa-faq", name: "German Missions India — student visa FAQ", url: "https://india.diplo.de/in-en/service/2546328-2546328", category: "Logistics", cost: "Free", status: "not-started", notes: "Book VFS the week you're admitted." },
     { id: "daad-registering", name: "DAAD — registering in Germany (Anmeldung)", url: "https://www.daad.de/en/studying-in-germany/living-in-germany/registering/", category: "Logistics", cost: "Free", status: "not-started", notes: "Anmeldung within 2 weeks of moving in." },
     { id: "aps-dmat", name: "APS India — dMAT page (who needs it, timing)", url: "https://aps-india.de/dmat/", category: "Exams — dMAT", cost: "Free", status: "not-started", notes: "Exempts bachelor students who have not completed 7 semesters of a 4-year program; the APS certificate issues only after the dMAT certificate is checked. Contact: info@aps-india.de (g.a.s.t. only runs the test and sent a boilerplate reply on 6 Oct)." },
-    { id: "aps-leaflet", name: "APS India application leaflet for bachelor graduates (June 2026)", url: "https://aps-india.de/wp-content/uploads/2026/06/Leaflet_BA_Graduates_English_dMAT_June2026.pdf", category: "Applications", cost: "Free", status: "not-started", notes: "Checklist: marksheets of all semesters, degree or provisional certificate (<1 year old), language certificate. For the visa only IELTS/TOEFL/Goethe count — NOT medium-of-instruction letters." }
+    { id: "aps-leaflet", name: "APS India application leaflet for bachelor graduates (June 2026)", url: "https://aps-india.de/wp-content/uploads/2026/06/Leaflet_BA_Graduates_English_dMAT_June2026.pdf", category: "Applications", cost: "Free", status: "not-started", notes: "Checklist: marksheets of all semesters, degree or provisional certificate (<1 year old), language certificate. For the visa only approved certificates (IELTS, Goethe) count — NOT medium-of-instruction letters." }
   ],
 
   /* -----------------------------------------------------------------
@@ -424,9 +429,9 @@ const DEFAULT_STATE = {
     { time: "09:30–18:00", block: "WORK WINDOW → DAY BLOCK", type: "flexible", note: "Until 1 Dec: Deloitte — interruptible, ~2 real work hours scattered. Use 25-min Quick sessions for resumable tasks only: Anki (German), IELTS vocabulary and reading passages, application admin. From 2 Dec: free day block (application documents, German A1 sprint). From January: Bennett's final semester + dMAT Core micro-drills." },
     { time: "18:00–18:45", block: "Decompress / dinner prep", type: "light" },
     { time: "18:45–19:30", block: "Dinner", type: "fixed" },
-    { time: "19:30–21:30", block: "DEEP WORK 1 — hardest task of the day", type: "deep", note: "Your best focus window. NPTEL exams (to 25 Oct) → IELTS prep + credit audit (Nov) → dMAT drills + CS foundations (Dec–Feb) → motivation letters (Mar) → one application at a time (Apr–Jul) → German B1 exam prep (Jun–Aug)." },
+    { time: "19:30–21:30", block: "DEEP WORK 1 — hardest task of the day", type: "deep", note: "Your best focus window. NPTEL exams (to 25 Oct) → credit audit + IELTS prep (Nov), IELTS sitting mid-Dec → dMAT drills + CS foundations (Dec–Feb) → motivation letters (Mar) → one application at a time (Apr–Jul) → German B1 exam prep (Jun–Aug)." },
     { time: "21:30–21:45", block: "Break", type: "light" },
-    { time: "21:45–23:15", block: "DEEP WORK 2 — second-hardest", type: "deep", note: "IELTS Writing/Speaking + application documents (Oct–Nov) → German A1/A2 + letters (Dec–Jan) → dMAT reading sets (Jan–Mar) → German B1 (Apr–Jul) → Werkstudent prep (Jul–Sep)." },
+    { time: "21:45–23:15", block: "DEEP WORK 2 — second-hardest", type: "deep", note: "application documents + German (Oct) → IELTS Writing/Speaking (Nov–Dec) → German A2 + letters (Dec–Jan) → dMAT reading sets (Jan–Mar) → German B1 (Apr–Jul) → Werkstudent prep (Jul–Sep)." },
     { time: "23:15–23:30", block: "Break", type: "light" },
     { time: "23:30–00:15", block: "LIGHT BLOCK — Anki / flashcards / plan tomorrow", type: "light", note: "Was 'Quant Lab'. Low-load only, never new theory. This is the FIRST block to cut: dropping it moves sleep to 23:30 (6h). At minimum, cut it in the 7 days before IELTS, dMAT and B1 (and NPTEL exams)." },
     { time: "00:15–00:30", block: "Quick review + plan tomorrow", type: "light" },
@@ -446,9 +451,9 @@ const DEFAULT_STATE = {
     { id: "g0", title: "G0 — Lock-in (14 Oct 2026)", dueDay: 14, status: "pending",
       criteria: "Exam plan locked: dMAT + IELTS only (no GATE, GRE parked until 15 Jan). The APS question sent (quiz run, email to info@aps-india.de). Bennett documents requested (syllabi with contact hours, 168 = 240 ECTS letter, grading scale + pass mark, CGPA→%, medium-of-instruction letter, transcript). Passau maths pre-check sent. DAAD decided (skip by default). IELTS date chosen. FAIL ACTION: chase everything on 21 Oct; the NPTEL GenAI exam on 16 Oct takes priority over all of it." },
     { id: "g1", title: "G1 — Credits, IELTS & A1 (1 Dec 2026)", dueDay: 62, status: "pending",
-      criteria: "IELTS sat (target ≥7.0 overall, no band under 6.5) or booked for early December/January. Credit-audit table done for TU Berlin, FU Berlin, Dortmund and Darmstadt (and Passau if it passed the pre-check) with syllabi attached. APS answer received and the checklist for a 7-of-8-semester student known. German: Nicos Weg A1 units 1–12, Anki on ≥80% of days. Every program page re-verified (15 Nov). FAIL ACTION: IELTS retake in January; drop any program whose credit minimum you fail; if APS needs the completed degree, switch the plan to the July–August deadlines or Summer 2028." },
+      criteria: "IELTS prep under way (diagnostic done, one full mock by mid-November) and the mid-December sitting booked. Credit-audit table done for TU Berlin, FU Berlin, Dortmund and Darmstadt (and Passau if it passed the pre-check) with syllabi attached. APS answer received and the checklist for a 7-of-8-semester student known. German: Nicos Weg A1 units 1–12, Anki on ≥80% of days. Every program page re-verified (15 Nov). FAIL ACTION: if IELTS prep has not started, sit in January instead — the certificate is only needed when you file APS (Feb–Mar); drop any program whose credit minimum you fail; if APS needs the completed degree, switch the plan to the July–August deadlines or Summer 2028." },
     { id: "g2", title: "G2 — Documents & A2 (15 Jan 2027)", dueDay: 107, status: "pending",
-      criteria: "A1 finished (certificate test); A2 course started 9 or 11 Jan. Semester 7 results in and marksheets 1–7 ready for APS. dMAT registered if g.a.s.t. has opened a date. Motivation-letter drafts for the shortlist (own words, reviewed by one human). GRE decision made (default: no). FAIL ACTION: no dMAT date by 15 Jan → keep the July–August deadlines and Summer 2028 as the fallback; add GRE only if you consciously want KIT/Mannheim." },
+      criteria: "IELTS sat in mid-December (target ≥7.0 overall, no band under 6.5), or the retake booked for late January. A1 finished (certificate test); A2 course started 9 or 11 Jan. Semester 7 results in and marksheets 1–7 ready for APS. dMAT registered if g.a.s.t. has opened a date. Motivation-letter drafts for the shortlist (own words, reviewed by one human). GRE decision made (default: no). FAIL ACTION: no dMAT date by 15 Jan → keep the July–August deadlines and Summer 2028 as the fallback; add GRE only if you consciously want KIT/Mannheim." },
     { id: "g3", title: "G3 — dMAT, APS & letters (31 Mar 2027)", dueDay: 182, status: "pending",
       criteria: "dMAT sat (or its date fixed) and the certificate forwarded to APS. APS certificate issued, or APS's written status known. Final list frozen at 4–6 programs. Letters reviewed by two humans; uni-assist VPDs filed where needed (≥8 weeks before the deadline). FAIL ACTION: no APS by ~mid-April → the May deadlines (Dortmund, Passau, FU Berlin) come off; TU Darmstadt (15 Jul) and TU Berlin (31 Aug) carry the cycle; otherwise Summer 2028." },
     { id: "g4", title: "G4 — Applications in (15 Jul 2027)", dueDay: 288, status: "pending",

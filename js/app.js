@@ -44,7 +44,13 @@ let STATE = null;
 // Passau/Göttingen/HPI/TUHH come in) and the GRE skills are archived. Because
 // the roadmap's tasks changed, only Week 1 ticks and day-1-to-6 slot ticks
 // are kept; everything else is archived in STATE.archive.preV6, not deleted.
-const CONTENT_VERSION = 6;
+//
+// v7 (2026-10-07): IELTS made realistic — nothing IELTS before 31 Oct (the
+// NPTEL exams come first), sit in mid-December, retake in late January — and
+// TOEFL removed from the plan. Task/slot counts are unchanged except one task
+// appended to a Phase 2 week, so every existing tick keeps its position; only
+// text is replaced, and the TOEFL practice resource is dropped if untouched.
+const CONTENT_VERSION = 7;
 const TOTAL_PLAN_DAYS = 355; // Day 1 = 2026-10-01, Day 355 = 2027-09-20 (arrival)
 
 function loadState() {
@@ -112,6 +118,9 @@ function migrateContent(saved) {
 
   // v6-only, one-time: the lean re-plan.
   if (savedVersion < 6) migrateToLeanPlan(saved, fresh);
+
+  // v7-only, one-time: realistic IELTS timing, no TOEFL.
+  if (savedVersion < 7) migrateToRealisticIelts(saved);
 
   saved.meta = saved.meta || {};
   saved.meta.contentVersion = CONTENT_VERSION;
@@ -246,6 +255,20 @@ const V6_DOSSIER_OLD = {
     "All 7–9 applications submitted"
   ]
 };
+const V7_TEXT_PATCHES = {
+  skills: {
+    english_test: [["PROVISIONAL until the Day 2 full mock.", "PROVISIONAL until your first full mock (31 Oct)."]]
+  },
+  courses: {
+    "aps-leaflet": [["For the visa only IELTS/TOEFL/Goethe count — NOT medium-of-instruction letters.", "For the visa only approved certificates (IELTS, Goethe) count — NOT medium-of-instruction letters."]]
+  }
+};
+function migrateToRealisticIelts(saved) {
+  // Drop the TOEFL practice resource unless the user already started it.
+  saved.courses = (saved.courses || []).filter(c => !(c.id === "toefl-practice" && c.status === "not-started"));
+  applyTextPatches(saved, V7_TEXT_PATCHES);
+}
+
 function migrateToLeanPlan(saved, fresh) {
   saved.archive = saved.archive || {};
   const prev = saved.archive.preV6 = saved.archive.preV6 || {};
