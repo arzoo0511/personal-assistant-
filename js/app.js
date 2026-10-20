@@ -439,6 +439,7 @@ const VIEW_TITLES = {
   competitions: ["Competitions", "Kaggle, hackathons, and the rest"],
   studylog: ["Study & Exercise Log", "Daily hours by category + streaks"],
   nptel: ["NPTEL Exam Tracker", "GenAI 16 Oct · Innovation 25 Oct — coverage, mocks, weak spots, daily plan"],
+  planner: ["Day-by-Day Plan", "20 Oct – 31 Dec · every block planned for you"],
   milestones: ["Milestones", "Go/No-Go gates G0–G5 + arrival"],
   reviews: ["Weekly / Monthly Review", "What got done, what didn't, why"],
   notes: ["Notes", "Freeform, tagged"],
@@ -480,6 +481,7 @@ const RENDERERS = {
   competitions: renderCompetitions, // trackers.js
   studylog: renderStudyLog,      // trackers.js
   nptel: renderNptel,            // nptel.js
+  planner: renderPlanner,        // planner.js
   milestones: renderMilestones,
   reviews: renderReviews,        // trackers.js
   notes: renderNotes,
