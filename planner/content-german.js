@@ -13,11 +13,11 @@ CONTENT.nw = {
   25:"So wohne ich",26:"Meine Wohnung",27:"Sofa, Sessel und Tisch",28:"Unser Haus",29:"Emmas Tag",30:"Tageszeiten",31:"Am Sonntag koche ich",32:"Emmas Wochenende",
   33:"Wie spät ist es?",34:"Hast du morgen Zeit?",35:"Wann spielen wir?",36:"Zu spät!?",37:"Ich bin Lehrerin",38:"Mein Beruf",39:"Wo ist der Aufzug?",40:"Traumberufe",
   41:"Wo ist der Bahnhof?",42:"An der Ampel links",43:"Mit Bus und Bahn",44:"Im Büro",45:"Lebensmittel",46:"Ich mag (nicht)!",47:"Haushaltsarbeit",48:"Was macht dir Spaß?",
-  49:"Mengen und Preise",50:"Was darf es sein?",51:"Sonst noch etwas?",52:"Wie viel Mehl?",56:"Wie wird das Wetter?",59:"Das passt gut!",61:"Meine Familie",62:"Meine Eltern",
+  49:"Mengen und Preise",53:"Wie war dein Urlaub?",55:"Der Ausflug",64:"Mein Bruder",50:"Was darf es sein?",51:"Sonst noch etwas?",52:"Wie viel Mehl?",56:"Wie wird das Wetter?",59:"Das passt gut!",61:"Meine Familie",62:"Meine Eltern",
   65:"Von Kopf bis Fuß",68:"Ist das gesund?",70:"Beim Arzt",77:"Final Test A1"
 };
 /* Order in which lessons are used (file 01 §7): N1-N52, then 7 picked lessons, then the Final Test on 22 Nov. */
-CONTENT.nwOrder = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,56,59,61,62,65,68,70];
+CONTENT.nwOrder = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,64,41,42,43,44,45,46,47,48,49,50,51,52,53,55,56,59,61,62,68,70];
 /* How many lessons on a given date (weekday 2, with exceptions). Sum over 20 Oct-21 Nov = 59 = len(nwOrder). */
 CONTENT.nwCount = function (iso, dow) {
   if (iso === "2026-10-20") return 4;                       // Welcome lessons are short
@@ -26,6 +26,7 @@ CONTENT.nwCount = function (iso, dow) {
   if (iso === "2026-10-31" || iso === "2026-11-07" || iso === "2026-11-14") return 1; // mock Saturdays
   if (["2026-10-26","2026-10-27","2026-10-28"].indexOf(iso) >= 0) return 3;           // catch-up for the NPTEL week
   if (["2026-11-10","2026-11-11","2026-11-12","2026-11-13"].indexOf(iso) >= 0) return 3; // catch-up after the Joveo-heavy weeks
+  if (["2026-11-16","2026-11-17"].indexOf(iso) >= 0) return 3;                         // Perfekt lessons N53 + N55 (audit fix)
   if (iso >= "2026-10-20" && iso <= "2026-11-20" && dow >= 1 && dow <= 5) return 2;
   return 0;
 };
@@ -38,30 +39,30 @@ CONTENT.listen = {
 "2026-10-23":["Easy German: ‘Introduce Yourself in Slow German’ — once plain, once with subtitles, once shadowing","DW ABC: Ch, Sch, St, Sp"],
 "2026-10-24":["Replay NW Chapter 1 (4 lessons)","DW ABC: B, P, R, Z"],
 "2026-10-25":["Easy German: ‘German Alphabet & Pronunciation – Full Guide’","DW ABC: Au, Eu, Ei, ie"],
-"2026-10-26":["DW ABC: 0–12, Y/ss/Qu/X, J/Ae/Oe/Ue + ABC Final Test","DT 4–5"],
+"2026-10-26":["DW ABC: 0–12, Y/ss/Qu/X, J/Ae/Oe/Ue + ABC Final Test","DT 4–5 + DT 14 (numbers 0–20 incl. 13–19)"],
 "2026-10-27":["CBG 06 (numbers)","NW ‘Zahlen von 1 bis 100’ replay"],
 "2026-10-28":["Replay NW Chapter 2 (Zahlen, Wichtige Nummern, Adressen, Auf dem Amt)","DT 13 + 70 (phone, spelling)"],
-"2026-10-29":["CBG 03 + 04","DT 6–7"],
+"2026-10-29":["CBG 03 + 04","DT 6–7 + DT 9 (requests: ‘Können Sie mir helfen?’, Wie bitte?, langsamer sprechen)"],
 "2026-10-30":["CBG 15 (counting)","Easy German: ‘Top 50 Everyday Objects in Slow German’"],
 "2026-10-31":["MOCK 0: official Modellsatz Hören (17:08) at 15:00 with the written mock — nothing at breakfast","—"],
-"2026-11-01":["Error review: replay the Modellsatz Hören items you missed with the transcript; shadow 5 sentences","CBG 05 (family)"],
-"2026-11-02":["DT 15–17 (months, days, time)","DT 26 (meal times)"],
-"2026-11-03":["Replay NW Chapter 7 (Emmas Tag, Tageszeiten …)","DT 18 (daily routine)"],
-"2026-11-04":["Replay NW Chapter 8 (Wie spät ist es? …)","CBG 21 (weather, time)"],
-"2026-11-05":["Replay NW Chapter 3 (Eine Pizza bitte, Zahlen bitte)","DT 31 (drinks)"],
-"2026-11-06":["CBG 11 + 12 (ordering)","Easy German: ‘Our Morning Routine in Slow German’"],
+"2026-11-01":["Error review: replay the Modellsatz Hören items you missed with the transcript; shadow 5 sentences","DT 25 (colours) + CBG 05 (family)"],
+"2026-11-02":["DT 15–17 (months, days, time)","DT 26 (meal times) + DT 27 (buying and paying)"],
+"2026-11-03":["Replay N21–N24 (Chapter 5: Things)","DT 18 (daily routine)"],
+"2026-11-04":["Replay N25–N27 (Chapter 6: Living)","CBG 21 (weather, time)"],
+"2026-11-05":["Replay NW Chapter 3 (Eine Pizza bitte, Zahlen bitte)","DT 31 (drinks) + DT 53 (zum/zur)"],
+"2026-11-06":["CBG 11 + 12 (ordering)","DT 84 (Formular, Familienstand, Unterschrift) + DT 79 (Einzel-/Doppelzimmer)"],
 "2026-11-07":["Mini-mock: Hören Teil 2 (announcements, heard ONCE) from a third-party/telc A1 sample","CBG 13"],
-"2026-11-08":["CBG 16 (shopping)","Easy German: ‘Supermarket in Slow German’"],
+"2026-11-08":["CBG 16 (shopping)","DT 97 + DT 96 (birthday invitation and congratulations — Schreiben 2)"],
 "2026-11-09":["DT 20–22 (transport, tickets)","DT 23 (places in town)"],
-"2026-11-10":["Replay NW Chapter 10 (Wo ist der Bahnhof? …)","CBG 08 (directions)"],
+"2026-11-10":["Replay N29–N36 (Chapters 7–8: days, times, appointments)","CBG 08 (directions)"],
 "2026-11-11":["CBG 17 + 18","DT 24 (directions)"],
-"2026-11-12":["CBG 19 + 35","Easy German: ‘100 Words You Should Know’"],
+"2026-11-12":["CBG 19 + 35","DT 83 (Ausweis) + DT 46 (Wetter)"],
 "2026-11-13":["CBG 30 + 32","DT 21"],
 "2026-11-14":["MOCK 1: official Übungssatz 01 Hören (18:59) as part of the full mock","—"],
-"2026-11-15":["Error review + shadowing","DT 59 (W-questions)"],
+"2026-11-15":["Error review + shadowing","DT 59 (W-questions) + DT 71–72 (school — the Sprechen Teil-2 theme)"],
 "2026-11-16":["DT 19 + 69 (cancel appointment, phone) + CBG 24","NW ‘Hast du morgen Zeit?’ replay"],
 "2026-11-17":["CBG 25 (emergencies)","Easy German: ‘Learn German at the Post Office’"],
-"2026-11-18":["Replay NW Chapter 9 (Working life)","DT 11–12"],
+"2026-11-18":["Replay NW Chapter 9 (Working life)","DT 35 + DT 37 (doctor/Fieber, body)"],
 "2026-11-19":["CBG 26 + 27","DT 76–77 (work, pay)"],
 "2026-11-20":["Numbers drill: have Google TTS or an AI read you 10 prices, 10 phone numbers, 10 times — you write them (Hören Teil 3 style)","CBG 28"],
 "2026-11-21":["MOCK 2: third-party Hören with headphones, part of the typed full mock","—"],
@@ -109,15 +110,15 @@ CONTENT.live = {
   "2026-10-22": "LS-A · Book TRIAL lessons now: Verbling free 30-min trial + 2 paid exam-prep trials (italki Professional / Preply), 3 different teachers, this week and next. Quality matters more than price: pick your MAIN tutor by Fri 30 Oct.",
   "2026-10-28": "LS-B · Trial #2 (an exam-prep tutor): Teil 1 intro, spelling, numbers, pronunciation check. Ask for their top 3 fixes for you.",
   "2026-10-30": "Decide your MAIN tutor today. From 4 Nov you have 2 live sessions a week (Wed 18:00 + Sat afternoon) — that is also two human conversations a week.",
-  "2026-11-04": "LS-C · Live session #1 with your main tutor (Wed ~18:00): Teil 2 with the official word cards, 2 themes.",
-  "2026-11-07": "LS-D · Sat session with your main tutor: Teil 1–3 mini-mock + feedback (30–45 min).",
-  "2026-11-11": "LS · Wed session: Teil 3 requests/answers + pronunciation fixes (umlauts, ch, st/sp).",
+  "2026-11-04": "LS-C · Live session #1 (Wed ~18:00): Sprechen 1 + spelling + numbers + repair phrases (Wie bitte? / Noch einmal, bitte / Langsamer, bitte). Do not start Teil 2 yet.",
+  "2026-11-07": "LS-D · Sat session: SPRECHEN 2 with the Essen & Trinken + Wochenende word cards — ask the tutor: is each of your questions a REAL question? (a question scores 2, an answer 1).",
+  "2026-11-11": "LS · Wed session: SPRECHEN 3 requests (Glas, Besteck, Apfel, Tasche, Stift …) + pronunciation (ü, ch, st/sp).",
   "2026-11-14": "LS-E · MOCK 1 Sprechen with the tutor — full 15-min exam after the written Übungssatz 01. Ask for a raw score out of 15 (≥11: drop optional sessions; ≤8: add extra sessions).",
-  "2026-11-18": "LS · Wed session: weakest Teil from Mock 1.",
+  "2026-11-18": "LS · Wed session: SCHREIBEN 2 — bring 3 messages (invitation, delay/apology, information request); the tutor scores 3 / 1.5 / 0 per content point + greeting and closing.",
   "2026-11-21": "LS-F · MOCK 2 Sprechen with a NEW examiner (different accent, no warning of the cards).",
-  "2026-11-25": "LS · Wed session: Schreiben speaking-through (what you would write) + Teil 2 cards.",
+  "2026-11-25": "LS · Wed session: second Schreiben-2 marking + Sprechen 2 cards on Schule, Beruf, Sport.",
   "2026-11-28": "LS-G · MOCK 3 Sprechen — full 15 min, target 11+/15.",
-  "2026-12-02": "LS-H · Wed session: targeted 40 min on your weakest Teil.",
+  "2026-12-02": "LS-H · Wed session: your weakest Teil (and the prohibition cards for Sprechen 3).",
   "2026-12-03": "LS · Optional extra 30-min session on your weakest Teil.",
   "2026-12-05": "LS-I · Dress rehearsal: group Sprechen (tutor + 1–2 peers) after the typed written mock."
 };
@@ -139,6 +140,15 @@ CONTENT.ankiNew = function (iso, dow) {
   if (iso <= "2026-11-28") return 20;
   if (iso <= "2026-12-05") return 10;
   return 0;
+};
+
+/* Short extra items from the A1 syllabus audit (file 12), shown inside the German retrieval / Sunday Anki slots */
+CONTENT.germanExtra = {
+  "2026-11-01": "10-min drill (after Mock 0): underline every ‘Bitte … Sie’ and every ‘sollen’ sentence in the Hören Teil 2/3 transcripts of the Modellsatz, say each aloud, rewrite 5 as ‘X soll …’.",
+  "2026-11-05": "Chunks to learn today (they appear in 3 of 3 official sets): ‘Ich freue mich (sehr) auf dich/euch/…’ and ‘Darf ich …?’.",
+  "2026-11-09": "10-min drill: ‘Darf ich hier …?’ and ‘Hier ist … verboten’ with the 4 prohibition pictograms from the Teil-3 cards.",
+  "2026-11-12": "5-min grammar page: Nicos Weg N72 (vor/nach + Dativ: vor dem Konzert, nach der Mittagspause). Then the Sie-Imperativ + sollen drill again (10 min).",
+  "2026-11-13": "5-min grammar page: Nicos Weg N69 (müssen or sollen) — read it after N64."
 };
 
 CONTENT.mocks = {

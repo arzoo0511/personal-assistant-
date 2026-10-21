@@ -10,6 +10,6 @@ function renderPlanner() {
   if (!el || el.dataset.ready) return;
   el.dataset.ready = "1";
   el.innerHTML =
-    '<iframe src="planner/index.html?v=1" title="Day-by-Day Plan" loading="lazy" ' +
+    '<iframe src="planner/index.html?v=2" title="Day-by-Day Plan" loading="lazy" ' +
     'style="width:100%;height:calc(100vh - 150px);min-height:620px;border:0;border-radius:12px"></iframe>';
 }
